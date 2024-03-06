@@ -7,12 +7,12 @@ import MemberIAM from '../models/memberIAM.model.js';
 // Sign Up
 export const signup = async (req, res, next) => {
   const { IAM, email, password, firstName, lastName } = req.body;
-  console.log(req.body);
   const hashedPassword = bcryptjs.hashSync(password, 10);
   const validIAM = IAM.toLocaleLowerCase();
 
   // Check if IAM is a member IAM 
   const verified = await isMemberIAM(IAM);
+  console.log(verified);
 
   const newUser = new User({ IAM: validIAM, email, password: hashedPassword, firstName, lastName, verified });
   try {
@@ -65,7 +65,7 @@ export const signout = (req, res) => {
  */
 async function isMemberIAM(IAM) {
   // Fetch the Member IAM
-  const memberIAM = await MemberIAM.findOne({ IAM });
+  const memberIAM = await MemberIAM.findOne({ IAM: IAM.toLocaleLowerCase() });
 
   if (!memberIAM) return false;
   if (memberIAM.IAM == IAM.toLocaleLowerCase()) return true;
