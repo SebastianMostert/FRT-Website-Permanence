@@ -9,11 +9,12 @@ export const signup = async (req, res, next) => {
   const { IAM, email, password, firstName, lastName } = req.body;
   console.log(req.body);
   const hashedPassword = bcryptjs.hashSync(password, 10);
+  const validIAM = IAM.toLocaleLowerCase();
 
   // Check if IAM is a member IAM 
   const verified = await isMemberIAM(IAM);
 
-  const newUser = new User({ IAM, email, password: hashedPassword, firstName, lastName, verified });
+  const newUser = new User({ IAM: validIAM, email, password: hashedPassword, firstName, lastName, verified });
   try {
     await newUser.save();
     res.status(201).json({ message: 'User created successfully' });
@@ -25,7 +26,11 @@ export const signup = async (req, res, next) => {
 
 // Sign In
 export const signin = async (req, res, next) => {
+  req.body.IAM = req.body.IAM.toLowerCase();
+
   const { IAM, password } = req.body;
+
+
   try {
     const validUser = await User.findOne({ IAM });
     if (!validUser) return next(errorHandler(404, 'User not found'));
@@ -53,11 +58,16 @@ export const signout = (req, res) => {
 };
 
 
+/**
+ * 
+ * @param {string} IAM The IAM of the user
+ * @returns {boolean} Whether the user is a member
+ */
 async function isMemberIAM(IAM) {
   // Fetch the Member IAM
   const memberIAM = await MemberIAM.findOne({ IAM });
 
   if (!memberIAM) return false;
-  if (memberIAM.IAM == IAM) return true;
+  if (memberIAM.IAM == IAM.toLocaleLowerCase()) return true;
   return false;
 }
