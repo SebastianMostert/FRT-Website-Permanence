@@ -1,3 +1,5 @@
+import React from 'react';
+
 const HomePage = () => {
   const styles = {
     homepage: {
@@ -47,7 +49,8 @@ const HomePage = () => {
         <h2>Contact Us</h2>
         <p>
           For emergencies, dial <strong style={styles.strong}>112</strong>. <br />
-          For non-emergency inquiries, you can find us in S1.XXX.
+          For non-emergency inquiries, you can email us at <a href="mailto:lux.frt.llis@gmail.com">lux.frt.llis@gmail.com</a>. <br />
+          Follow us on Instagram: <a href="https://www.instagram.com/frt.llis/">@frt.llis</a>
         </p>
       </section>
 
