@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   getDownloadURL,
   getStorage,
@@ -17,8 +17,11 @@ import {
   deleteUserFailure,
   signOut,
 } from '../redux/user/userSlice';
+import { toast } from 'react-toastify';
 
 export default function Profile() {
+  const toastId = React.useRef(null);
+
   const dispatch = useDispatch();
   const fileRef = useRef(null);
   const [image, setImage] = useState(undefined);
@@ -33,7 +36,7 @@ export default function Profile() {
       handleFileUpload(image);
     }
   }, [image]);
-  
+
   const handleFileUpload = async (image) => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + image.name;
@@ -47,10 +50,12 @@ export default function Profile() {
         setImagePercent(Math.round(progress));
       },
       (error) => {
+        toast.error('An error occurred while uploading the image');
         console.log(error);
         setImageError(true);
       },
       () => {
+        toast.success('Image uploaded successfully!');
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
           setFormData({ ...formData, profilePicture: downloadURL })
         );
@@ -65,6 +70,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      toastId.current = toast.info("Updating profile...", { autoClose: false });
       dispatch(updateUserStart());
 
       const updatedUserData = {
@@ -82,13 +88,17 @@ export default function Profile() {
 
       const data = await res.json();
       if (data.success === false) {
+        console.log(data);
+        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to update profile: ${data.message}` });
         dispatch(updateUserFailure(data));
         return;
       }
 
+      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `Successfully updated profile` });
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
     } catch (error) {
+      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to update profile: ${error.message}` });
       dispatch(updateUserFailure(error));
     }
   };
@@ -114,7 +124,9 @@ export default function Profile() {
     try {
       await fetch('/api/auth/signout');
       dispatch(signOut())
+      toast.info("Signed out");
     } catch (error) {
+      toast.info("Error signing out");
       console.log(error);
     }
   };

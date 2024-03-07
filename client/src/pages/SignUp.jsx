@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
@@ -26,11 +27,14 @@ export default function SignUp() {
       console.log(data);
       setLoading(false);
       if (data.success === false) {
+        toast.error(`An error occured while creating your account`)
         setError(true);
         return;
       }
+      toast.success(`Your account has been created successfully`);
       navigate('/sign-in');
     } catch (error) {
+      toast.error(`An error occured while creating your account`)
       setLoading(false);
       setError(true);
     }
