@@ -79,6 +79,7 @@ export default function Profile() {
         ...formData,    // Include the changed fields
       };
 
+      //#region Verify password, class, training
       // Verify password security
       if (updatedUserData.password) {
         const _isPasswordValid = await isPasswordValid(updatedUserData.password);
@@ -96,6 +97,8 @@ export default function Profile() {
         const _isTrainingValid = await isTrainingValid(updatedUserData.training);
         if (!_isTrainingValid.success) toast.error(`Failed to update profile: ${_isTrainingValid.message}`);
       }
+      //#endregion
+
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {

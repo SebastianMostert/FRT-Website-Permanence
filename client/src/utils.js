@@ -42,12 +42,15 @@ export function isPasswordValid(password) {
      * At least 1 uppercase character
      * At least 1 lowercase character
      * At least 1 special character
+     * 
+     * No spaces
      */
-    if (!password.length > 8) return { success: false, message: 'Password must be at least 8 characters long!' };
+    if (password.length < 8) return { success: false, message: 'Password must be at least 8 characters long!' };
     if (!/\d/.test(password)) return { success: false, message: 'Password must contain at least 1 digit!' };
     if (!/[A-Z]/.test(password)) return { success: false, message: 'Password must contain at least 1 uppercase character!' };
     if (!/[a-z]/.test(password)) return { success: false, message: 'Password must contain at least 1 lowercase character!' };
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) return { success: false, message: 'Password must contain at least 1 special character!' };
+    if (/\s/.test(password)) return { success: false, message: 'Password cannot contain spaces!' };
 
     return { success: true, message: '' };
 }
@@ -67,7 +70,7 @@ export async function isIAMValid(IAM) {
 }
 
 export async function isTrainingValid(trainingStr) {
-    
+    console.log(trainingStr)
     return { success: true, message: '' };
 }
 //#endregion

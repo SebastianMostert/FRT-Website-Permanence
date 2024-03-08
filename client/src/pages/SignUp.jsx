@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { isIAMValid, isPasswordValid, } from '../utils';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
@@ -16,6 +17,25 @@ export default function SignUp() {
     try {
       setLoading(true);
       setError(false);
+
+      //#region Verify password, IAM
+      // Verify password security
+      const _isPasswordValid = await isPasswordValid(formData.password);
+      if (!_isPasswordValid.success) {
+        setLoading(false);
+        return toast.error(`Failed to update profile: ${_isPasswordValid.message}`);
+      }
+
+      // Verify IAM
+      const _isIAMValid = await isIAMValid(formData.IAM);
+      if (!_isIAMValid.success) {
+        setLoading(false);
+        return toast.error(`Failed to update profile: ${_isIAMValid.message}`);
+      }
+
+      //#endregion
+
+
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
