@@ -83,19 +83,19 @@ export default function Profile() {
       // Verify password security
       if (updatedUserData.password) {
         const _isPasswordValid = await isPasswordValid(updatedUserData.password);
-        if (!_isPasswordValid.success) toast.error(`Failed to update profile: ${_isPasswordValid.message}`);
+        if (!_isPasswordValid.success) return toast.error(`Failed to update profile: ${_isPasswordValid.message}`);
       }
 
       // Verify class
       if (updatedUserData.studentClass) {
         const _isClassValid = await isClassValid(updatedUserData.studentClass);
-        if (!_isClassValid.success) toast.error(`Failed to update profile: ${_isClassValid.message}`);
+        if (!_isClassValid.success) return toast.error(`Failed to update profile: ${_isClassValid.message}`);
       }
 
       // Verify training
       if (updatedUserData.training) {
         const _isTrainingValid = await isTrainingValid(updatedUserData.training);
-        if (!_isTrainingValid.success) toast.error(`Failed to update profile: ${_isTrainingValid.message}`);
+        if (!_isTrainingValid.success) return toast.error(`Failed to update profile: ${_isTrainingValid.message}`);
       }
       //#endregion
 
