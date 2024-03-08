@@ -14,6 +14,11 @@ const availabilitySchema = new mongoose.Schema(
             type: Date,
             required: true,
         },
+        confirmed: {
+            type: Boolean,
+            default: false,
+            required: true,
+        }
     },
 );
 

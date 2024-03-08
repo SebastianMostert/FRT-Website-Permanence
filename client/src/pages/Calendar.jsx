@@ -11,11 +11,13 @@ import moment from 'moment';
 
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux'
+import { verifyClass } from '../utils'
 
 const VIEW_TYPE_KEY = 'viewType';
 
 export default function Calendar() {
-    const toastId = React.useRef(null);
+    const toastId_loading = React.useRef(null);
+
     const { currentUser } = useSelector((state) => state.user);
 
     const businessHours = {
@@ -32,20 +34,24 @@ export default function Calendar() {
 
     useEffect(() => {
         async function fetchData() {
-            toastId.current = toast.info('Loading exams...', { autoClose: false });
-            const calendarEvents = await getExams(IAM);
-            setCalendarEvent(calendarEvents);
-            toast.update(toastId.current, { type: 'success', autoClose: 5000, render: 'Exams loaded successfully!' });
+            toastId_loading.current = toast.info('Loading exams and availabilities...', { autoClose: false });
 
-            // Get availabilities
-            toastId.current = toast.info('Loading availabilities...', { autoClose: false });
+            // Get exams and availabilities
+            const calendarEvents = await getExams(currentUser);
+            if (!calendarEvents.success) toast.error('Failed to load exams! Verify you\'ve provided the correct class in the profile page!');
+
             const calendarAvailabilities = await getAvailabilities(IAM);
+
+            // Set exams and availabilities
+            setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
-            toast.update(toastId.current, { type: 'success', autoClose: 5000, render: 'Availabilities loaded successfully!' });
+
+            // Update toast
+            toast.update(toastId_loading.current, { type: 'success', autoClose: 5000, render: 'Exams and availabilities loaded successfully!' });
         }
 
         fetchData();
-    }, [IAM]);
+    }, [IAM, currentUser]);
 
     return (
         <>
@@ -97,12 +103,34 @@ export default function Calendar() {
                         buttonText: 'Year',
                     },
                 }}
-                eventClick={(e) => {
-                    const isExam = e.event.extendedProps.type === 'exam';
+
+                eventClick={async (e) => {
+                    const event = e.event;
+                    const calendar = e.view.calendar;
+                    const isExam = event.extendedProps.type === 'exam';
+                    const isAvailability = event.extendedProps.type === 'availability';
+
+                    calendar.unselect();
+                    calendar.refetchEvents();
+
                     if (isExam) {
                         toast.error("You are not availabe on this day!", {
                             theme: 'colored',
                         })
+                    }
+
+                    if (isAvailability) {
+                        try {
+                            const result = await deleteAvailability(event.id, IAM)
+
+                            if (result.success) {
+                                event.remove()
+                                return toast.success('Availability deleted successfully!')
+                            }
+                            return toast.error('Failed to delete availability!')
+                        } catch (err) {
+                            return toast.error('Failed to delete availability!')
+                        }
                     }
                 }}
 
@@ -133,7 +161,12 @@ export default function Calendar() {
                         title: 'Available',
                         start: availability.startTime,
                         end: availability.endTime,
-                        backgroundColor: '#00FF00',
+                        backgroundColor: '#0000FF',
+                        id: availability._id,
+                        extendedProps: {
+                            type: 'availability',
+                            ...availability
+                        }
                     })
 
 
@@ -145,6 +178,10 @@ export default function Calendar() {
 
                     localStorage.setItem(VIEW_TYPE_KEY, viewType)
                 }}
+
+                longPressDelay={1000}
+                eventLongPressDelay={1000}
+                selectLongPressDelay={1000}
             />
         </>
     );
@@ -173,11 +210,19 @@ function convertExamTimeToDate(examDate, startTime, endTime) {
     return { startDate, endDate };
 }
 
-async function getExams(IAM) {
+async function getExams(user) {
+    // Check class
+    const hasClass = await verifyClass(user.studentClass);
+
+    if (!hasClass.success) {
+        return { success: false, data: [] }
+    }
+
     try {
         const calendarEvents = []
-        const examResponse = await fetch(`/api/exam/user/${IAM}`, { method: "post" });
+        const examResponse = await fetch(`/api/exam/user/${user.IAM}`, { method: "post" });
 
+        console.log(examResponse);
         const examsData = await examResponse.json();
         const exams = examsData.exams;
 
@@ -206,9 +251,10 @@ async function getExams(IAM) {
             });
         }
 
-        return calendarEvents;
+        return { success: true, data: calendarEvents }
     } catch (error) {
         console.error(error);
+        return { success: false, data: [] }
     }
 }
 
@@ -226,12 +272,21 @@ async function getAvailabilities(IAM) {
 
         for (let i = 0; i < data.length; i++) {
             const availability = data[i];
+            // Mark as available
+            let title = 'Available';
+            const isVerifiedAvailability = availability.confirmed;
+
+            // If true, mark as in service/working/availability confirmed
+            if (isVerifiedAvailability) {
+                title == `Confirmed Availability`
+            }
 
             availabilityEvents.push({
-                title: 'Available',
+                title,
                 start: availability.startTime,
                 end: availability.endTime,
                 id: availability._id,
+                backgroundColor: isVerifiedAvailability ? '#00FF00' : '#0000FF',
                 extendedProps: { ...availability, type: 'availability' },
             });
         }
@@ -266,6 +321,25 @@ async function createAvailability(start, end, user) {
     }
 }
 
-async function deleteAvailability() {
-    // TODO
+async function deleteAvailability(id, IAM) {
+    try {
+        console.log(id)
+        console.log(id)
+        const res = await fetch(`/api/availability/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ IAM: IAM }),
+        })
+
+        const data = await res.json()
+
+        if (data?.success != true) return { success: false, message: 'Deleted availability' }
+        return { success: true }
+    } catch (err) {
+        return { success: false, message: err.message }
+    }
 }
+
+

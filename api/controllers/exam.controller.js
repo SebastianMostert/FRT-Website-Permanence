@@ -21,14 +21,46 @@ export const getExamsByUser = async (req, res, next) => {
     if (!validUser) {
         return next(errorHandler(404, 'No user with this IAM found!'))
     }
-    
+
     const studentClass = validUser.studentClass;
 
-    if(!studentClass || studentClass === 'None') {
+    if (studentClass && typeof studentClass === 'string') {
+        // Get all exams
+        const untisHelper = new UntisHelper({
+            school: process.env.UNTIS_SCHOOL,
+            username: process.env.UNTIS_USERNAME,
+            secret: process.env.UNTIS_SECRET,
+            baseUrl: process.env.UNTIS_BASE_URL,
+        })
+
+        await untisHelper.login();
+
+        const exams = await untisHelper.allExams();
+        const filteredExams = [];
+
+        for (let i = 0; i < exams.length; i++) {
+            const exam = exams[i];
+            const examClasses = exam.studentClass;
+
+            for (let i = 0; i < examClasses.length; i++) {
+                const examClass = examClasses[i];
+
+                if (examClass === studentClass) {
+                    filteredExams.push(exam)
+                }
+            }
+        }
+
+        res.json({
+            message: 'Not yet checking IAM! Returning all exams with the users class!',
+            exams: filteredExams
+        });
+    } else {
         return next(errorHandler(404, 'No class found for this user!'))
     }
+};
 
-    // Get all exams
+export const getClasses = async (req, res, next) => {
     const untisHelper = new UntisHelper({
         school: process.env.UNTIS_SCHOOL,
         username: process.env.UNTIS_USERNAME,
@@ -37,25 +69,10 @@ export const getExamsByUser = async (req, res, next) => {
     })
 
     await untisHelper.login();
-
-    const exams = await untisHelper.allExams();
-    const filteredExams = [];
-
-    for (let i = 0; i < exams.length; i++) {
-        const exam = exams[i];
-        const examClasses = exam.studentClass;
-
-        for (let i = 0; i < examClasses.length; i++) {
-            const examClass = examClasses[i];
-            
-            if (examClass === studentClass) {
-                filteredExams.push(exam)
-            }
-        }
-    }
+    const classes = await untisHelper.untis.getClasses();
 
     res.json({
-        message: 'Not yet checking IAM! Returning all exams with the users class!',
-        exams: filteredExams
+        message: 'All available classes',
+        classes
     });
-};
+}

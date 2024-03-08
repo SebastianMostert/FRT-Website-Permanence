@@ -41,9 +41,9 @@ export const deleteAvailability = async (req, res, next) => {
         });
 
         if (deleted.deletedCount > 0) {
-            return res.status(200).json({ message: 'Availability deleted successfully' });
+            return res.status(200).json({ message: 'Availability deleted successfully', success: true });
         }
-        res.status(200).json({ message: 'An issue occurred' });
+        res.status(200).json({ message: 'An issue occurred', success: false });
     } catch (err) {
         next(err);
     }

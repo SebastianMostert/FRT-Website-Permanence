@@ -36,12 +36,12 @@ const HomePage = () => {
 
   return (
     <div style={styles.homepage}>
-      <h1 style={styles.title}>Lenster Lycee First Responder Team</h1>
+      <h1 style={styles.title}>Lënster Lycée First Responder Team</h1>
 
       <section style={styles.section}>
         <h2>Our Mission</h2>
         <p>
-          Ensuring the safety and well-being of the school community at Lenster Lycee International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all.
+          Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all.
         </p>
       </section>
 

@@ -12,7 +12,6 @@ export const signup = async (req, res, next) => {
 
   // Check if IAM is a member IAM 
   const verified = await isMemberIAM(IAM);
-  console.log(verified);
 
   const newUser = new User({ IAM: validIAM, email, password: hashedPassword, firstName, lastName, verified });
   try {

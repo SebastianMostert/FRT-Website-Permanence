@@ -18,6 +18,7 @@ import {
   signOut,
 } from '../redux/user/userSlice';
 import { toast } from 'react-toastify';
+import { isClassValid, isPasswordValid, isTrainingValid } from '../utils';
 
 export default function Profile() {
   const toastId = React.useRef(null);
@@ -78,6 +79,23 @@ export default function Profile() {
         ...formData,    // Include the changed fields
       };
 
+      // Verify password security
+      if (updatedUserData.password) {
+        const _isPasswordValid = await isPasswordValid(updatedUserData.password);
+        if (!_isPasswordValid.success) toast.error(`Failed to update profile: ${_isPasswordValid.message}`);
+      }
+
+      // Verify class
+      if (updatedUserData.studentClass) {
+        const _isClassValid = await isClassValid(updatedUserData.studentClass);
+        if (!_isClassValid.success) toast.error(`Failed to update profile: ${_isClassValid.message}`);
+      }
+
+      // Verify training
+      if (updatedUserData.training) {
+        const _isTrainingValid = await isTrainingValid(updatedUserData.training);
+        if (!_isTrainingValid.success) toast.error(`Failed to update profile: ${_isTrainingValid.message}`);
+      }
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {
