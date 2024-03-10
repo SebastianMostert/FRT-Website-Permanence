@@ -1,0 +1,11 @@
+/* SlotLane.css */
+
+.slot-lane {
+    padding: 8px;
+    margin: 5px;
+    height: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}

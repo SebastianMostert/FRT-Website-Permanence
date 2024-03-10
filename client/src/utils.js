@@ -1,4 +1,4 @@
-async function getClasses() {
+export async function getClasses() {
     try {
         const res = await fetch(`/api/exam/classes`, {
             method: 'POST',
@@ -16,7 +16,6 @@ async function getClasses() {
 export async function verifyClass(classStr) {
     try {
         const data = await getClasses();
-        console.log(data)
 
         if (!data.success) return { success: false, data: null }
 
@@ -32,6 +31,48 @@ export async function verifyClass(classStr) {
     } catch (error) {
         return { success: false, data: null }
     }
+}
+
+export async function getSelectMenuClass() {
+    try {
+        const finalClasses = [];
+
+        // Get all classes
+        const res = await getClasses();
+        if (!res.success) return [
+            { value: '', label: 'Select Class' },
+        ];
+        const data = res.data;
+
+        const classes = data.classes;
+
+        // Format them value, label
+        for (let i = 0; i < classes.length; i++) {
+            const _class = classes[i];
+            const value = _class.name;
+            const label = `${_class.longName} - (${_class.name})`;
+
+            finalClasses.push({ value, label });
+        }
+
+        // Return them
+
+        return finalClasses;
+    } catch (error) {
+        return [
+            { value: '', label: 'Select Class' },
+        ];
+    }
+}
+
+export function getSelectMenuTraining() {
+    return [
+        { value: 'SAP 1', label: 'SAP 1' },
+        { value: 'SAP 2', label: 'SAP 2' },
+        { value: 'FIS 1', label: 'FIS 1' },
+        { value: 'FIS 2', label: 'FIS 2' },
+        { value: 'FIS 3', label: 'FIS 3' },
+    ]
 }
 
 //#region Verification
@@ -74,3 +115,7 @@ export async function isTrainingValid(trainingStr) {
     return { success: true, message: '' };
 }
 //#endregion
+
+export function isMobile() {
+    return window.innerWidth <= 768; // Adjust the threshold as needed
+}

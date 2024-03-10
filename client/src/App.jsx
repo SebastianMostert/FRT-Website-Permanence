@@ -7,6 +7,7 @@ import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
 import Calendar from './pages/Calendar';
 import { ToastContainer } from 'react-toastify';
+import Report from './pages/Report';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path='/sign-up' element={<SignUp />} />
           <Route element={<PrivateRoute />}>
             {/* protected routes */}
+            {/* <Route path='/report' element={<Report />} /> */}
             <Route path='/calendar' element={<Calendar />} />
             <Route path='/profile' element={<Profile />} />
           </Route>

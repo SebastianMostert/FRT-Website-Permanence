@@ -1,32 +1,33 @@
-import FullCalendar from '@fullcalendar/react'
-
-import dayGridPlugin from '@fullcalendar/daygrid'
-import multiMonthPlugin from '@fullcalendar/multimonth'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interaction from '@fullcalendar/interaction'
-
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useEffect, useState, useRef } from 'react';
 import moment from 'moment';
-
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux'
-import { verifyClass } from '../utils'
+import { useSelector } from 'react-redux';
+import { verifyClass } from '../utils';
+
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import multiMonthPlugin from '@fullcalendar/multimonth';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interaction from '@fullcalendar/interaction';
+import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+
+import '../Styles/CustomCalendar.css'; // Import your custom CSS stylesheet
+import DayCell from '../components/Calendar/DayCell';
+import SlotLane from '../components/Calendar/SlotLane';
+import SlotLabel from '../components/Calendar/SlotLabel';
+import DayHeader from '../components/Calendar/DayHeader';
 
 const VIEW_TYPE_KEY = 'viewType';
+const EXAM_TYPE = 'exam';
+const AVAILABILITY_TYPE = 'availability';
 
 export default function Calendar() {
-    const toastId_loading = React.useRef(null);
-
+    const toastIdLoading = useRef(null);
     const { currentUser } = useSelector((state) => state.user);
-
-    const businessHours = {
-        daysOfWeek: [1, 2, 3, 4, 5],
-        startTime: '08:00',
-        endTime: '18:00',
-    }
-
-    const view = localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth';
     const IAM = currentUser.IAM;
 
     const [calendarEvent, setCalendarEvent] = useState([]);
@@ -34,156 +35,153 @@ export default function Calendar() {
 
     useEffect(() => {
         async function fetchData() {
-            toastId_loading.current = toast.info('Loading exams and availabilities...', { autoClose: false });
+            toastIdLoading.current = toast.info('Loading exams and availabilities...', { autoClose: false });
 
-            // Get exams and availabilities
             const calendarEvents = await getExams(currentUser);
-            if (!calendarEvents.success) toast.error('Failed to load exams! Verify you\'ve provided the correct class in the profile page!');
+
+            if (!calendarEvents.success) {
+                toast.error('Failed to load exams! Verify you\'ve provided the correct class in the profile page!');
+            }
 
             const calendarAvailabilities = await getAvailabilities(IAM);
 
-            // Set exams and availabilities
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
 
-            // Update toast
-            toast.update(toastId_loading.current, { type: 'success', autoClose: 5000, render: 'Exams and availabilities loaded successfully!' });
+            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: 'Exams and availabilities loaded successfully!' });
         }
 
         fetchData();
     }, [IAM, currentUser]);
 
+    const handleSelect = async (e) => {
+        const calendar = e.view.calendar;
+        calendar.unselect();
+        const start = new Date(e.start);
+        const end = new Date(e.end);
+
+        const createdAvailability = await createAvailability(start, end, currentUser);
+
+        if (!createdAvailability.success) return;
+
+        const availability = createdAvailability.data;
+        if (!availability) return;
+
+        const newAvailabilityEvent = {
+            title: 'Available',
+            start: availability.startTime,
+            end: availability.endTime,
+            backgroundColor: '#0000FF',
+            id: availability._id,
+            extendedProps: { type: AVAILABILITY_TYPE, ...availability },
+        };
+
+        setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
+    };
+
+    const handleEventClick = async (e) => {
+        const event = e.event;
+        const calendar = e.view.calendar;
+        const isExam = event.extendedProps.type === EXAM_TYPE;
+        const isAvailability = event.extendedProps.type === AVAILABILITY_TYPE;
+
+        calendar.unselect();
+        calendar.refetchEvents();
+
+        if (isExam) {
+            toast.error("You are not available on this day!", { theme: 'colored' });
+        }
+
+        if (isAvailability) {
+            handleAvailabilityDelete(event.id);
+        }
+    };
+
+    const handleAvailabilityDelete = async (id) => {
+        try {
+            const result = await deleteAvailability(id, IAM);
+
+            if (result.success) {
+                setCalendarAvailability(calendarAvailability.filter((event) => event.id !== id));
+                toast.success('Availability deleted successfully!');
+            } else {
+                toast.error('Failed to delete availability!');
+            }
+        } catch (err) {
+            toast.error('Failed to delete availability!');
+        }
+    };
+
+    const handleViewDidMount = (info) => {
+        const viewType = info.view.type;
+        localStorage.setItem(VIEW_TYPE_KEY, viewType);
+    };
+
     return (
-        <>
+        <div className="calendar-container">
             <FullCalendar
-                plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction]}
-                initialView={view}
-
+                plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction, bootstrap5Plugin]}
+                initialView={localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth'}
                 events={[...calendarEvent, ...calendarAvailability]}
-
-                businessHours={businessHours}
+                businessHours={{ daysOfWeek: [1, 2, 3, 4, 5], startTime: '08:00', endTime: '18:00' }}
                 firstDay={1}
-                navLinks={true}
                 nowIndicator={true}
+                weekends={false}
+
+                // Selection
+                selectConstraint={{ startTime: '08:00', endTime: '18:00', daysOfWeek: [1, 2, 3, 4, 5] }}
+                selectOverlap={() => false}
+                selectLongPressDelay={1000}
+                eventLongPressDelay={1000}
+                longPressDelay={1000}
                 selectable={true}
 
+                // Handlers
+                eventClick={handleEventClick}
+                select={handleSelect}
+                viewDidMount={handleViewDidMount}
+
+                // Styling
+                headerToolbar={{ left: 'prev,next today', center: 'title', right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay' }}
+                navLinks={true}
                 height={'auto'}
-                titleFormat={{
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit',
+                titleFormat={{ year: 'numeric', month: 'short', day: '2-digit' }}
+                slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                eventTimeFormat={{ hour12: false, hour: '2-digit', minute: '2-digit' }}
+                themeSystem="bootstrap5"
+                buttonIcons={{
+                    prev: 'bi-chevron-left',
+                    next: 'bi-chevron-right',
+                    prevYear: 'bi-skip-backward',
+                    nextYear: 'bi-skip-forward'
                 }}
-                slotLabelFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
+                buttonText={{
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day',
+                    multiMonthYear: 'Year'
                 }}
-                eventTimeFormat={{
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }}
-                headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
-                }}
-
+                eventDisplay="block"
+                windowResizeDelay={100}
+                handleWindowResize={true}
+                aspectRatio={1.5}
                 views={{
-                    timeGridDay: {
-                        buttonText: 'Day',
-                    },
-                    timeGridWeek: {
-                        buttonText: 'Week',
-                    },
-                    dayGridMonth: {
-                        buttonText: 'Month',
-                    },
-                    multiMonthYear: {
-                        buttonText: 'Year',
-                    },
+                    timeGridDay: { buttonText: 'Day' },
+                    timeGridWeek: { buttonText: 'Week' },
+                    dayGridMonth: { buttonText: 'Month' },
+                    multiMonthYear: { buttonText: 'Year' },
                 }}
-
-                eventClick={async (e) => {
-                    const event = e.event;
-                    const calendar = e.view.calendar;
-                    const isExam = event.extendedProps.type === 'exam';
-                    const isAvailability = event.extendedProps.type === 'availability';
-
-                    calendar.unselect();
-                    calendar.refetchEvents();
-
-                    if (isExam) {
-                        toast.error("You are not availabe on this day!", {
-                            theme: 'colored',
-                        })
-                    }
-
-                    if (isAvailability) {
-                        try {
-                            const result = await deleteAvailability(event.id, IAM)
-
-                            if (result.success) {
-                                event.remove()
-                                return toast.success('Availability deleted successfully!')
-                            }
-                            return toast.error('Failed to delete availability!')
-                        } catch (err) {
-                            return toast.error('Failed to delete availability!')
-                        }
-                    }
-                }}
-
-                selectOverlap={() => {
-                    return false
-                }}
-
-                selectConstraint={{
-                    startTime: '08:00',
-                    endTime: '18:00',
-                    daysOfWeek: [1, 2, 3, 4, 5],
-                }}
-
-                select={async (e) => {
-                    // const view = e.view.type
-                    const calendar = e.view.calendar
-                    calendar.unselect();
-                    const start = new Date(e.start);
-                    const end = new Date(e.end);
-
-                    const createdAvailability = await createAvailability(start, end, currentUser)
-
-                    if (!createdAvailability.success) return;
-                    const availability = createdAvailability.data;
-                    if (!availability) return
-
-                    calendar.addEvent({
-                        title: 'Available',
-                        start: availability.startTime,
-                        end: availability.endTime,
-                        backgroundColor: '#0000FF',
-                        id: availability._id,
-                        extendedProps: {
-                            type: 'availability',
-                            ...availability
-                        }
-                    })
-
-
-                    return false
-                }}
-
-                viewDidMount={(info) => {
-                    const viewType = info.view.type
-
-                    localStorage.setItem(VIEW_TYPE_KEY, viewType)
-                }}
-
-                longPressDelay={1000}
-                eventLongPressDelay={1000}
-                selectLongPressDelay={1000}
+                dayCellContent={(arg) => <DayCell arg={arg} />}
+                slotMinTime={'08:00'}
+                slotMaxTime={'18:00'}
+                slotEventOverlap={true}
+                slotLabelInterval={{ minutes: 30 }}
+                slotLaneContent={(arg) => <SlotLane arg={arg} />}
+                slotLabelContent={(arg) => <SlotLabel arg={arg} />}
+                dayHeaderContent={(arg) => <DayHeader arg={arg} />}
             />
-        </>
+        </div>
     );
 }
 
@@ -341,5 +339,3 @@ async function deleteAvailability(id, IAM) {
         return { success: false, message: err.message }
     }
 }
-
-

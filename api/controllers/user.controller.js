@@ -11,43 +11,44 @@ export const test = (req, res) => {
 
 // Update User
 export const updateUser = async (req, res, next) => {
-  console.log(req.body);
+  const body = req.body;
   if (req.user.id !== req.params.id) {
     return next(errorHandler(401, 'You can update only your account!'));
   }
   try {
-    if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 10);
+    if (body.password) {
+      body.password = bcryptjs.hashSync(body.password, 10);
     }
 
-    if (req.body.training) {
-      // Convert the string of trainings seperated by comma to an array
-      console.log(req.body.training);
-      try {
-        req.body.training = req.body.training?.split(',');
-      } catch (error) {
-        req.body.training = [];
+    if (body.experience) {
+      body.experience.RTW = body.experienceRTW || body.experience.RTW;
+      body.experience.FR = body.experienceFR || body.experience.FR;
+    }
+
+    const training = [];
+    if (body.training) {
+      for (let i = 0; i < body.training.length; i++) {
+        const _training = body.training[i];
+        console.log(_training)
+
+        training.push(_training.value);
+        console.log(training)
       }
-    }
-
-    if (req.body.experience) {
-      req.body.experience.RTW = req.body.experienceRTW || req.body.experience.RTW;
-      req.body.experience.FR = req.body.experienceFR || req.body.experience.FR;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
+          firstName: body.firstName,
+          lastName: body.lastName,
 
-          studentClass: req.body.studentClass,
-          password: req.body.password,
-          profilePicture: req.body.profilePicture,
-          experience: req.body.experience,
-          email: req.body.email,
-          training: req.body.training,
+          studentClass: body.studentClass,
+          password: body.password,
+          profilePicture: body.profilePicture,
+          experience: body.experience,
+          email: body.email,
+          training,
         },
       },
       { new: true }

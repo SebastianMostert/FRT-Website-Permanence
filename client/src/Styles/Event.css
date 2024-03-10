@@ -1,0 +1,46 @@
+/* CustomEvent.css */
+
+.custom-event {
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 5px;
+    padding: 10px;
+  }
+  
+  .custom-event:hover {
+    background-color: #d0d0d0;
+  }
+  
+  .event-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .event-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333; /* Adjust text color as needed */
+  }
+  
+  .event-type {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  .event-time {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  /* Additional styles for event details */
+  .event-details div {
+    margin-bottom: 3px;
+    font-size: 0.8rem;
+    color: #777;
+  }
+  

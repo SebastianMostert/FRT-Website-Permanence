@@ -1,4 +1,6 @@
-import React from 'react';
+import ContactInfo from "../components/ContactInfo";
+import Footer from "../components/Footer";
+import Section from "../components/Section";
 
 const HomePage = () => {
   const styles = {
@@ -14,49 +16,24 @@ const HomePage = () => {
       fontSize: '2.5em',
       color: '#333',
       marginBottom: '20px',
-    },
-    section: {
-      margin: '30px 0',
-      fontSize: '1.2em',
-      lineHeight: '1.6',
-      backgroundColor: '#fff',
-      padding: '20px',
-      borderRadius: '8px',
-      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-    },
-    strong: {
-      fontWeight: 'bold',
-    },
-    footer: {
-      marginTop: '30px',
-      color: '#888',
-      fontSize: '0.9em',
-    },
+    }
   };
 
   return (
     <div style={styles.homepage}>
       <h1 style={styles.title}>Lënster Lycée First Responder Team</h1>
 
-      <section style={styles.section}>
-        <h2>Our Mission</h2>
-        <p>
-          Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all.
-        </p>
-      </section>
+      <Section
+        title="Our Mission"
+        content="Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all."
+      />
 
-      <section style={styles.section}>
-        <h2>Contact Us</h2>
-        <p>
-          For emergencies, dial <strong style={styles.strong}>112</strong>. <br />
-          For non-emergency inquiries, you can email us at <a href="mailto:lux.frt.llis@gmail.com">lux.frt.llis@gmail.com</a>. <br />
-          Follow us on Instagram: <a href="https://www.instagram.com/frt.llis/">@frt.llis</a>
-        </p>
-      </section>
+      <Section
+        title="Contact Us"
+        content={<ContactInfo />}
+      />
 
-      <footer style={styles.footer}>
-        <p>&copy; 2024 Lenster Lycee First Responder Team</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

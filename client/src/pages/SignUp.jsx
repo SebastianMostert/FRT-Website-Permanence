@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { isIAMValid, isPasswordValid, } from '../utils';
+import InputField from '../components/Inputs/InputField';
+import InputLabel from '../components/Inputs/InputLabel';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
@@ -63,35 +65,45 @@ export default function SignUp() {
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-7'>Sign Up</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-        <input
+        <InputField
+          label={'IAM'}
           type='text'
           placeholder='IAM'
           id='IAM'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
         />
-        <input
-          type='text'
-          placeholder='First Name'
-          id='firstName'
-          className='bg-slate-100 p-3 rounded-lg'
-          onChange={handleChange}
-        />
-        <input
-          type='text'
-          placeholder='Last Name'
-          id='lastName'
-          className='bg-slate-100 p-3 rounded-lg'
-          onChange={handleChange}
-        />
-        <input
+        {/* First and Last Name */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <InputLabel text="First Name" />
+            <InputField
+              type='text'
+              id='firstName'
+              placeholder='First Name'
+              onChange={handleChange}
+            />
+          </div>
+          <div className="flex-1">
+            <InputLabel text="Last Name" />
+            <InputField
+              type='text'
+              id='lastName'
+              placeholder='Last Name'
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <InputField
+          label={'Email'}
           type='email'
           placeholder='Email'
           id='email'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
         />
-        <input
+        <InputField
+          label={'Password'}
           type='password'
           placeholder='Password'
           id='password'
