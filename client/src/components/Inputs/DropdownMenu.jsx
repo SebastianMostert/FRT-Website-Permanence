@@ -3,7 +3,7 @@
 
 import InputLabel from "./InputLabel";
 
-const DropdownMenu = ({ selectedValue, onChange, options, label }) => {
+const DropdownMenu = ({ selectedValue, onChange, options, label, id }) => {
   if (!selectedValue || !onChange || !options) return null
 
   return (
@@ -13,7 +13,7 @@ const DropdownMenu = ({ selectedValue, onChange, options, label }) => {
         value={selectedValue}
         onChange={onChange}
         className='bg-slate-100 rounded-lg p-3'
-        id='studentClass'
+        id={id}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

@@ -1,6 +1,6 @@
-import ContactInfo from "../components/ContactInfo";
-import Footer from "../components/Footer";
-import Section from "../components/Section";
+import ContactInfo from "../components/HomePage/ContactInfo";
+import Footer from "../components/HomePage/Footer";
+import Section from "../components/HomePage/Section";
 
 const HomePage = () => {
   const styles = {

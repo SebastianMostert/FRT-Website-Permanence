@@ -271,6 +271,7 @@ export default function Profile() {
           </div>
         </div>
         <DropdownMenu
+          id='studentClass'
           label={'Class'}
           selectedValue={formData.studentClass || currentUser.studentClass}
           onChange={handleChange}
