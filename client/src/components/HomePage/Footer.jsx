@@ -4,10 +4,10 @@ const Footer = () => {
         color: '#888',
         fontSize: '0.9em',
     }
-    
+
     return (
         <footer style={footer}>
-            <p>&copy; {new Date().getFullYear()} Lenster Lycee First Responder Team</p>
+            <p>&copy; {new Date().getFullYear()} Lënster Lycée International School First Responder Team</p>
         </footer>
     );
 };

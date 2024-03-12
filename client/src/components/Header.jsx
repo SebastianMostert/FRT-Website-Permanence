@@ -8,7 +8,7 @@ export default function Header() {
       <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
         <Link className='remove-link-decoration' to='/'>
           {/* <h1 className='font-bold'>First Responder Team - LLIS</h1> */}
-          <img src="https://i.imgur.com/6s840fb_d.png" alt='Logo' className='h-12 w-12 rounded-full object-cover' />
+          <img src="https://i.imgur.com/Jlu1pjU.png" alt='Logo' className='h-20 rounded-lg' />
         </Link>
         <ul className='flex gap-4'>
           <Link className='remove-link-decoration' to='/'>

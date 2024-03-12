@@ -1,8 +1,12 @@
+import { useTranslation } from 'react-i18next';
+
 const ContactInfo = () => {
+    const { t } = useTranslation();
+
     const contactDetails = [
-        { label: 'In case of an emergency, call', value: '112' },
-        { label: 'Email Address', value: 'lux.frt.llis@gmail.com', link: 'mailto:lux.frt.llis@gmail.com' },
-        { label: 'Follow us on Instagram', value: '@frt.llis', link: 'https://www.instagram.com/frt.llis/' },
+        { label: `${t('contactLabel112')}`, value: '112' },
+        { label: `${t('emailAddressLabel')}`, value: 'lux.frt.llis@gmail.com', link: 'mailto:lux.frt.llis@gmail.com' },
+        { label: `${t('instagramLabel')}`, value: '@frt.llis', link: 'https://www.instagram.com/frt.llis/' },
     ];
 
     return (
