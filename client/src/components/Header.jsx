@@ -16,6 +16,7 @@ export default function Header() {
           </Link>
           {currentUser && <Link className='remove-link-decoration' to='/calendar'><li>Calendar</li></Link>}
           {currentUser && <Link className='remove-link-decoration' to='/report'><li>Report</li></Link>}
+          {currentUser && <Link className='remove-link-decoration' to='/admin'><li>Admin</li></Link>}
           <Link className='remove-link-decoration' to='/profile'>
             {currentUser ? (
               <img src={currentUser.profilePicture} alt='profile' className='h-7 w-7 rounded-full object-cover' />

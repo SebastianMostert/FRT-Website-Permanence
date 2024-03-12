@@ -8,26 +8,18 @@ import { verifyClass } from '../utils';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import multiMonthPlugin from '@fullcalendar/multimonth';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interaction from '@fullcalendar/interaction';
-import bootstrap5Plugin from '@fullcalendar/bootstrap5';
-
 import '../Styles/CustomCalendar.css'; // Import your custom CSS stylesheet
-import DayCell from '../components/Calendar/DayCell';
-import SlotLane from '../components/Calendar/SlotLane';
-import SlotLabel from '../components/Calendar/SlotLabel';
-import DayHeader from '../components/Calendar/DayHeader';
+
+import CalendarComponent from '../components/Calendar/Calendar';
+import { NotAuthorized } from './ErrorPages/Pages/401';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
 const AVAILABILITY_TYPE = 'availability';
 
 export default function Calendar() {
+    const { currentUser } = useSelector((state) => state.user)
     const toastIdLoading = useRef(null);
-    const { currentUser } = useSelector((state) => state.user);
     const IAM = currentUser.IAM;
 
     const [calendarEvent, setCalendarEvent] = useState([]);
@@ -53,6 +45,10 @@ export default function Calendar() {
 
         fetchData();
     }, [IAM, currentUser]);
+
+    if (!currentUser?.IAM) {
+        return <NotAuthorized />
+    }
 
     const handleSelect = async (e) => {
         const calendar = e.view.calendar;
@@ -119,67 +115,11 @@ export default function Calendar() {
 
     return (
         <div className="calendar-container">
-            <FullCalendar
-                plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction, bootstrap5Plugin]}
-                initialView={localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth'}
+            <CalendarComponent
                 events={[...calendarEvent, ...calendarAvailability]}
-                businessHours={{ daysOfWeek: [1, 2, 3, 4, 5], startTime: '08:00', endTime: '18:00' }}
-                firstDay={1}
-                nowIndicator={true}
-                weekends={false}
-
-                // Selection
-                selectConstraint={{ startTime: '08:00', endTime: '18:00', daysOfWeek: [1, 2, 3, 4, 5] }}
-                selectOverlap={() => false}
-                selectLongPressDelay={1000}
-                eventLongPressDelay={1000}
-                longPressDelay={1000}
-                selectable={true}
-
-                // Handlers
-                eventClick={handleEventClick}
-                select={handleSelect}
-                viewDidMount={handleViewDidMount}
-
-                // Styling
-                headerToolbar={{ left: 'prev,next today', center: 'title', right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay' }}
-                navLinks={true}
-                height={'auto'}
-                titleFormat={{ year: 'numeric', month: 'short', day: '2-digit' }}
-                slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
-                eventTimeFormat={{ hour12: false, hour: '2-digit', minute: '2-digit' }}
-                themeSystem="bootstrap5"
-                buttonIcons={{
-                    prev: 'bi-chevron-left',
-                    next: 'bi-chevron-right',
-                    prevYear: 'bi-skip-backward',
-                    nextYear: 'bi-skip-forward'
-                }}
-                buttonText={{
-                    today: 'Today',
-                    month: 'Month',
-                    week: 'Week',
-                    day: 'Day',
-                    multiMonthYear: 'Year'
-                }}
-                eventDisplay="block"
-                windowResizeDelay={100}
-                handleWindowResize={true}
-                aspectRatio={1.5}
-                views={{
-                    timeGridDay: { buttonText: 'Day' },
-                    timeGridWeek: { buttonText: 'Week' },
-                    dayGridMonth: { buttonText: 'Month' },
-                    multiMonthYear: { buttonText: 'Year' },
-                }}
-                dayCellContent={(arg) => <DayCell arg={arg} />}
-                slotMinTime={'08:00'}
-                slotMaxTime={'18:00'}
-                slotEventOverlap={true}
-                slotLabelInterval={{ minutes: 30 }}
-                slotLaneContent={(arg) => <SlotLane arg={arg} />}
-                slotLabelContent={(arg) => <SlotLabel arg={arg} />}
-                dayHeaderContent={(arg) => <DayHeader arg={arg} />}
+                handleEventClick={handleEventClick}
+                handleSelect={handleSelect}
+                handleViewDidMount={handleViewDidMount}
             />
         </div>
     );

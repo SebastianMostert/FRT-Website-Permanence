@@ -8,7 +8,7 @@ const ReportForm = ({ handleChange }) => {
 
     return (
         <>
-            <h1 className="text-3xl font-semibold text-center my-7">EMT Report</h1>
+            <h1 className="text-3xl font-semibold text-center my-7">First Responder Report [WIP]</h1>
             <CollapsibleSection title="(c) ABCDE Schema">
                 <ABCDESchema handleChange={handleChange} />
             </CollapsibleSection>
@@ -19,8 +19,6 @@ const ReportForm = ({ handleChange }) => {
 };
 
 export default ReportForm;
-
-
 
 /*
 Boolbtn = Button with Yes or No option / Radio Button

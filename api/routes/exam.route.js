@@ -8,6 +8,6 @@ import { verifyToken } from '../utils/verifyUser.js';
 const router = express.Router();
 
 router.post('/user/:IAM', verifyToken, getExamsByUser);
-router.post('/classes', verifyToken, getClasses);
+router.post('/classes', getClasses);
 
 export default router;

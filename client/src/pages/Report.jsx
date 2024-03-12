@@ -1,12 +1,17 @@
 import { useSelector } from "react-redux";
 import ReportForm from "../components/Report/ReportForm";
+import { NotAuthorized } from "./ErrorPages/Pages/401";
 
 export default function Report() {
-  const { loading } = useSelector((state) => state.user);
+  const { currentUser, loading } = useSelector((state) => state.user)
 
   const handleChange = (e) => {
     console.log('Here');
     console.log(e.target.id + ': ' + e.target.value);
+  }
+
+  if (!currentUser?.IAM) {
+    return <NotAuthorized />
   }
 
   return (

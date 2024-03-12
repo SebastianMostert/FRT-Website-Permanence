@@ -4,19 +4,18 @@ import Select from 'react-select';
 import InputLabel from "./InputLabel";
 
 const MultiSelectDropdown = ({ selectedValues, onChange, options, id, label }) => {
-    // Check if the selectedValues are in the form of an array containing objects
-    let _value = selectedValues
+    // Create a new variable to hold the modified values
+    let _value;
 
     if (Array.isArray(selectedValues)) {
-        if (Array.isArray(selectedValues) && selectedValues.length > 0 && typeof selectedValues[0] === 'object') {
-            _value = selectedValues
+        if (selectedValues.length > 0 && typeof selectedValues[0] === 'object') {
+            _value = selectedValues;
         } else {
-            for (let i = 0; i < selectedValues.length; i++) {
-                _value[i] = { value: selectedValues[i], label: selectedValues[i] }
-            }
+            // Map selectedValues to an array of objects
+            _value = selectedValues.map(value => ({ value, label: value }));
         }
     } else {
-        _value = []
+        _value = [];
     }
 
     return (

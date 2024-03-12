@@ -26,11 +26,10 @@ export const updateUser = async (req, res, next) => {
     }
 
     const training = [];
-    if (body.training) {
+    if (body.training?.length > 0) {
       for (let i = 0; i < body.training.length; i++) {
         const _training = body.training[i];
-        console.log(_training)
-
+        if(!_training?.value) continue
         training.push(_training.value);
         console.log(training)
       }
