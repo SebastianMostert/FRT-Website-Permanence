@@ -29,7 +29,7 @@ export const updateUser = async (req, res, next) => {
     if (body.training?.length > 0) {
       for (let i = 0; i < body.training.length; i++) {
         const _training = body.training[i];
-        if(!_training?.value) continue
+        if (!_training?.value) continue
         training.push(_training.value);
         console.log(training)
       }
@@ -72,4 +72,17 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 
+}
+
+export const fetchUser = async (req, res, next) => {
+  const IAM = req.params.IAM;
+  try {
+    const user = await User.find({ IAM });
+    const { password, ...rest } = user[0];
+
+    res.status(200).json(rest);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 }

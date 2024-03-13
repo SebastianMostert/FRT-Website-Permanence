@@ -27,6 +27,13 @@ export const getAvailabilities = async (req, res, next) => {
     const availabilities = await Availability.find({ IAM: validIAM });
 
     res.status(200).json(availabilities);
+
+};
+
+export const getAllAvailabilities = async (req, res, next) => {
+    const availabilities = await Availability.find();
+
+    res.status(200).json(availabilities);
 };
 
 // Delete availability

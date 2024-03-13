@@ -119,3 +119,22 @@ export async function isTrainingValid(trainingStr) {
 export function isMobile() {
     return window.innerWidth <= 768; // Adjust the threshold as needed
 }
+
+export async function getMember(IAM) {
+    try {
+        const res = await fetch(`/api/user/fetch/${IAM}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        const data = await res.json()
+        const document = data._doc;
+        if (!document) return { success: false, data: null }
+        if (res.status == 200) return { success: true, data: document }
+        return { success: false, data: null }
+    } catch (error) {
+        return { success: false, data: null }
+    }
+}
