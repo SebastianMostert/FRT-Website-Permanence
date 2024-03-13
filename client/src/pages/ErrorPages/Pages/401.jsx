@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const NotAuthorizedPage = () => {
     return (
         <NotAuthorized />
@@ -7,6 +9,8 @@ const NotAuthorizedPage = () => {
 export default NotAuthorizedPage;
 
 export function NotAuthorized() {
+    const { t } = useTranslation();
+
     return (
         <div id="oopss">
             <div className="flex items-center justify-center h-screen w-screen">
@@ -15,15 +19,15 @@ export function NotAuthorized() {
                         401
                     </div>
                     <div className="text-6xl font-bold text-red-500 mb-4">
-                        ACCESS DENIED
+                        {t('401.title')}
                     </div>
 
                     <div className="text-xl text-gray-700 mb-4">
-                        Oops, You don&apos;t have permission to access this page.
+                        {t('401.description')}
                     </div>
 
                     <div className="text-md text-gray-600 mb-8">
-                        This may be due to missing credentials or insufficient permissions. Please contact the site administrator for assistance.
+                        {t('401.explanation')}
                     </div>
 
                     <div>
@@ -31,7 +35,7 @@ export function NotAuthorized() {
                             href="/"
                             className="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-700 remove-link-decoration"
                         >
-                            Go to homepage
+                            {t('401.home')}
                         </a>
                     </div>
                 </div>

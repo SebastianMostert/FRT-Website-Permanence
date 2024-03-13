@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   signInStart,
@@ -9,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
 export default function SignIn() {
+  const { t } = useTranslation();
   const toastId = React.useRef(null);
 
   const [formData, setFormData] = useState({});
@@ -23,7 +25,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      toastId.current = toast.info('Signing in...', {
+      toastId.current = toast.info(`${t('signin.loading')}`, {
         autoClose: false,
       });
       dispatch(signInStart());
@@ -36,23 +38,22 @@ export default function SignIn() {
       });
       const data = await res.json();
       if (data.success === false) {
-        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to sign in: ${data.message}` });
+        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('signin.failed', { reason: data.message })}` });
         dispatch(signInFailure(data));
         return;
       }
-      console.log(data);
-      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `Successfully signed in as ${data.firstName} ${data.lastName}` });
+      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `${t('signin.success')}` });
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
-      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to sign in: ${error.message}` });
+      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('signin.failed', { reason: error.message })}` });
       dispatch(signInFailure(error));
     }
   };
   return (
     <>
       <div className='p-3 max-w-lg mx-auto'>
-        <h1 className='text-3xl text-center font-semibold my-7'>Sign In</h1>
+        <h1 className='text-3xl text-center font-semibold my-7'>{t('signin.title')}</h1>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           <input
             type='text'
@@ -63,7 +64,7 @@ export default function SignIn() {
           />
           <input
             type='password'
-            placeholder='Password'
+            placeholder={t('signin.password')}
             id='password'
             className='bg-slate-100 p-3 rounded-lg'
             onChange={handleChange}
@@ -72,17 +73,17 @@ export default function SignIn() {
             disabled={loading}
             className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
           >
-            {loading ? 'Loading...' : 'Sign In'}
+            {loading ? `${t('submit.btn.loading')}` : `${t('signin.title')}`}
           </button>
         </form>
         <div className='flex gap-2 mt-5'>
-          <p>Dont Have an account?</p>
+          <p>{t('signin.noaccount')}</p>
           <Link to='/sign-up'>
-            <span className='text-blue-500'>Sign up</span>
+            <span className='text-blue-500'>{t('signin.signup')}</span>
           </Link>
         </div>
         <p className='text-red-700 mt-5'>
-          {error ? error.message || 'Something went wrong!' : ''}
+          {error ? error.message || `${t('signin.error')}` : ''}
         </p>
       </div>
     </>

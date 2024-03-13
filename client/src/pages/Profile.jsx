@@ -18,8 +18,10 @@ import InputField from '../components/Inputs/InputField';
 import MultiSelectDropdown from '../components/Inputs/MultiSelectDropdown';
 import InputLabel from '../components/Inputs/InputLabel';
 import { NotAuthorized } from './ErrorPages/Pages/401';
+import { useTranslation } from 'react-i18next';
 
 export default function Profile() {
+  const { t } = useTranslation();
   const toastId = React.useRef(null);
 
   const dispatch = useDispatch();
@@ -33,7 +35,7 @@ export default function Profile() {
           const response = await getSelectMenuClass(); // Use your actual fetching function
           setClassOptions(response);
         } catch (error) {
-          console.error('Error fetching class options:', error);
+          console.error(error);
         }
       };
 
@@ -81,7 +83,8 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      toastId.current = toast.info("Updating profile...", { autoClose: false });
+      { t('profile.update.loading') }
+      toastId.current = toast.info(`${t('profile.update.loading')}`, { autoClose: false });
       dispatch(updateUserStart());
 
       const updatedUserData = {
@@ -94,7 +97,7 @@ export default function Profile() {
       if (updatedUserData.password) {
         const _isPasswordValid = await isPasswordValid(updatedUserData.password);
         if (!_isPasswordValid.success) {
-          const msg = `Failed to update profile: ${_isPasswordValid.message}`
+          const msg = `${t('profile.update.failed', { reason: _isPasswordValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }
@@ -104,7 +107,7 @@ export default function Profile() {
       if (updatedUserData.studentClass) {
         const _isClassValid = await isClassValid(updatedUserData.studentClass);
         if (!_isClassValid.success) {
-          const msg = `Failed to update profile: ${_isClassValid.message}`
+          const msg = `${t('profile.update.failed', { reason: _isClassValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }
@@ -114,7 +117,7 @@ export default function Profile() {
       if (updatedUserData.training) {
         const _isTrainingValid = await isTrainingValid(updatedUserData.training);
         if (!_isTrainingValid.success) {
-          const msg = `Failed to update profile: ${_isTrainingValid.message}`
+          const msg = `${t('profile.update.failed', { reason: _isTrainingValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }
@@ -131,15 +134,15 @@ export default function Profile() {
 
       const data = await res.json();
       if (data.success === false) {
-        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to update profile: ${data.message}` });
+        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('profile.update.failed', { reason: data.message })}` });
         dispatch(updateUserFailure(data));
         return;
       }
 
-      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `Successfully updated profile` });
+      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `${t('profile.update.success')}` });
       dispatch(updateUserSuccess(data));
     } catch (error) {
-      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `Failed to update profile: ${error.message}` });
+      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('profile.update.failed', { reason: error.message })}` });
       dispatch(updateUserFailure(error));
     }
   };
@@ -165,9 +168,9 @@ export default function Profile() {
     try {
       await fetch('/api/auth/signout');
       dispatch(signOut())
-      toast.info("Signed out");
+      toast.info(`${t('profile.signed.out')}`);
     } catch (error) {
-      toast.info("Error signing out");
+      toast.info(`${t('profile.signed.error')}`);
     }
   };
 
@@ -175,27 +178,27 @@ export default function Profile() {
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
+      <h1 className='text-3xl font-semibold text-center my-7'>{t('profile.title')}</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         {/* First and Last Name */}
         <div className="flex gap-4">
           <div className="flex-1">
-            <InputLabel text="First Name" />
+            <InputLabel text={`${t('profile.first.name')}`} />
             <InputField
               defaultValue={formData.firstName || currentUser.firstName}
               type='text'
               id='firstName'
-              placeholder='First Name'
+              placeholder={`${t('profile.first.name')}`}
               onChange={handleChange}
             />
           </div>
           <div className="flex-1">
-            <InputLabel text="Last Name" />
+            <InputLabel text={`${t('profile.last.name')}`} />
             <InputField
               defaultValue={formData.lastName || currentUser.lastName}
               type='text'
               id='lastName'
-              placeholder='Last Name'
+              placeholder={`${t('profile.last.name')}`}
               onChange={handleChange}
             />
           </div>
@@ -203,57 +206,57 @@ export default function Profile() {
         {/* Experience */}
         <div className="flex gap-4">
           <div className="flex-1">
-            <InputLabel text="Experience RTW /h" />
+            <InputLabel text={`${t('profile.experience.rtw')}`} />
             <InputField
               defaultValue={formData.experienceRTW || currentUser.experience.RTW}
               type='number'
               id='experienceRTW'
-              placeholder='Experience RTW /h'
+              placeholder={`${t('profile.experience.rtw')}`}
               onChange={handleChange}
             />
           </div>
           <div className="flex-1">
-            <InputLabel text="Experience FR /h" />
+            <InputLabel text={`${t('profile.experience.fr')}`} />
             <InputField
               defaultValue={formData.experienceFR || currentUser.experience.FR}
               type='number'
               id='experienceFR'
-              placeholder='Experience First Responder /h'
+              placeholder={`${t('profile.experience.fr')}`}
               onChange={handleChange}
             />
           </div>
         </div>
         <DropdownMenu
           id='studentClass'
-          label={'Class'}
+          label={`${t('profile.dropdown.class.label')}`}
           selectedValue={formData.studentClass || currentUser.studentClass}
           onChange={handleChange}
           options={classOptions}
         />
         <MultiSelectDropdown
-          label={'Training'}
+          label={`${t('profile.multi.dropdown.training.label')}`}
           id='training'
           selectedValues={formData.training || currentUser.training} // Assuming it expects an array of strings
           onChange={handleTrainingChange}
           options={trainingOptions}
         />
         <InputField
-          label={'Email'}
+          label={`${t('profile.email')}`}
           defaultValue={formData.email || currentUser.email}
           type='email'
           id='email'
-          placeholder='Email'
+          placeholder={`${t('profile.email')}`}
           onChange={handleChange}
         />
         <InputField
-          label={'Password'}
+          label={`${t('profile.password')}`}
           type='password'
           id='password'
-          placeholder='Password'
+          placeholder={`${t('profile.password')}`}
           onChange={handleChange}
         />
         <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>
-          {loading ? 'Loading...' : 'Update'}
+          {loading ? `${t('submit.btn.loading')}` : `${t('submit.btn.update')}`}
         </button>
       </form>
       <div className='flex justify-between mt-5'>
@@ -261,10 +264,10 @@ export default function Profile() {
           onClick={handleDeleteAccount}
           className='text-red-700 cursor-pointer'
         >
-          Delete Account
+          {t('profile.delete.account')}
         </span>
         <span onClick={handleSignOut} className='text-red-700 cursor-pointer'>
-          Sign out
+          {t('profile.sign.out')}
         </span>
       </div>
     </div>

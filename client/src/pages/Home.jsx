@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import ContactInfo from "../components/HomePage/ContactInfo";
 import Footer from "../components/HomePage/Footer";
 import Section from "../components/HomePage/Section";
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const styles = {
     homepage: {
       textAlign: 'center',
@@ -24,12 +26,12 @@ const HomePage = () => {
       <h1 style={styles.title}>Lënster Lycée First Responder Team</h1>
 
       <Section
-        title="Our Mission"
-        content="Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all."
+        title={t('home.title.mission')}
+        content={t('home.description.mission')}
       />
 
       <Section
-        title="Contact Us"
+        title={t('home.title.contact')}
         content={<ContactInfo />}
       />
 

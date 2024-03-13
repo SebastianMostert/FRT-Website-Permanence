@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
   return (
     <div className='bg-slate-200'>
@@ -12,16 +14,16 @@ export default function Header() {
         </Link>
         <ul className='flex gap-4'>
           <Link className='remove-link-decoration' to='/'>
-            <li>Home</li>
+            <li>{t('header.home')}</li>
           </Link>
-          {currentUser && <Link className='remove-link-decoration' to='/calendar'><li>Calendar</li></Link>}
-          {currentUser && <Link className='remove-link-decoration' to='/report'><li>Report</li></Link>}
-          {currentUser && <Link className='remove-link-decoration' to='/admin'><li>Admin</li></Link>}
+          {currentUser && <Link className='remove-link-decoration' to='/calendar'><li>{t('header.calendar')}</li></Link>}
+          {currentUser && <Link className='remove-link-decoration' to='/report'><li>{t('header.report')}</li></Link>}
+          {currentUser && <Link className='remove-link-decoration' to='/admin'><li>{t('header.admin')}</li></Link>}
           <Link className='remove-link-decoration' to='/profile'>
             {currentUser ? (
               <img src={currentUser.profilePicture} alt='profile' className='h-7 w-7 rounded-full object-cover' />
             ) : (
-              <li>Sign In</li>
+              <li>{t('header.signin')}</li>
             )}
           </Link>
         </ul>

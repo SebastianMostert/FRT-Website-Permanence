@@ -1,5 +1,6 @@
 /* eslint-disable react/no-deprecated */
 /* eslint-disable no-undef */
+import { useTranslation } from 'react-i18next';
 import '../CSS/404.css'; // Import your CSS file
 
 const NotFoundPage = () => {
@@ -11,6 +12,8 @@ const NotFoundPage = () => {
 export default NotFoundPage;
 
 export function NotFound() {
+    const { t } = useTranslation();
+
     return (
         <div>
             <div id="oopss">
@@ -20,8 +23,8 @@ export function NotFound() {
                         alt={404}
                     />
                     <span>Error 404</span>
-                    <p className="p-a">Page not found! Looks like the URL went on a vacation without leaving a forwarding address. Let&apos;s hope it&apos;s enjoying some sunny beaches and will be back soon!</p>
-                    <p className="p-b"><a href="/">Take me back Home</a></p>
+                    <p className="p-a">{t('404.description')}</p>
+                    <p className="p-b"><a href="/">{t('404.home')}</a></p>
                 </div>
             </div>
         </div>

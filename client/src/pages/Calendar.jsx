@@ -12,12 +12,15 @@ import '../Styles/CustomCalendar.css'; // Import your custom CSS stylesheet
 
 import CalendarComponent from '../components/Calendar/Calendar';
 import { NotAuthorized } from './ErrorPages/Pages/401';
+import { useTranslation } from 'react-i18next';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
 const AVAILABILITY_TYPE = 'availability';
 
+
 export default function Calendar() {
+    const { t } = useTranslation();
     const { currentUser } = useSelector((state) => state.user)
     const toastIdLoading = useRef(null);
     const IAM = currentUser.IAM;
@@ -27,12 +30,12 @@ export default function Calendar() {
 
     useEffect(() => {
         async function fetchData() {
-            toastIdLoading.current = toast.info('Loading exams and availabilities...', { autoClose: false });
+            toastIdLoading.current = toast.info(`${t('calendar.loading')}`, { autoClose: false });
 
             const calendarEvents = await getExams(currentUser);
 
             if (!calendarEvents.success) {
-                toast.error('Failed to load exams! Verify you\'ve provided the correct class in the profile page!');
+                toast.error(`${t('calendar.loading.error')}`);
             }
 
             const calendarAvailabilities = await getAvailabilities(IAM);
@@ -40,7 +43,7 @@ export default function Calendar() {
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
 
-            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: 'Exams and availabilities loaded successfully!' });
+            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('calendar.loading.success')}` });
         }
 
         fetchData();
@@ -56,7 +59,7 @@ export default function Calendar() {
         const start = new Date(e.start);
         const end = new Date(e.end);
 
-        const createdAvailability = await createAvailability(start, end, currentUser);
+        const createdAvailability = await createAvailability(start, end, currentUser, t);
 
         if (!createdAvailability.success) return;
 
@@ -85,7 +88,7 @@ export default function Calendar() {
         calendar.refetchEvents();
 
         if (isExam) {
-            toast.error("You are not available on this day!", { theme: 'colored' });
+            toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
         }
 
         if (isAvailability) {
@@ -95,16 +98,16 @@ export default function Calendar() {
 
     const handleAvailabilityDelete = async (id) => {
         try {
-            const result = await deleteAvailability(id, IAM);
+            const result = await deleteAvailability(id, IAM, t);
 
             if (result.success) {
                 setCalendarAvailability(calendarAvailability.filter((event) => event.id !== id));
-                toast.success('Availability deleted successfully!');
+                toast.success(`${t('calendar.availability.delete.success')}`);
             } else {
-                toast.error('Failed to delete availability!');
+                toast.error(`${t('calendar.availability.delete.error')}`);
             }
         } catch (err) {
-            toast.error('Failed to delete availability!');
+            toast.error(`${t('calendar.availability.delete.error')}`);
         }
     };
 
@@ -235,7 +238,7 @@ async function getAvailabilities(IAM) {
     }
 }
 
-async function createAvailability(start, end, user) {
+async function createAvailability(start, end, user, t) {
     try {
         const res = await fetch('/api/availability/create', {
             method: 'POST',
@@ -248,18 +251,18 @@ async function createAvailability(start, end, user) {
         const data = await res.json()
 
         if (data?.success != true) {
-            toast.error(`An error occured while creating your availability!`)
+            toast.error(`${t('calendar.availability.create.error')}`);
             return { success: false, data: null }
         }
-        toast.success(`You have been marked as available from ${moment(start).format('HH:mm')} to ${moment(end).format('HH:mm')}`)
+        toast.success(`${t('calendar.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
         return { success: true, data: data.availability }
     } catch (error) {
-        toast.error(`An error occured while creating your availability: ${error.message}`)
+        toast.error(`${t('calendar.availability.create.error')}`);
         return { success: false, data: null }
     }
 }
 
-async function deleteAvailability(id, IAM) {
+async function deleteAvailability(id, IAM, t) {
     try {
         console.log(id)
         console.log(id)
@@ -273,7 +276,7 @@ async function deleteAvailability(id, IAM) {
 
         const data = await res.json()
 
-        if (data?.success != true) return { success: false, message: 'Deleted availability' }
+        if (data?.success != true) return { success: false, message: `${t('calendar.availability.delete.success')}` }
         return { success: true }
     } catch (err) {
         return { success: false, message: err.message }

@@ -4,8 +4,10 @@ import { toast } from 'react-toastify';
 import { isIAMValid, isPasswordValid, } from '../utils';
 import InputField from '../components/Inputs/InputField';
 import InputLabel from '../components/Inputs/InputLabel';
+import { useTranslation } from 'react-i18next';
 
 export default function SignUp() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,14 +27,14 @@ export default function SignUp() {
       const _isPasswordValid = await isPasswordValid(formData.password);
       if (!_isPasswordValid.success) {
         setLoading(false);
-        return toast.error(`Failed to update profile: ${_isPasswordValid.message}`);
+        return toast.error(`${t("signup.create.failed", { reason: _isPasswordValid.message })}`);
       }
 
       // Verify IAM
       const _isIAMValid = await isIAMValid(formData.IAM);
       if (!_isIAMValid.success) {
         setLoading(false);
-        return toast.error(`Failed to update profile: ${_isIAMValid.message}`);
+        return toast.error(`${t("signup.create.failed", { reason: _isIAMValid.message })}`);
       }
 
       //#endregion
@@ -49,21 +51,21 @@ export default function SignUp() {
       console.log(data);
       setLoading(false);
       if (data.success === false) {
-        toast.error(`An error occured while creating your account`)
+        toast.error(`${t('signup.create.error')}`)
         setError(true);
         return;
       }
-      toast.success(`Your account has been created successfully`);
+      toast.success(`${t('signup.create.success')}`)
       navigate('/sign-in');
     } catch (error) {
-      toast.error(`An error occured while creating your account`)
+      toast.error(`${t('signup.create.error')}`)
       setLoading(false);
       setError(true);
     }
   };
   return (
     <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl text-center font-semibold my-7'>Sign Up</h1>
+      <h1 className='text-3xl text-center font-semibold my-7'>{t('signin.signup')}</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <InputField
           label={'IAM'}
@@ -76,36 +78,36 @@ export default function SignUp() {
         {/* First and Last Name */}
         <div className="flex gap-4">
           <div className="flex-1">
-            <InputLabel text="First Name" />
+            <InputLabel text={t('profile.first.name')} />
             <InputField
               type='text'
               id='firstName'
-              placeholder='First Name'
+              placeholder={t('profile.first.name')}
               onChange={handleChange}
             />
           </div>
           <div className="flex-1">
-            <InputLabel text="Last Name" />
+            <InputLabel text={t('profile.last.name')} />
             <InputField
               type='text'
               id='lastName'
-              placeholder='Last Name'
+              placeholder={t('profile.last.name')}
               onChange={handleChange}
             />
           </div>
         </div>
         <InputField
-          label={'Email'}
+          label={t('profile.email')}
           type='email'
-          placeholder='Email'
+          placeholder={t('profile.email')}
           id='email'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
         />
         <InputField
-          label={'Password'}
+          label={t('profile.password')}
           type='password'
-          placeholder='Password'
+          placeholder={t('profile.password')}
           id='password'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
@@ -114,16 +116,16 @@ export default function SignUp() {
           disabled={loading}
           className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
         >
-          {loading ? 'Loading...' : 'Sign Up'}
+          {loading ? `${t('submit.btn.loading')}` : `${t('signin.signup')}`}
         </button>
       </form>
       <div className='flex gap-2 mt-5'>
-        <p>Have an account?</p>
+        <p>{t('signup.haveaccount')}</p>
         <Link to='/sign-in'>
-          <span className='text-blue-500'>Sign in</span>
+          <span className='text-blue-500'>{t('signin.title')}</span>
         </Link>
       </div>
-      <p className='text-red-700 mt-5'>{error && 'Something went wrong!'}</p>
+      <p className='text-red-700 mt-5'>{error && `${t("signin.error")}`}</p>
     </div>
   );
 }

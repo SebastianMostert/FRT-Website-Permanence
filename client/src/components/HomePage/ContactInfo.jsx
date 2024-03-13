@@ -4,9 +4,9 @@ const ContactInfo = () => {
     const { t } = useTranslation();
 
     const contactDetails = [
-        { label: `${t('contactLabel112')}`, value: '112' },
-        { label: `${t('emailAddressLabel')}`, value: 'lux.frt.llis@gmail.com', link: 'mailto:lux.frt.llis@gmail.com' },
-        { label: `${t('instagramLabel')}`, value: '@frt.llis', link: 'https://www.instagram.com/frt.llis/' },
+        { label: `${t('contact.label.112')}`, value: '112' },
+        { label: `${t('contact.label.email')}`, value: 'lux.frt.llis@gmail.com', link: 'mailto:lux.frt.llis@gmail.com' },
+        { label: `${t('contact.label.instagram')}`, value: '@frt.llis', link: 'https://www.instagram.com/frt.llis/' },
     ];
 
     return (
