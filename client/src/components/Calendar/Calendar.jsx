@@ -9,10 +9,11 @@ import DayCell from './DayCell';
 import SlotLane from './SlotLane';
 import SlotLabel from './SlotLabel';
 import DayHeader from './DayHeader';
+import EventCell from './EventCell';
 
 const VIEW_TYPE_KEY = 'viewType';
 
-const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount }) => {
+const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, selectable }) => {
     return (
         <FullCalendar
             plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction, bootstrap5Plugin]}
@@ -29,7 +30,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount }
             selectLongPressDelay={1000}
             eventLongPressDelay={1000}
             longPressDelay={1000}
-            selectable={true}
+            selectable={selectable}
 
             // Handlers
             eventClick={handleEventClick}
@@ -70,11 +71,11 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount }
             dayCellContent={(arg) => <DayCell arg={arg} />}
             slotMinTime={'08:00'}
             slotMaxTime={'18:00'}
-            slotEventOverlap={true}
             slotLabelInterval={{ minutes: 30 }}
             slotLaneContent={(arg) => <SlotLane arg={arg} />}
             slotLabelContent={(arg) => <SlotLabel arg={arg} />}
             dayHeaderContent={(arg) => <DayHeader arg={arg} />}
+            eventContent={(arg) => <EventCell arg={arg} />}
         />
     )
 }

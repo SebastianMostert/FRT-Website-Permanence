@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { getMember } from '../utils'
+import AvailabilityModal from '../components/Calendar/AvailabilityModal'
+import { t } from 'i18next'
 
 const AdminDashboard = () => {
     const { t } = useTranslation();
@@ -12,20 +14,15 @@ const AdminDashboard = () => {
     const toastIdLoading = useRef(null);
     const IAM = currentUser.IAM;
     const [calendarAvailability, setCalendarAvailability] = useState([]);
-
-    const roles = currentUser?.roles;
-
-    // If user is not an admin, redirect to 401 page
-    if (!roles?.includes('admin')) {
-        return <NotAuthorized />
-    }
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     // Get all availabilities    
     useEffect(() => {
         async function fetchData() {
             toastIdLoading.current = toast.info(`${t('calendar.loading')}`, { autoClose: false });
 
-            const calendarAvailabilities = await getAvailabilities();
+            const calendarAvailabilities = await getCalendarAvailabilities();
 
             setCalendarAvailability(calendarAvailabilities);
 
@@ -33,78 +30,24 @@ const AdminDashboard = () => {
         }
 
         fetchData();
-    }, [IAM, currentUser]);
+    }, [IAM, currentUser, t]);
 
-    async function getAvailabilities() {
-        try {
-            const availabilityEvents = [];
-            const res = await fetch(`/api/availability/all`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const data = await res.json();
-
-            // Create a map to store availabilities by date
-            const availabilitiesByDate = {};
-            data.forEach((availability) => {
-                const date = availability.startTime.split('T')[0];
-                if (!availabilitiesByDate[date]) {
-                    availabilitiesByDate[date] = [];
-                }
-                availabilitiesByDate[date].push(availability);
-            });
-
-            // Filter availabilities to show only if at least two are at the same time
-            for (const dateAvailabilities of Object.values(availabilitiesByDate)) {
-                if (dateAvailabilities.length >= 2) {
-                    const firstAvailability = dateAvailabilities[0];
-                    const secondAvailability = dateAvailabilities[1];
-
-                    const startTime1 = new Date(firstAvailability.startTime);
-                    const endTime1 = new Date(firstAvailability.endTime);
-
-                    const startTime2 = new Date(secondAvailability.startTime);
-                    const endTime2 = new Date(secondAvailability.endTime);
-
-                    // Compare start and end times to get the overlapping slot
-                    const startTime = startTime1 < startTime2 ? startTime2 : startTime1;
-                    const endTime = endTime1 < endTime2 ? endTime1 : endTime2;
-
-                    //#region Verify availability
-                    const firstUserData = await getMember(firstAvailability.IAM);
-                    const secondUserData = await getMember(secondAvailability.IAM);
-
-                    if (!firstUserData.success || !secondUserData.success) {
-                        toast.error(`Error verifying availability`);
-                        continue; // Skip this pair of availabilities
-                    }
-
-                    const firstUser = firstUserData.data;
-                    const secondUser = secondUserData.data;
-                    //#endregion
-
-                    availabilityEvents.push({
-                        title: `${firstUser.firstName} ${firstUser.lastName} and ${secondUser.firstName} ${secondUser.lastName} are available (Training is not checked yet)`,
-                        start: startTime,
-                        end: endTime,
-                    });
-                }
-            }
-
-            return availabilityEvents;
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
+    const roles = currentUser?.roles;
+    // If user is not an admin, redirect to 401 page
+    if (!roles?.includes('admin')) {
+        return <NotAuthorized />
     }
 
+    const handleEventClick = (e) => {
+        const event = e.event;
+        const calendar = e.view.calendar;
+        calendar.unselect();
 
-
-    const handleEventClick = (event) => {
-        console.log(event)
+        if (event?.extendedProps?.type === 'availability') {
+            console.log(event);
+            setSelectedEvent(event);
+            setShowModal(true);
+        }
     }
 
     return (
@@ -112,9 +55,144 @@ const AdminDashboard = () => {
             <Calendar
                 events={calendarAvailability}
                 handleEventClick={handleEventClick}
+                selectable={false}
+            />
+            <AvailabilityModal
+                show={showModal}
+                handleClose={() => setShowModal(false)}
+                event={selectedEvent}
+                handleDelete={handleDelete}
             />
         </div>
     );
+
+    async function handleDelete(id, IAM, event) {
+        setShowModal(false);
+        const res = await deleteAvailability(id, IAM);
+        if (res.success) {
+            setCalendarAvailability(calendarAvailability.filter((availability) => availability.id !== id));
+            toast.success(`${t('calendar.availability.delete.success')}`);
+            event.remove();
+        } else {
+            toast.error(`${t('calendar.availability.delete.error')}`);
+        }
+    }
 }
 
 export default AdminDashboard;
+
+async function getAvailabilities() {
+    const res = await fetch(`/api/availability/all`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const data = await res.json();
+
+    return data;
+}
+async function getCalendarAvailabilities() {
+    // Get all availabilities
+    const data = await getAvailabilities();
+
+    const allDayEvents = await getAllDayEvent(data)
+    const calendarAvailabilities = [...allDayEvents];
+
+    for (let i = 0; i < data.length; i++) {
+        const availability = data[i];
+        const res = await getMember(availability.IAM);
+        if (!res.success) return toast.error('Could not get member');
+        const user = await res.data;
+
+        calendarAvailabilities.push({
+            title: `${user.firstName} ${user.lastName}`,
+            start: availability.startTime,
+            end: availability.endTime,
+            extendedProps: {
+                type: 'availability',
+                availability,
+                user
+            },
+            id: availability._id
+        })
+    }
+
+    return calendarAvailabilities;
+}
+function getAllDayEvent(availabilities) {
+    // Group availabilities by day
+    const availabilitiesByDay = availabilities.reduce((acc, availability) => {
+        const day = availability.startTime.split("T")[0];
+        if (!acc[day]) {
+            acc[day] = [];
+        }
+        acc[day].push(availability);
+        return acc;
+    }, {});
+
+    const allDayEvents = [];
+
+    // Iterate through days with availabilities
+    for (const day in availabilitiesByDay) {
+        if (availabilitiesByDay.hasOwnProperty(day)) {
+            // Sort availabilities by start time
+            availabilitiesByDay[day].sort((a, b) => {
+                return new Date(a.startTime) - new Date(b.startTime);
+            });
+
+            let currentAllDay = { allDay: true, extendedProps: {} };
+            const overlappingAvailabilities = [];
+
+            // Iterate through sorted availabilities
+            for (let i = 0; i < availabilitiesByDay[day].length; i++) {
+                const availability = availabilitiesByDay[day][i];
+
+                // If availability overlaps with current allDay, add it to overlappingAvailabilities
+                if (
+                    currentAllDay.extendedProps.overlappingAvailabilities &&
+                    new Date(availability.startTime) <
+                    new Date(currentAllDay.extendedProps.overlappingAvailabilities[currentAllDay.extendedProps.overlappingAvailabilities.length - 1].endTime)
+                ) {
+                    overlappingAvailabilities.push(availability);
+                } else {
+                    // If availability doesn't overlap, create a new allDay object
+                    currentAllDay = {
+                        allDay: true,
+                        extendedProps: {
+                            overlappingAvailabilities: [availability]
+                        },
+                        date: new Date(availability.startTime),
+                        title: `There are "${availabilitiesByDay[day].length}" on this day! Click to view more info`,
+                    };
+                }
+            }
+
+            if (overlappingAvailabilities.length > 1) {
+                currentAllDay.extendedProps.overlappingAvailabilities = overlappingAvailabilities;
+                allDayEvents.push(currentAllDay);
+            }
+        }
+    }
+
+    return allDayEvents;
+}
+async function deleteAvailability(id, IAM) {
+    try {
+        const res = await fetch(`/api/availability/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ IAM: IAM }),
+        })
+
+        const data = await res.json()
+
+        if (data?.success != true) return { success: false, message: `${t('calendar.availability.delete.success')}` }
+        return { success: true }
+    } catch (err) {
+        return { success: false, message: err.message }
+    }
+}

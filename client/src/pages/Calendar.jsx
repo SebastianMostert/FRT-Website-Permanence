@@ -3,7 +3,7 @@ import moment from 'moment';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { verifyClass } from '../utils';
+import { getMember, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -13,6 +13,7 @@ import '../Styles/CustomCalendar.css'; // Import your custom CSS stylesheet
 import CalendarComponent from '../components/Calendar/Calendar';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
+import AvailabilityModal from '../components/Calendar/AvailabilityModal';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -27,6 +28,8 @@ export default function Calendar() {
 
     const [calendarEvent, setCalendarEvent] = useState([]);
     const [calendarAvailability, setCalendarAvailability] = useState([]);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -92,11 +95,18 @@ export default function Calendar() {
         }
 
         if (isAvailability) {
-            handleAvailabilityDelete(event.id);
+            const event = e.event;
+            calendar.unselect();
+
+            if (event?.extendedProps?.type === 'availability') {
+                setSelectedEvent(event);
+                setShowModal(true);
+            }
         }
     };
 
-    const handleAvailabilityDelete = async (id) => {
+    const handleAvailabilityDelete = async (id, IAM) => {
+        setShowModal(false);
         try {
             const result = await deleteAvailability(id, IAM, t);
 
@@ -123,6 +133,13 @@ export default function Calendar() {
                 handleEventClick={handleEventClick}
                 handleSelect={handleSelect}
                 handleViewDidMount={handleViewDidMount}
+                selectable={true}
+            />
+            <AvailabilityModal
+                show={showModal}
+                handleClose={() => setShowModal(false)}
+                event={selectedEvent}
+                handleDelete={handleAvailabilityDelete}
             />
         </div>
     );
@@ -222,13 +239,16 @@ async function getAvailabilities(IAM) {
                 title == `Confirmed Availability`
             }
 
+            const res = await getMember(availability.IAM)
+            const user = await res.data
+
             availabilityEvents.push({
                 title,
                 start: availability.startTime,
                 end: availability.endTime,
                 id: availability._id,
                 backgroundColor: isVerifiedAvailability ? '#00FF00' : '#0000FF',
-                extendedProps: { ...availability, type: 'availability' },
+                extendedProps: { ...availability, type: 'availability', user },
             });
         }
 
@@ -264,8 +284,6 @@ async function createAvailability(start, end, user, t) {
 
 async function deleteAvailability(id, IAM, t) {
     try {
-        console.log(id)
-        console.log(id)
         const res = await fetch(`/api/availability/delete/${id}`, {
             method: 'DELETE',
             headers: {
