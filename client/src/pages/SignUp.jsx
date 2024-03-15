@@ -23,10 +23,11 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (e) => {
+    console.log('1')
     e.preventDefault();
     try {
       setLoading(true);
-      setError(false);
+      console.log('2');
 
       // Verify password security
       const _isPasswordValid = await isPasswordValid(formData.password);
@@ -34,13 +35,16 @@ export default function SignUp() {
         setLoading(false);
         return toast.error(`${t("signup.create.failed", { reason: _isPasswordValid.message })}`);
       }
+      console.log('3')
 
       // Verify IAM
       const _isIAMValid = await isIAMValid(formData.IAM);
       if (!_isIAMValid.success) {
+        console.log('4')
         setLoading(false);
         return toast.error(`${t("signup.create.failed", { reason: _isIAMValid.message })}`);
       }
+      console.log('4')
 
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -49,6 +53,7 @@ export default function SignUp() {
         },
         body: JSON.stringify(formData),
       });
+
       const data = await res.json();
       setLoading(false);
       if (data.success === false) {
@@ -77,6 +82,7 @@ export default function SignUp() {
             <Form.Control
               type='text'
               placeholder={'IAM'}
+              id='IAM'
               onChange={handleChange}
             />
           </FloatingLabel>
@@ -94,6 +100,7 @@ export default function SignUp() {
                     type='text'
                     placeholder={t('profile.first.name')}
                     onChange={handleChange}
+                    id='firstName'
                   />
                 </FloatingLabel>
               </Form.Group>
@@ -108,6 +115,7 @@ export default function SignUp() {
                     type='text'
                     placeholder={t('profile.last.name')}
                     onChange={handleChange}
+                    id='lastName'
                   />
                 </FloatingLabel>
               </Form.Group>
@@ -124,6 +132,7 @@ export default function SignUp() {
               type='email'
               placeholder={t('profile.email')}
               onChange={handleChange}
+              id='email'
             />
           </FloatingLabel>
         </Form.Group>
@@ -135,6 +144,7 @@ export default function SignUp() {
               placeholder={t('signin.password')}
               className={`bg-slate-100 p-3 rounded-lg ${showPassword ? 'text-black' : ''}`}
               onChange={handleChange}
+              id='password'
             />
             <InputGroup.Text>
               <Button
