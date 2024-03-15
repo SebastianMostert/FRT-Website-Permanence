@@ -180,12 +180,12 @@ function getAllDayEvent(availabilities) {
 }
 async function deleteAvailability(id, IAM) {
     try {
-        const res = await fetch(`/api/availability/delete/${id}`, {
+        const res = await fetch(`/api/availability/delete/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ IAM: IAM }),
+            body: JSON.stringify({ IAM: IAM, id: id }),
         })
 
         const data = await res.json()

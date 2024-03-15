@@ -284,12 +284,12 @@ async function createAvailability(start, end, user, t) {
 
 async function deleteAvailability(id, IAM, t) {
     try {
-        const res = await fetch(`/api/availability/delete/${id}`, {
+        const res = await fetch(`/api/availability/delete/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ IAM: IAM }),
+            body: JSON.stringify({ IAM: IAM, id: id }),
         })
 
         const data = await res.json()

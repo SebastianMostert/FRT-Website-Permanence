@@ -8,6 +8,6 @@ const router = express.Router();
 router.post('/create', verifyToken, createAvailability);
 router.post('/get/:IAM', verifyToken, getAvailabilities);
 router.post('/all', verifyToken, getAllAvailabilities);
-router.delete('/delete/:id', verifyToken, deleteAvailability);
+router.delete('/delete', verifyToken, deleteAvailability);
 
 export default router;
