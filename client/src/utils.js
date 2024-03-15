@@ -120,6 +120,10 @@ export function isMobile() {
     return window.innerWidth <= 768; // Adjust the threshold as needed
 }
 
+export function isSmallMobile() {
+    return window.innerWidth <= 500; // Adjust the threshold as needed
+}
+
 export async function getMember(IAM) {
     try {
         const res = await fetch(`/api/user/fetch/${IAM}`, {

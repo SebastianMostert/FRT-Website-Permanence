@@ -11,9 +11,12 @@ import AdminDashboard from './pages/AdminDashboard';
 import NotFoundPage from './pages/ErrorPages/Pages/404';
 import './App.css';
 import HeaderRoute from './components/HeaderRoute';
+import { isSmallMobile } from './utils';
+import NoMobilePage from './pages/ErrorPages/noMobilePage';
 
 function App() {
 
+  if (isSmallMobile()) return <NoMobilePage />
   return (
     <BrowserRouter>
       <Routes>
