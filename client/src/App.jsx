@@ -12,7 +12,7 @@ import NotFoundPage from './pages/ErrorPages/Pages/404';
 import './App.css';
 import HeaderRoute from './components/HeaderRoute';
 import { isSmallMobile } from './utils';
-import NoMobilePage from './pages/ErrorPages/noMobilePage';
+import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
 
 function App() {
 
