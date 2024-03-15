@@ -15,7 +15,6 @@ import { isSmallMobile } from './utils';
 import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
 
 function App() {
-
   if (isSmallMobile()) return <NoMobilePage />
   return (
     <BrowserRouter>

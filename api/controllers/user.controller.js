@@ -26,14 +26,8 @@ export const updateUser = async (req, res, next) => {
     }
 
     const training = [];
-    if (body.training?.length > 0) {
-      for (let i = 0; i < body.training.length; i++) {
-        const _training = body.training[i];
-        if (!_training?.value) continue;
-        training.push(_training.value);
-        console.log(training);
-      }
-    }
+    if (body.trainingSAP1) training.push('SAP 1');
+    if (body.trainingSAP2) training.push('SAP 2');
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,

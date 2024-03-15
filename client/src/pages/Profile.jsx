@@ -12,13 +12,10 @@ import {
   signOut,
 } from '../redux/user/userSlice';
 import { toast } from 'react-toastify';
-import { getSelectMenuClass, getSelectMenuTraining, isClassValid, isPasswordValid, isTrainingValid } from '../utils';
-import DropdownMenu from '../components/Inputs/DropdownMenu';
-import InputField from '../components/Inputs/InputField';
-import MultiSelectDropdown from '../components/Inputs/MultiSelectDropdown';
-import InputLabel from '../components/Inputs/InputLabel';
+import { getSelectMenuClass, isClassValid, isPasswordValid, isTrainingValid } from '../utils';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
+import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstrap';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -27,6 +24,9 @@ export default function Profile() {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
   const [classOptions, setClassOptions] = useState([]);
+  const [trainingSAP1, setTrainingSAP1] = useState(false);
+  const [trainingSAP2, setTrainingSAP2] = useState(false);
+  const { currentUser, loading } = useSelector((state) => state.user)
 
   useEffect(() => {
     try {
@@ -34,35 +34,46 @@ export default function Profile() {
         try {
           const response = await getSelectMenuClass(); // Use your actual fetching function
           setClassOptions(response);
+
         } catch (error) {
           console.error(error);
         }
       };
 
+      console.log(currentUser.training)
+      console.log(currentUser.training?.includes('SAP 1'))
+      console.log(currentUser.training?.includes('SAP 2'))
+
+      setTrainingSAP1(currentUser.training?.includes('SAP 1'));
+      setTrainingSAP2(currentUser.training?.includes('SAP 2'));
       fetchData();
     } catch (error) {
       console.log(error);
     }
   }, []);
 
-  const { currentUser, loading } = useSelector((state) => state.user)
   if (!currentUser?.IAM) {
     return <NotAuthorized />
   }
+
   const handleClassChange = (selectedClass) => {
     try {
+      console.log(selectedClass);
       setFormData({ ...formData, studentClass: selectedClass });
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleTrainingChange = (selectedOptions) => {
-    try {
-      const selectedValues = selectedOptions.map((option) => option.value);
-      setFormData({ ...formData, training: selectedValues });
-    } catch (error) {
-      console.log(error);
+  const handleTrainingChange = (e) => {
+    const { id, checked } = e.target;
+
+    if (id === 'trainingSAP1') {
+      setTrainingSAP1(checked)
+      setFormData({ ...formData, trainingSAP1: checked, trainingSAP2 });
+    } else if (id === 'trainingSAP2') {
+      setTrainingSAP2(checked)
+      setFormData({ ...formData, trainingSAP1, trainingSAP2: checked });
     }
   };
 
@@ -91,6 +102,8 @@ export default function Profile() {
         ...currentUser,  // Keep existing user data
         ...formData,    // Include the changed fields
       };
+
+      console.log(updatedUserData);
 
       //#region Verify password, class, training
       // Verify password security
@@ -174,91 +187,144 @@ export default function Profile() {
     }
   };
 
-  const trainingOptions = getSelectMenuTraining();
-
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>{t('profile.title')}</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-        {/* First and Last Name */}
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <InputLabel text={`${t('profile.first.name')}`} />
-            <InputField
-              defaultValue={formData.firstName || currentUser.firstName}
-              type='text'
-              id='firstName'
-              placeholder={`${t('profile.first.name')}`}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="flex-1">
-            <InputLabel text={`${t('profile.last.name')}`} />
-            <InputField
-              defaultValue={formData.lastName || currentUser.lastName}
-              type='text'
-              id='lastName'
-              placeholder={`${t('profile.last.name')}`}
-              onChange={handleChange}
-            />
-          </div>
+      <Form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+        <div id='Names'>
+          <Row>
+            <Col>
+              <Form.Group controlId='firstName'>
+                <FloatingLabel
+                  label={t('profile.first.name')}
+                  className="mb-3"
+                >
+                  <Form.Control
+                    type='text'
+                    defaultValue={formData.firstName || currentUser.firstName}
+                    placeholder={t('profile.first.name')}
+                    onChange={handleChange}
+                    id='firstName'
+                  />
+                </FloatingLabel>
+              </Form.Group>
+            </Col>
+            <Col>
+              <Form.Group controlId='lastName'>
+                <FloatingLabel
+                  label={t('profile.last.name')}
+                  className="mb-3"
+                >
+                  <Form.Control
+                    type='text'
+                    defaultValue={formData.lastName || currentUser.lastName}
+                    placeholder={t('profile.last.name')}
+                    onChange={handleChange}
+                    id='lastName'
+                  />
+                </FloatingLabel>
+              </Form.Group>
+            </Col>
+          </Row>
         </div>
-        {/* Experience */}
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <InputLabel text={`${t('profile.experience.rtw')}`} />
-            <InputField
-              defaultValue={formData.experienceRTW || currentUser.experience.RTW}
-              type='number'
-              id='experienceRTW'
-              placeholder={`${t('profile.experience.rtw')}`}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="flex-1">
-            <InputLabel text={`${t('profile.experience.fr')}`} />
-            <InputField
-              defaultValue={formData.experienceFR || currentUser.experience.FR}
-              type='number'
-              id='experienceFR'
-              placeholder={`${t('profile.experience.fr')}`}
-              onChange={handleChange}
-            />
-          </div>
+        <div id='Experience'>
+          <Row>
+            <Col>
+              <Form.Group controlId='experienceRTW'>
+                <FloatingLabel
+                  label={t('profile.experience.rtw')}
+                  className="mb-3"
+                >
+                  <Form.Control
+                    type='number'
+                    defaultValue={formData.experienceRTW || currentUser.experience.RTW}
+                    placeholder={t('profile.experience.rtw')}
+                    onChange={handleChange}
+                    id='experienceRTW'
+
+                  />
+                </FloatingLabel>
+              </Form.Group>
+            </Col>
+            <Col>
+              <Form.Group controlId='experienceFR'>
+                <FloatingLabel
+                  label={t('profile.experience.fr')}
+                  className="mb-3"
+                >
+                  <Form.Control
+                    type='number'
+                    defaultValue={formData.experienceFR || currentUser.experience.FR}
+                    placeholder={t('profile.experience.fr')}
+                    onChange={handleChange}
+                    id='experienceFR'
+
+                  />
+                </FloatingLabel>
+              </Form.Group>
+            </Col>
+          </Row>
         </div>
-        <DropdownMenu
-          id='studentClass'
-          label={`${t('profile.dropdown.class.label')}`}
-          selectedValue={formData.studentClass || currentUser.studentClass}
-          onChange={handleChange}
-          options={classOptions}
-        />
-        <MultiSelectDropdown
-          label={`${t('profile.multi.dropdown.training.label')}`}
-          id='training'
-          selectedValues={formData.training || currentUser.training} // Assuming it expects an array of strings
-          onChange={handleTrainingChange}
-          options={trainingOptions}
-        />
-        <InputField
-          label={`${t('profile.email')}`}
-          defaultValue={formData.email || currentUser.email}
-          type='email'
-          id='email'
-          placeholder={`${t('profile.email')}`}
-          onChange={handleChange}
-        />
-        <InputField
-          label={`${t('profile.password')}`}
-          type='password'
-          id='password'
-          placeholder={`${t('profile.password')}`}
-          onChange={handleChange}
-        />
-        <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>
+
+        <Form.Group controlId='studentClass'>
+          <FloatingLabel
+            label={t('profile.dropdown.class.label')}
+            className="mb-3"
+          >
+            <Form.Select id='studentClass' onChange={handleChange} value={formData.studentClass || currentUser.studentClass}>
+              {classOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Form.Select>
+          </FloatingLabel>
+        </Form.Group>
+
+        <Form.Group controlId='training'>
+          <FormLabel className="mb-3 text-lg">
+            {t('profile.multi.dropdown.training.label')}
+          </FormLabel>
+          <Form.Check
+            checked={trainingSAP1}
+            label="SAP 1"
+            type='checkbox'
+            name='group1'
+            id={`trainingSAP1`}
+            onChange={handleTrainingChange}
+          />
+          <Form.Check
+            checked={trainingSAP2}
+            label="SAP 2"
+            type='checkbox'
+            name='group2'
+            id={`trainingSAP2`}
+            onChange={handleTrainingChange}
+          />
+        </Form.Group>
+        <Form.Group controlId='email'>
+          <FloatingLabel
+            label={t('profile.email')}
+            className="mb-3"
+          >
+            <Form.Control
+              type='email'
+              defaultValue={formData.email || currentUser.email}
+              placeholder={t('profile.email')}
+              onChange={handleChange}
+              id='email'
+            />
+          </FloatingLabel>
+        </Form.Group>
+        <Button
+          variant='primary'
+          type='submit'
+          disabled={loading}
+          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
+        >
           {loading ? `${t('submit.btn.loading')}` : `${t('submit.btn.update')}`}
-        </button>
-      </form>
+        </Button>
+      </Form>
       <div className='flex justify-between mt-5'>
         <span
           onClick={handleDeleteAccount}
@@ -273,4 +339,3 @@ export default function Profile() {
     </div>
   );
 }
-
