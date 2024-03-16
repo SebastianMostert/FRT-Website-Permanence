@@ -1,42 +1,61 @@
 import { useTranslation } from "react-i18next";
-import ContactInfo from "../components/HomePage/ContactInfo";
-import Footer from "../components/HomePage/Footer";
-import Section from "../components/HomePage/Section";
+import { Container, Row, Col, Card } from "react-bootstrap";
+import LanguageSelector from "../components/Inputs/LanguageSelector";
 
 const HomePage = () => {
   const { t } = useTranslation();
-  const styles = {
-    homepage: {
-      textAlign: 'center',
-      padding: '40px',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#f4f4f4',
-      borderRadius: '8px',
-      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-    },
-    title: {
-      fontSize: '2.5em',
-      color: '#333',
-      marginBottom: '20px',
-    }
-  };
+
+  const contactDetails = [
+    { label: `${t('contact.label.112')}`, value: '112' },
+    { label: `${t('contact.label.email')}`, value: 'lux.frt.llis@gmail.com', link: 'mailto:lux.frt.llis@gmail.com' },
+    { label: `${t('contact.label.instagram')}`, value: '@frt.llis', link: 'https://www.instagram.com/frt.llis/' },
+  ];
 
   return (
-    <div style={styles.homepage}>
-      <h1 style={styles.title}>Lënster Lycée First Responder Team</h1>
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col>
+          <Card className="p-4 shadow-lg rounded-lg">
+            <Card.Body>
+              <h1 className="text-center mb-4">Lënster Lycée First Responder Team</h1>
 
-      <Section
-        title={t('home.title.mission')}
-        content={t('home.description.mission')}
-      />
+              <Card.Text className="text-center"></Card.Text>
 
-      <Section
-        title={t('home.title.contact')}
-        content={<ContactInfo />}
-      />
+              <hr />
 
-      <Footer />
-    </div>
+              <div className="mt-4">
+                <h2>{t('home.title.mission')}</h2>
+                <p>{t('home.description.mission')}</p>
+              </div>
+
+              <div className="mt-4">
+                <h2>{t('home.title.contact')}</h2>
+                <div className="space-y-2">
+                  {contactDetails.map(({ label, value, link }) => (
+                    <div key={label}>
+                      <span className="font-weight-bold">{label}:</span>{" "}
+                      {link ? (
+                        <a href={link} className="text-primary">
+                          {value}
+                        </a>
+                      ) : (
+                        <span>{value}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card.Body>
+            <Card.Footer className="bg-transparent border-0 d-flex justify-content-between align-items-center">
+              <small className="text-muted">
+                &copy; {new Date().getFullYear()} Lënster Lycée International School First Responder Team
+              </small>
+              <LanguageSelector />
+            </Card.Footer>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

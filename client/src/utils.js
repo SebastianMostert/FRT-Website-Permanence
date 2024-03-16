@@ -121,7 +121,11 @@ export function isMobile() {
 }
 
 export function isSmallMobile() {
-    return window.innerWidth <= 500; // Adjust the threshold as needed
+    return window.innerWidth <= 768; // Adjust the threshold as needed
+}
+
+export function isTinyMobile() {
+    return window.innerWidth <= 300; // Adjust the threshold as needed
 }
 
 export async function getMember(IAM) {

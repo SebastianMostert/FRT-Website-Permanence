@@ -11,11 +11,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import NotFoundPage from './pages/ErrorPages/Pages/404';
 import './App.css';
 import HeaderRoute from './components/HeaderRoute';
-import { isSmallMobile } from './utils';
+import { isTinyMobile } from './utils';
 import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
 
 function App() {
-  if (isSmallMobile()) return <NoMobilePage />
+  if (isTinyMobile()) return <NoMobilePage />
   return (
     <BrowserRouter>
       <Routes>
@@ -36,6 +36,7 @@ function App() {
         limit={4}
         closeOnClick={true}
         draggable={true}
+        style={{ zIndex: 10000 }}
       />
     </BrowserRouter>
   );

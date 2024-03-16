@@ -1,33 +1,61 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { Navbar, Nav } from 'react-bootstrap';
 
 export default function Header() {
   const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
+
+  const logoStyle = {
+    maxHeight: '50px',
+    marginRight: '10px',
+    marginLeft: '10px',
+  };
+
+  const roles = currentUser?.roles;
+  // If user is not an admin, redirect to 401 page
+
   return (
-    <div className='bg-slate-200'>
-      <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
-        <Link className='remove-link-decoration' to='/'>
-          {/* <h1 className='font-bold'>First Responder Team - LLIS</h1> */}
-          <img src="https://i.imgur.com/Jlu1pjU.png" alt='Logo' className='h-20 rounded-lg' />
-        </Link>
-        <ul className='flex gap-4'>
-          <Link className='remove-link-decoration' to='/'>
-            <li>{t('header.home')}</li>
-          </Link>
-          {currentUser && <Link className='remove-link-decoration' to='/calendar'><li>{t('header.calendar')}</li></Link>}
-          {currentUser && <Link className='remove-link-decoration' to='/report'><li>{t('header.report')}</li></Link>}
-          {currentUser && <Link className='remove-link-decoration' to='/admin'><li>{t('header.admin')}</li></Link>}
-          <Link className='remove-link-decoration' to='/profile'>
-            {currentUser ? (
-              <img src={currentUser.profilePicture} alt='profile' className='h-7 w-7 rounded-full object-cover' />
-            ) : (
-              <li>{t('header.signin')}</li>
-            )}
-          </Link>
-        </ul>
-      </div>
-    </div>
+    <Navbar expand="lg" className="shadow-sm bg-slate-200">
+      <Navbar.Brand as={Link} to="/" className='navbar-brand'>
+        <img src="https://i.imgur.com/Jlu1pjU.png" alt="Logo" style={logoStyle} />
+      </Navbar.Brand>
+      <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+      <Navbar.Collapse id="responsive-navbar-nav">
+        <Nav className="mr-auto">
+          <Nav.Link as={Link} to="/" className="nav-link">
+            {t('header.home')}
+          </Nav.Link>
+          {currentUser && (
+            <>
+              <Nav.Link as={Link} to="/calendar" className="nav-link">
+                {t('header.calendar')}
+              </Nav.Link>
+              <Nav.Link as={Link} to="/report" className="nav-link">
+                {t('header.report')}
+              </Nav.Link>
+
+              {roles?.includes('admin') && (
+                <Nav.Link as={Link} to="/admin" className="nav-link">
+                  {t('header.admin')}
+                </Nav.Link>
+              )}
+            </>
+          )}
+        </Nav>
+        <Nav className="ml-3 mr-3">
+          {currentUser ? (
+            <span>
+              Logged in as: <Link to="/profile" className='no-underline'>{currentUser.firstName} {currentUser.lastName}</Link>
+            </span>
+          ) : (
+            <Nav.Link as={Link} to="/profile" className="nav-link">
+              {t('header.signin')}
+            </Nav.Link>
+          )}
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
   );
 }

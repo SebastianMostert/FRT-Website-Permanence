@@ -136,7 +136,7 @@ function getAllDayEvent(availabilities) {
 
     // Iterate through days with availabilities
     for (const day in availabilitiesByDay) {
-        if (availabilitiesByDay.hasOwnProperty(day)) {
+        if (Object.prototype.hasOwnProperty.call(availabilitiesByDay, day)) {
             // Sort availabilities by start time
             availabilitiesByDay[day].sort((a, b) => {
                 return new Date(a.startTime) - new Date(b.startTime);

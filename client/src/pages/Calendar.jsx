@@ -3,7 +3,7 @@ import moment from 'moment';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { getMember, verifyClass } from '../utils';
+import { getMember, isSmallMobile, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -14,6 +14,7 @@ import CalendarComponent from '../components/Calendar/Calendar';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import AvailabilityModal from '../components/Calendar/AvailabilityModal';
+import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -55,6 +56,8 @@ export default function Calendar() {
     if (!currentUser?.IAM) {
         return <NotAuthorized />
     }
+
+    if (isSmallMobile()) return <NoMobilePage />
 
     const handleSelect = async (e) => {
         const calendar = e.view.calendar;
