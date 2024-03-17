@@ -3,6 +3,7 @@ import { Container, Form, Button, Accordion } from 'react-bootstrap';
 import FirstResponders from './FirstResponders';
 import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
+import SamplerSchema from './SamplerSchema';
 
 const ReportForm = () => {
     const [missionNumber, setMissionNumber] = useState('');
@@ -60,6 +61,8 @@ const ReportForm = () => {
             abdomen: '',
             becken: '',
             oberschenkel: '',
+            ecgImage: '',
+            spO2: '',
         },
         disability: {
             problem: false,
@@ -86,6 +89,42 @@ const ReportForm = () => {
             weitereVerletzungen: '',
             wundversorgung: false,
             extremitätenschienung: false,
+            bodyDiagramLetters: [],
+        },
+    });
+
+    const [samplerData, setSamplerData] = useState({
+        symptoms: {
+            text: '',
+            erhoben: false,
+        },
+        allergies: {
+            text: '',
+            erhoben: false,
+        },
+        medications: {
+            text: '',
+            medicineHasImage: false,
+            medicineListImage: '',
+            erhoben: false,
+        },
+        pastMedicalHistory: {
+            text: '',
+            erhoben: false,
+        },
+        lastOralIntake: {
+            type: '',
+            time: '',
+            erhoben: false,
+            details: ''
+        },
+        events: {
+            text: '',
+            erhoben: false,
+        },
+        riskFactors: {
+            text: '',
+            erhoben: false,
         },
     });
 
@@ -111,6 +150,16 @@ const ReportForm = () => {
         });
     };
 
+    const handleSamplerChange = (field, subField, value) => {
+        setSamplerData({
+            ...samplerData,
+            [field]: {
+                ...samplerData[field],
+                [subField]: value,
+            },
+        });
+    };
+
     const handleMissionNumberChange = (event) => {
         setMissionNumber(event.target.value);
     };
@@ -122,6 +171,7 @@ const ReportForm = () => {
         console.log('First Responders:', firstResponders);
         console.log('Patient Info:', patientInfo);
         console.log('(c) ABCDE Schema:', abcdeData);
+        console.log('SAMPLER Schema:', samplerData);
     };
 
     return (
@@ -169,6 +219,18 @@ const ReportForm = () => {
                             <ABCDESchema
                                 abcdeData={abcdeData}
                                 handleABCDEChange={handleABCDEChange}
+                            />
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
+
+                <Accordion defaultActiveKey="1">
+                    <Accordion.Item eventKey="1">
+                        <Accordion.Header>SAMPLER Schema</Accordion.Header>
+                        <Accordion.Body>
+                            <SamplerSchema
+                                samplerData={samplerData}
+                                handleSamplerChange={handleSamplerChange}
                             />
                         </Accordion.Body>
                     </Accordion.Item>

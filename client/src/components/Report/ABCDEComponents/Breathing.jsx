@@ -19,7 +19,7 @@ const Breathing = ({ value = {}, onChange }) => {
         const updatedValue = { ...value, problem: isChecked };
         if (!isChecked) {
             updatedValue.breathingSpeed = '';
-            updatedValue.auskultation = false;
+            updatedValue.auskultationSeitengleich = false;
             updatedValue.thorax = '';
             updatedValue.sauerstoffgabe = '';
             updatedValue.brille = false;
@@ -84,8 +84,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                             <Form.Check
                                                 type="checkbox"
                                                 label="Auskultation seitengleich"
-                                                checked={value.auskultation || false}
-                                                onChange={() => handleMeasureChange('auskultation')}
+                                                checked={value.auskultationSeitengleich || false}
+                                                onChange={() => handleMeasureChange('auskultationSeitengleich')}
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">

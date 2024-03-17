@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card, Table } from 'react-bootstrap';
+import { Form, Row, Col, Card, Table, InputGroup } from 'react-bootstrap';
 
 const Disability = ({ value = {}, onChange }) => {
     const [showMeasures, setShowMeasures] = useState(false);
@@ -37,6 +37,7 @@ const Disability = ({ value = {}, onChange }) => {
             updatedValue.pupillenLeft = '';
             updatedValue.pupillenLeftLicht = false;
             updatedValue.pupillenRightLicht = false;
+            updatedValue.temperature = '';
         }
 
         onChange('disability', 'problem', isChecked);
@@ -148,6 +149,10 @@ const Disability = ({ value = {}, onChange }) => {
         );
     };
 
+    const handleInputChange = (field, inputValue) => {
+        onChange('disability', field, inputValue);
+    };
+
     return (
         <Form.Group className="mb-3">
             <Form.Label>Disability</Form.Label>
@@ -168,6 +173,7 @@ const Disability = ({ value = {}, onChange }) => {
                             <Card className="mb-3">
                                 <Card.Body>
                                     <Form.Label>Diagnostic</Form.Label>
+                                    <hr />
                                     <Form.Group className="mb-3">
                                         <Form.Label>AVPU</Form.Label>
                                         <div>
@@ -278,6 +284,17 @@ const Disability = ({ value = {}, onChange }) => {
                                     <Form.Group className="mb-3">
                                         <Form.Label>Pupillen right / left</Form.Label>
                                         {renderPupillenTable()}
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <InputGroup>
+                                            <InputGroup.Text>Temperature</InputGroup.Text>
+                                            <Form.Control
+                                                type="number"
+                                                value={value.temperature || ''}
+                                                onChange={(e) => handleInputChange('temperature', e.target.value)}
+                                            />
+                                            <InputGroup.Text>°C</InputGroup.Text>
+                                        </InputGroup>
                                     </Form.Group>
                                 </Card.Body>
                             </Card>

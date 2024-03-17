@@ -35,7 +35,7 @@ const Airway = ({ value = {}, onChange }) => {
 
     return (
         <Form.Group className="mb-3">
-            <Form.Label>Airway</Form.Label>
+        <Form.Label>Airway</Form.Label>
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
