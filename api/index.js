@@ -5,6 +5,7 @@ import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
 import examRoutes from './routes/exam.route.js';
 import availabilityRoutes from './routes/availability.route.js';
+import reportRoutes from './routes/report.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 dotenv.config();
@@ -36,10 +37,11 @@ app.listen(3000, () => {
   console.log('Server listening on port 3000');
 });
 
-app.use('/api/user', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/exam', examRoutes)
-app.use('/api/availability', availabilityRoutes)
+app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/exam', examRoutes)
+app.use('/api/v1/availability', availabilityRoutes)
+app.use('/api/v1/report', reportRoutes)
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

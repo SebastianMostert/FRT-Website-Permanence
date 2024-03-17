@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card } from 'react-bootstrap';
-import BodyDiagram from '../BodyDiagram';
+import BodyDiagram from './BodyDiagram';
 
 const ExposureEnvironment = ({ value = {}, onChange }) => {
     const [showMeasures, setShowMeasures] = useState(false);
@@ -67,6 +67,14 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                                     step={1}
                                     value={value.schmerzskala || 0}
                                     onChange={handleRangeChange}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Body Check"
+                                    checked={value.bodycheck || false}
+                                    onChange={() => handleMeasureChange('bodycheck')}
                                 />
                             </Form.Group>
                             <Form.Group className="mb-3">

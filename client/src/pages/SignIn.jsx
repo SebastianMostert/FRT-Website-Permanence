@@ -36,7 +36,7 @@ export default function SignIn() {
       toastId.current = toast.info(`${t('signin.loading')}`, {
         autoClose: false,
       });
-      dispatch(signInStart()); const res = await fetch('/api/auth/signin', {
+      dispatch(signInStart()); const res = await fetch('/api/v1/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

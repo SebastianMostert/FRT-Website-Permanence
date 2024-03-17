@@ -137,7 +137,7 @@ export default function Profile() {
       }
       //#endregion
 
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+      const res = await fetch(`/api/v1/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+      const res = await fetch(`/api/v1/user/delete/${currentUser._id}`, {
         method: 'DELETE',
       });
       const data = await res.json();
@@ -179,7 +179,7 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/auth/signout');
+      await fetch('/api/v1/auth/signout');
       dispatch(signOut())
       toast.info(`${t('profile.signed.out')}`);
     } catch (error) {

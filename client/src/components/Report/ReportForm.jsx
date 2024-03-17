@@ -19,7 +19,7 @@ const ReportForm = () => {
         firstName: '',
         lastName: '',
         iam: '',
-        otherInfo: '',
+        matricule: '',
     });
 
     const [abcdeData, setAbcdeData] = useState({
@@ -63,6 +63,7 @@ const ReportForm = () => {
             oberschenkel: '',
             ecgImage: '',
             spO2: '',
+            bloodSugar: '',
         },
         disability: {
             problem: false,
@@ -89,6 +90,7 @@ const ReportForm = () => {
             weitereVerletzungen: '',
             wundversorgung: false,
             extremitätenschienung: false,
+            bodycheck: false,
             bodyDiagramLetters: [],
         },
     });

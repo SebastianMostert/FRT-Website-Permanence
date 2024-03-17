@@ -68,13 +68,12 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
             </Row>
             <Row className="mb-3">
                 <Col sm={12}>
-                    <Form.Label>Other Info</Form.Label>
+                    <Form.Label>Matricule</Form.Label>
                     <Form.Control
-                        as="textarea"
-                        rows={3}
-                        placeholder="Enter any other important information"
-                        name="otherInfo"
-                        value={patientInfo.otherInfo}
+                        type="text"
+                        placeholder="Enter Patient Matricule"
+                        name="matricule"
+                        value={patientInfo.matricule}
                         onChange={handlePatientChange}
                     />
                 </Col>

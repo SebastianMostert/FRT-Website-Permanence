@@ -27,6 +27,7 @@ const Circulation = ({ value = {}, onChange }) => {
             updatedValue.oberschenkel = '';
             updatedValue.ecgImage = '';
             updatedValue.spO2 = '';
+            updatedValue.bloodSugar = '';
         }
 
         onChange('circulation', 'problem', isChecked);
@@ -127,6 +128,20 @@ const Circulation = ({ value = {}, onChange }) => {
                                                         onChange={(e) => handleInputChange('bpm', e.target.value)}
                                                         className="ml-2"
                                                     />
+                                                </InputGroup>
+                                            </div>
+                                        </Form.Group>
+                                        <Form.Group className="mb-3">
+                                            <div className="d-flex align-items-center">
+                                                <InputGroup>
+                                                    <InputGroup.Text>Blood Sugar</InputGroup.Text>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={value.bloodSugar || ''}
+                                                        onChange={(e) => handleInputChange('bloodSugar', e.target.value)}
+                                                        className="ml-2"
+                                                    />
+                                                    <InputGroup.Text>mg/dL</InputGroup.Text>
                                                 </InputGroup>
                                             </div>
                                         </Form.Group>

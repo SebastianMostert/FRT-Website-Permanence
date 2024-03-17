@@ -1,6 +1,6 @@
 export async function getClasses() {
     try {
-        const res = await fetch(`/api/exam/classes`, {
+        const res = await fetch(`/api/v1/exam/classes`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export function isTinyMobile() {
 
 export async function getMember(IAM) {
     try {
-        const res = await fetch(`/api/user/fetch/${IAM}`, {
+        const res = await fetch(`/api/v1/user/fetch/${IAM}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

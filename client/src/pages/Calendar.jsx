@@ -181,7 +181,7 @@ async function getExams(user) {
 
     try {
         const calendarEvents = []
-        const examResponse = await fetch(`/api/exam/user/${user.IAM}`, { method: "post" });
+        const examResponse = await fetch(`/api/v1/exam/user/${user.IAM}`, { method: "post" });
 
         console.log(examResponse);
         const examsData = await examResponse.json();
@@ -222,7 +222,7 @@ async function getExams(user) {
 async function getAvailabilities(IAM) {
     try {
         const availabilityEvents = [];
-        const res = await fetch(`/api/availability/get/${IAM}`, {
+        const res = await fetch(`/api/v1/availability/get/${IAM}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ async function getAvailabilities(IAM) {
 
 async function createAvailability(start, end, user, t) {
     try {
-        const res = await fetch('/api/availability/create', {
+        const res = await fetch('/api/v1/availability/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -287,7 +287,7 @@ async function createAvailability(start, end, user, t) {
 
 async function deleteAvailability(id, IAM, t) {
     try {
-        const res = await fetch(`/api/availability/delete/`, {
+        const res = await fetch(`/api/v1/availability/delete/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
