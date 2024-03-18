@@ -9,12 +9,16 @@ const AdminDashboard = () => {
     const { currentUser } = useSelector((state) => state.user)
     const IAM = currentUser.IAM;
     const [availabilty, setAvailability] = useState([]);
+    const [shift, setShift] = useState([]);
 
     // Get all availabilities    
     useEffect(() => {
         async function fetchData() {
             const availabilities = await getAvailabilities(IAM);
             setAvailability(availabilities);
+
+            const shifts = await getShifts();
+            setShift(shifts);
         }
 
         fetchData();
@@ -27,7 +31,7 @@ const AdminDashboard = () => {
     }
     return (
         <div>
-            <ShiftAvailability availabilities={availabilty} />
+            <ShiftAvailability availabilities={availabilty} shifts={shift} />
         </div>
     );
 }
@@ -44,5 +48,18 @@ async function getAvailabilities() {
 
     const data = await res.json();
 
+    return data;
+}
+
+async function getShifts() {
+    const res = await fetch(`/api/v1/shift/fetch`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const data = (await res.json()).data;
+    console.log(data)
     return data;
 }

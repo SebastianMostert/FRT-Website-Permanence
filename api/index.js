@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.route.js';
 import examRoutes from './routes/exam.route.js';
 import availabilityRoutes from './routes/availability.route.js';
 import reportRoutes from './routes/report.route.js';
+import shiftRoutes from './routes/shift.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/exam', examRoutes)
 app.use('/api/v1/availability', availabilityRoutes)
 app.use('/api/v1/report', reportRoutes)
+app.use('/api/v1/shift', shiftRoutes)
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

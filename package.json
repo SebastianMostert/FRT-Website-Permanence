@@ -20,6 +20,7 @@
     "jsonwebtoken": "^9.0.1",
     "llis-frt-webuntis": "^1.0.4",
     "mongoose": "^7.4.2",
+    "nodemailer": "^6.9.12",
     "nodemon": "^3.0.1"
   }
 }

@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
 import bcryptjs from 'bcryptjs';
+import nodemailer from 'nodemailer';
 
 // Test
 export const test = (req, res) => {
@@ -82,4 +83,25 @@ export const fetchUser = async (req, res, next) => {
     console.log(error);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
+};
+
+export const notifyUser = async (req, res, next) => {
+  const emailBody = req.body.emailBody;
+
+  const emailUser = process.env.REACT_APP_EMAIL_USER;
+  const emailPassword = process.env.REACT_APP_EMAIL_PASSWORD;
+
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPassword
+    }
+  });
+
+  // Send email using transporter
+  let info = await transporter.sendMail(emailBody);
+
+
+  return res.status(200).json({ info });
 };
