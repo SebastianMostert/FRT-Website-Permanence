@@ -220,9 +220,8 @@ const deleteAvailability = async (id, IAM) => {
 const createShiftDB = async (data) => {
     for (let i = 0; i < data.length; i++) {
         const element = data[i];
-        console.log(element);
+        notifyUser(element, data);
     }
-
     try {
         const res = await fetch('/api/v1/shift/create', {
             method: 'POST',
@@ -238,72 +237,35 @@ const createShiftDB = async (data) => {
     }
 }
 
-const notifyUser = async (IAM, shift) => {
-    const res = await getMember(IAM);
-    const data = res.data;
+const notifyUser = async (shift, allShifts) => {
+    const { IAM, firstName, lastName, position, startDate, endDate } = shift;
+    const partnerInfo = {
+        IAMs: [],
+        firstNames: [],
+        lastNames: [],
+        positions: [],
+    };
 
+    for (let i = 0; i < allShifts.length; i++) {
+        if (allShifts[i].IAM === IAM) continue;
+
+        partnerInfo.IAMs.push(allShifts[i].IAM);
+        partnerInfo.firstNames.push(allShifts[i].firstName);
+        partnerInfo.lastNames.push(allShifts[i].lastName);
+        partnerInfo.positions.push(allShifts[i].position);
+    }
+
+    // Get the partner info from the allShifts array (ignore the current user)
+
+    const res = await getMember(IAM);
+
+    const data = res.data;
     const email = data.email;
 
-    // Prepare the data for the email
-    const { date, startTime, endTime } = shift[0];
+    const formattedStartDate = formatDate(new Date(startDate));
+    const startTimeStr = formatTime(new Date(startDate));
+    const endTimeStr = formatTime(new Date(endDate));
 
-    const shiftDate = new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    const shiftTime = `${startTime} - ${endTime}`;
-
-    const fullNames = shift.map((shift) => `${shift.firstName} ${shift.lastName}`);
-    const positions = shift.map((shift) => shift.position);
-
-    // Create the HTML table rows
-    const tableRows = fullNames.map((fullName, index) => `
-        <tr>
-            <td>${fullName}</td>
-            <td>${positions[index]}</td>
-        </tr>
-    `).join('');
-
-    // Create the HTML content for the email
-    const html = `
-        <html>
-        <head>
-            <style>
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-                th, td {
-                    border: 1px solid #dddddd;
-                    text-align: left;
-                    padding: 8px;
-                }
-                th {
-                    background-color: #f2f2f2;
-                }
-            </style>
-        </head>
-        <body>
-            <p>Hello,</p>
-            <p>This is a notification for the upcoming shift on ${shiftDate} from ${shiftTime}.</p>
-            <p>Here are the details of the shift:</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Position</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-            <p>Thank you.</p>
-        </body>
-        </html>
-    `;
 
     const res2 = await fetch('/api/v1/user/notify', {
         method: 'POST',
@@ -314,7 +276,7 @@ const notifyUser = async (IAM, shift) => {
             emailBody: {
                 to: email,
                 subject: 'Permanence Notification',
-                html: html
+                text: `Hello ${firstName} ${lastName},\n\nYou have been assigned to a shift on the ${formattedStartDate} from ${startTimeStr} to ${endTimeStr}.\n\nYou're assigned as a "${position}".\n\nYour partner(s) are:\n${partnerInfo.firstNames.map((name, index) => `${name} ${partnerInfo.lastNames[index]} as a "${partnerInfo.positions[index]}"`).join('\n')}`,
             }
         }),
     });
@@ -323,3 +285,16 @@ const notifyUser = async (IAM, shift) => {
     console.log(json);
     return json;
 }
+
+const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+const formatTime = (date) => {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+};
