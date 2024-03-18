@@ -88,8 +88,8 @@ export const fetchUser = async (req, res, next) => {
 export const notifyUser = async (req, res, next) => {
   const emailBody = req.body.emailBody;
 
-  const emailUser = process.env.REACT_APP_EMAIL_USER;
-  const emailPassword = process.env.REACT_APP_EMAIL_PASSWORD;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPassword = process.env.EMAIL_PASSWORD;
 
   let transporter = nodemailer.createTransport({
     service: 'gmail',

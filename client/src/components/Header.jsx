@@ -13,6 +13,8 @@ export default function Header() {
     marginLeft: '10px',
   };
 
+  console.log(currentUser);
+
   const roles = currentUser?.roles;
   // If user is not an admin, redirect to 401 page
 
@@ -23,7 +25,7 @@ export default function Header() {
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />
       <Navbar.Collapse id="responsive-navbar-nav">
-        <Nav className="mr-auto">
+      <Nav className="mr-auto">
           <Nav.Link as={Link} to="/" className="nav-link">
             {t('header.home')}
           </Nav.Link>
