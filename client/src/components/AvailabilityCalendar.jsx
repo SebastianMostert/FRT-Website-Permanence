@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Tab, Tabs, Table, Button } from 'react-bootstrap';
 import MarkBesetztModal from './MarkBesetztModal'; // Import the modal component
 
+
 const ShiftAvailability = ({ availabilities, shifts }) => {
     const [showModal, setShowModal] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -184,6 +185,7 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                                         <th>Date</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
+                                        <th>Action</th> {/* New Action Column Header */}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -196,7 +198,7 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                                         const endDate = new Date(shift.shifts[0].endDate);
 
                                         const startDateStr = `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getDate().toString().padStart(2, '0')}`;
-                                        
+
                                         const startTimeStr = `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}`;
                                         const endTimeStr = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
 
@@ -207,15 +209,24 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                                             positions.push(shiftEl.position);
                                         }
 
-                                        return (<tr key={index}>
-                                            <td>{IAMs.join(', ')}</td>
-                                            <td>{fullNames.join(', ')}</td>
-                                            <td>{positions.join(', ')}</td>
-                                            <td>{startDateStr}</td>
-                                            <td>{startTimeStr}</td>
-                                            <td>{endTimeStr}</td>
-                                        </tr>
-                                        )
+                                        return (
+                                            <tr key={index}>
+                                                <td>{IAMs.join(', ')}</td>
+                                                <td>{fullNames.join(', ')}</td>
+                                                <td>{positions.join(', ')}</td>
+                                                <td>{startDateStr}</td>
+                                                <td>{startTimeStr}</td>
+                                                <td>{endTimeStr}</td>
+                                                <td>
+                                                    <Button
+                                                        variant="danger"
+                                                        onClick={() => deleteShift(shift._id)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        );
                                     })}
                                 </tbody>
                             </Table>
@@ -235,3 +246,20 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
 };
 
 export default ShiftAvailability;
+
+const deleteShift = (id) => {
+    // Implement the logic to delete the shift
+    console.log('Delete shift:', id);
+    // You can make an API call to delete the shift
+    const res = fetch(`/api/v1/shifts/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (res.status === 200) {
+        // Success, reload the page
+        window.location.reload();
+    }
+};

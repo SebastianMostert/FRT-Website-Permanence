@@ -30,6 +30,17 @@ export const getAvailabilities = async (req, res, next) => {
     }
 };
 
+export const getAvailabilityByID = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const availability = await Availability.findById(id);
+        res.status(200).json(availability);
+    } catch (error) {
+        console.log(error);
+        next(errorHandler(500, 'Internal Server Error'));
+    }
+}
+
 // Get all availabilities
 export const getAllAvailabilities = async (req, res, next) => {
     try {

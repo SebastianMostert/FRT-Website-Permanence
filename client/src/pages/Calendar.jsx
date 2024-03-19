@@ -19,6 +19,7 @@ import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
 const AVAILABILITY_TYPE = 'availability';
+const SHIFT_TYPE = 'shift';
 
 
 export default function Calendar() {
@@ -29,6 +30,8 @@ export default function Calendar() {
 
     const [calendarEvent, setCalendarEvent] = useState([]);
     const [calendarAvailability, setCalendarAvailability] = useState([]);
+    const [calendarShift, setCalendarShift] = useState([]);
+
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
@@ -43,9 +46,11 @@ export default function Calendar() {
             }
 
             const calendarAvailabilities = await getAvailabilities(IAM);
+            const calendarShifts = await getShifts(IAM);
 
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
+            setCalendarShift(calendarShifts);
 
             toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('calendar.loading.success')}` });
         }
@@ -78,7 +83,7 @@ export default function Calendar() {
             end: availability.endTime,
             backgroundColor: '#0000FF',
             id: availability._id,
-            extendedProps: { type: AVAILABILITY_TYPE, ...availability },
+            extendedProps: { type: AVAILABILITY_TYPE, ...availability, user: currentUser },
         };
 
         setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
@@ -89,15 +94,15 @@ export default function Calendar() {
         const calendar = e.view.calendar;
         const isExam = event.extendedProps.type === EXAM_TYPE;
         const isAvailability = event.extendedProps.type === AVAILABILITY_TYPE;
+        const isShift = event.extendedProps.type === SHIFT_TYPE;
 
         calendar.unselect();
         calendar.refetchEvents();
 
         if (isExam) {
             toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
-        }
-
-        if (isAvailability) {
+            return;
+        } else if (isAvailability) {
             const event = e.event;
             calendar.unselect();
 
@@ -105,6 +110,9 @@ export default function Calendar() {
                 setSelectedEvent(event);
                 setShowModal(true);
             }
+        } else if (isShift) {
+            toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
+            return;
         }
     };
 
@@ -132,7 +140,7 @@ export default function Calendar() {
     return (
         <div className="calendar-container">
             <CalendarComponent
-                events={[...calendarEvent, ...calendarAvailability]}
+                events={[...calendarEvent, ...calendarAvailability, ...calendarShift]}
                 handleEventClick={handleEventClick}
                 handleSelect={handleSelect}
                 handleViewDidMount={handleViewDidMount}
@@ -256,6 +264,43 @@ async function getAvailabilities(IAM) {
         }
 
         return availabilityEvents;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function getShifts(IAM) {
+    try {
+        const shiftEvents = [];
+        const res = await fetch(`/api/v1/shift/fetch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        const data = (await res.json()).data
+        const memberRes = await getMember(IAM)
+        const member = await memberRes.data
+
+        for (let i = 0; i < data.length; i++) {
+            const shift = data[i];
+            for (let i = 0; i < shift.shifts.length; i++) {
+                const element = shift.shifts[i];
+
+                if (element.IAM === IAM) {
+                    shiftEvents.push({
+                        title: 'Shift',
+                        start: element.startDate,
+                        end: element.endDate,
+                        id: element._id,
+                        backgroundColor: '#00FF00',
+                        extendedProps: { shiftObject: element, userObject: member, type: SHIFT_TYPE },
+                    });
+                } else continue
+            }
+        }
+        return shiftEvents;
     } catch (error) {
         console.log(error)
     }

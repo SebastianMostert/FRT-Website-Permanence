@@ -74,7 +74,7 @@ const MarkBesetztModal = ({ show, handleClose, selectedSlot }) => {
         setSelectedUsers((prevUsers) => prevUsers.filter((user) => user.IAM !== userIAM));
     };
 
-    const handleCreateShift = () => {
+    const handleCreateShift = async () => {
         const selectedUsersWithPosition = selectedUsers.filter((user) => user.position !== '');
 
         if (selectedUsersWithPosition.length === 0) {
@@ -95,9 +95,48 @@ const MarkBesetztModal = ({ show, handleClose, selectedSlot }) => {
 
         for (let i = 0; i < selectedUsersWithPosition.length; i++) {
             const selectedUserWithPosition = selectedUsersWithPosition[i];
-            deleteAvailability(selectedUserWithPosition.availabilityId, selectedUserWithPosition.IAM);
-        }
+            // only delete availability if the start time and end time exactly match the created shifts start and end time
+            const shiftStart = new Date(selectedUserWithPosition.startDate);
+            const shiftEnd = new Date(selectedUserWithPosition.endDate);
 
+            const availabilityID = selectedUserWithPosition.availabilityId;
+            const IAM = selectedUserWithPosition.IAM;
+
+            // Fetch availability
+            const availability = await getAvailabilities(availabilityID);
+            const availabilityStart = new Date(availability.startTime);
+            const availabilityEnd = new Date(availability.endTime);
+
+            if (shiftStart.getTime() === availabilityStart.getTime() && shiftEnd.getTime() === availabilityEnd.getTime()) {
+                deleteAvailability(availabilityID, IAM);
+            } else {
+                // Delete availability
+                deleteAvailability(availabilityID, IAM);
+
+                // Validate start and end time are not the same
+                if (shiftStart.getTime() === shiftEnd.getTime()) {
+                    console.error('Start and end time cannot be the same.');
+                    continue; // Skip this user and move to the next
+                }
+
+                // Create new availabilities
+                const newAvailability1 = {
+                    IAM,
+                    startTime: availabilityStart,
+                    endTime: shiftStart,
+                };
+
+                const newAvailability2 = {
+                    IAM,
+                    startTime: shiftEnd,
+                    endTime: availabilityEnd,
+                };
+
+                // Implement logic to create new availabilities, possibly with an API call
+                createAvailability(newAvailability1);
+                createAvailability(newAvailability2);
+            }
+        }
         createShiftDB(selectedUsersWithPosition);
 
         console.log('Creating shift with selected users:', selectedUsersWithPosition);
@@ -255,8 +294,6 @@ const notifyUser = async (shift, allShifts) => {
         partnerInfo.positions.push(allShifts[i].position);
     }
 
-    // Get the partner info from the allShifts array (ignore the current user)
-
     const res = await getMember(IAM);
 
     const data = res.data;
@@ -298,3 +335,39 @@ const formatTime = (date) => {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 };
+
+const getAvailabilities = async (id) => {
+    try {
+        const res = await fetch(`/api/v1/availability/get-by-id/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log(res);
+
+        const data = await res.json();
+
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+const createAvailability = async (data) => {
+    const { IAM, startTime, endTime } = data;
+
+    try {
+        const res = await fetch('/api/v1/availability/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ IAM, startTime, endTime }),
+        });
+        const json = await res.json();
+        return json;
+    } catch (err) {
+        console.error(err);
+    }
+}

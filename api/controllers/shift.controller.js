@@ -34,17 +34,17 @@ export const createShift = async (req, res, next) => {
 };
 
 export const deleteShift = async (req, res, next) => {
-  const { shiftId } = req.params;
+  const { id } = req.params;
 
   try {
     // Check if the shift exists
-    const shift = await Shift.findById(shiftId);
+    const shift = await Shift.findById(id);
     if (!shift) {
       return res.status(404).json({ success: false, message: 'Shift not found.' });
     }
 
     // Delete the shift
-    await Shift.findByIdAndDelete(shiftId);
+    await Shift.findByIdAndDelete(id);
 
     res.status(200).json({ success: true, message: 'Shift deleted successfully.' });
   } catch (error) {

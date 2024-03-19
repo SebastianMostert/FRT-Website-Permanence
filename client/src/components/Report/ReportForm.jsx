@@ -4,6 +4,8 @@ import FirstResponders from './FirstResponders';
 import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
+import jsPDF from 'jspdf';
+import MissionNumber from '../Inputs/MissionNumber';
 
 const ReportForm = () => {
     const [missionNumber, setMissionNumber] = useState('');
@@ -12,7 +14,6 @@ const ReportForm = () => {
         { name: 'Equipier Bin', iam: '' },
         { name: 'Stagiaire Bin', iam: '' },
     ]);
-
     const [patientInfo, setPatientInfo] = useState({
         age: '',
         gender: '',
@@ -21,7 +22,6 @@ const ReportForm = () => {
         iam: '',
         matricule: '',
     });
-
     const [abcdeData, setAbcdeData] = useState({
         criticalBleeding: {
             problem: false,
@@ -94,7 +94,6 @@ const ReportForm = () => {
             bodyDiagramLetters: [],
         },
     });
-
     const [samplerData, setSamplerData] = useState({
         symptoms: {
             text: '',
@@ -162,18 +161,22 @@ const ReportForm = () => {
         });
     };
 
-    const handleMissionNumberChange = (event) => {
-        setMissionNumber(event.target.value);
+    const handleMissionNumberChange = (newMissionNumber) => {
+        setMissionNumber(newMissionNumber.split(''));
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        // You can perform further actions here, like sending the data to an API
-        console.log('Mission Number:', missionNumber);
-        console.log('First Responders:', firstResponders);
-        console.log('Patient Info:', patientInfo);
-        console.log('(c) ABCDE Schema:', abcdeData);
-        console.log('SAMPLER Schema:', samplerData);
+        // Gather all the data
+        const reportData = {
+            missionNumber,
+            firstResponders,
+            patientInfo,
+            abcdeData,
+            samplerData,
+        };
+
+        console.log(reportData);
     };
 
     return (
@@ -182,11 +185,9 @@ const ReportForm = () => {
             <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Form.Label>Mission Number</Form.Label>
-                    <Form.Control
-                        type="text"
-                        placeholder="Enter Mission Number (YYYYMMDDXX)"
-                        value={missionNumber}
-                        onChange={handleMissionNumberChange}
+                    <MissionNumber
+                        missionNumber={missionNumber}
+                        handleMissionNumberChange={handleMissionNumberChange}
                     />
                 </Form.Group>
 

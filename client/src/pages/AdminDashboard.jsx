@@ -3,6 +3,8 @@ import { NotAuthorized } from './ErrorPages/Pages/401'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ShiftAvailability from '../components/AvailabilityCalendar'
+import NoMobilePage from './ErrorPages/Pages/NoMobilePage'
+import { isMobile } from '../utils'
 
 const AdminDashboard = () => {
     const { t } = useTranslation();
@@ -29,6 +31,13 @@ const AdminDashboard = () => {
     if (!roles?.includes('admin')) {
         return <NotAuthorized />
     }
+
+    if (isMobile()) {
+        return (
+            <NoMobilePage />
+        );
+    }
+
     return (
         <div>
             <ShiftAvailability availabilities={availabilty} shifts={shift} />
@@ -60,6 +69,5 @@ async function getShifts() {
     });
 
     const data = (await res.json()).data;
-    console.log(data)
     return data;
 }

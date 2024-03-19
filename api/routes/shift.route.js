@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post('/create', verifyToken, createShift);
 router.post('/fetch', verifyToken, fetchAllShifts);
-router.delete('/delete', verifyToken, deleteShift);
+router.delete('/delete/:id', verifyToken, deleteShift);
 
 export default router;
