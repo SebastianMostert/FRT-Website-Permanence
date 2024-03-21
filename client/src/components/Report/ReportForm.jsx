@@ -10,9 +10,9 @@ import MissionNumber from '../Inputs/MissionNumber';
 const ReportForm = () => {
     const [missionNumber, setMissionNumber] = useState('');
     const [firstResponders, setFirstResponders] = useState([
-        { name: 'Chef Agres', iam: '' },
-        { name: 'Equipier Bin', iam: '' },
-        { name: 'Stagiaire Bin', iam: '' },
+        { position: 'Chef Agres', iam: '' },
+        { position: 'Equipier Bin', iam: '' },
+        { position: 'Stagiaire Bin', iam: '' },
     ]);
     const [patientInfo, setPatientInfo] = useState({
         age: '',

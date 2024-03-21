@@ -32,8 +32,8 @@ export default function Header() {
               <Nav.Link as={Link} to="/calendar" className="nav-link">
                 {t('header.calendar')}
               </Nav.Link>
-              <Nav.Link as={Link} to="/report" className="nav-link">
-                {t('header.report')}
+              <Nav.Link as={Link} to="/reports" className="nav-link">
+                {t('header.reports')}
               </Nav.Link>
 
               {roles?.includes('admin') && (

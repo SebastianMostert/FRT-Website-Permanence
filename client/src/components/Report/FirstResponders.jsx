@@ -9,7 +9,7 @@ const FirstResponders = ({ firstResponders, handleResponderChange }) => {
             {firstResponders.map((responder, index) => (
                 <Row key={index} className="mb-3">
                     <Col sm={8} className="mx-auto">
-                        <Form.Label>{responder.name}</Form.Label>
+                        <Form.Label>{responder.position}</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder="Enter IAM"

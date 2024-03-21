@@ -7,7 +7,6 @@ import Profile from './pages/Profile';
 import PrivateRoute from './components/PrivateRoute';
 import Calendar from './pages/Calendar';
 import { ToastContainer } from 'react-toastify';
-import Report from './pages/Report';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFoundPage from './pages/ErrorPages/Pages/404';
 import './App.css';
@@ -17,6 +16,7 @@ import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
+import Reports from './pages/Reports';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -71,7 +71,7 @@ function App() {
           <Route path='/sign-in' element={<SignIn />} />
           <Route path='/sign-up' element={<SignUp />} />
           <Route element={<PrivateRoute />}>
-            <Route path='/report' element={<Report />} />
+            <Route path='/reports' element={<Reports />} />
             <Route path='/calendar' element={<Calendar />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/admin' element={<AdminDashboard />} />

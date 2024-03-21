@@ -19,6 +19,11 @@ const reportSchema = new mongoose.Schema({
     missionNumber: {
         type: Number,
         required: true,
+        unique: true,
+    },
+    firstResponders: {
+        type: Array,
+        default: [],
     },
     patientInfo: {
         age: {
@@ -32,7 +37,7 @@ const reportSchema = new mongoose.Schema({
         },
         firstName: reqStr,
         lastName: reqStr,
-        iam: reqStr,
+        IAM: reqStr,
         otherInfo: reqStr,
     },
     abcdeSchema: {

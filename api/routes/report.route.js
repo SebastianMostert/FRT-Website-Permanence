@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/create', verifyToken, createReport);
 router.post('/fetch/:id', verifyToken, getReport);
-router.post('/fetch/all', verifyToken, getAllReports);
+router.post('/fetch-all', verifyToken, getAllReports);
 router.delete('/delete/:id', verifyToken, deleteReport);
 
 export default router;
