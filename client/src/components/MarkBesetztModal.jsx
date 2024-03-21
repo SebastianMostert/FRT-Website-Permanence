@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { getMember } from '../utils';
 
-const MarkBesetztModal = ({ show, handleClose, selectedSlot }) => {
+const MarkBesetztModal = ({ show, handleClose, selectedSlot, setAvailability, shifts }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -88,8 +88,8 @@ const MarkBesetztModal = ({ show, handleClose, selectedSlot }) => {
 
         const valid = validateShift(chefsCount, equipiersCount, stagiairesCount);
 
-        if (!valid) {
-            alert('Invalid shift configuration. Please check the positions and number of users.');
+        if (!valid.isValid) {
+            alert(valid.message);
             return;
         }
 
@@ -144,19 +144,47 @@ const MarkBesetztModal = ({ show, handleClose, selectedSlot }) => {
     };
 
     const validateShift = (chefsCount, equipiersCount, stagiairesCount) => {
-        if (chefsCount + equipiersCount + stagiairesCount < 2 || chefsCount + equipiersCount + stagiairesCount > 3) {
-            return false;
-        }
+        if (chefsCount + equipiersCount + stagiairesCount < 2 || chefsCount + equipiersCount + stagiairesCount > 3) return { isValid: false, message: 'Each shift must have at least 2 and at most 3 positions.' };
+        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1) return { isValid: true, message: '' };
+        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0) return { isValid: true, message: '' };
 
-        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1) {
-            return true;
+        // Ensure that there is no other shift
+        for (let i = 0; i < shifts.length; i++) {
+            const shift = shifts[i];
+            const shiftStart = new Date(shift.startDate);
+            const shiftEnd = new Date(shift.endDate);
+            if (shiftStart >= shiftEnd) continue;
+            if (shiftStart <= shiftStart && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
+            if (shiftStart <= shiftStart && shiftEnd > shiftStart && shiftEnd <= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
+            if (shiftStart > shiftStart && shiftStart < shiftEnd && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
         }
+        return { isValid: true, message: '' };
+    };
 
-        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0) {
-            return true;
+    const deleteAvailability = async (id, IAM) => {
+        try {
+            const res = await fetch(`/api/v1/availability/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ IAM: IAM, id: id }),
+            });
+
+            const data = await res.json();
+
+            if (data?.success !== true) {
+                // Handle error, show alert, etc.
+                return;
+            }
+
+            // Refetch data after deletion
+            const availabilities = await getAvailabilities(id);
+            setAvailability(availabilities);
+        } catch (err) {
+            // Handle error, show alert, etc.
+            console.error(err);
         }
-
-        return false;
     };
 
     return (
@@ -231,30 +259,6 @@ const getAllowedPositions = (operationalPosition) => {
 
 export default MarkBesetztModal;
 
-const deleteAvailability = async (id, IAM) => {
-    try {
-        const res = await fetch(`/api/v1/availability/delete/`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: IAM, id: id }),
-        });
-
-        const data = await res.json();
-
-        if (data?.success !== true) {
-            // Handle error, show alert, etc.
-            return;
-        }
-
-        // Reload the page after successful delete
-        window.location.reload();
-    } catch (err) {
-        // Handle error, show alert, etc.
-        console.error(err);
-    }
-};
 
 const createShiftDB = async (data) => {
     for (let i = 0; i < data.length; i++) {

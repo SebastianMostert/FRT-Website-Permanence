@@ -1,15 +1,95 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tab, Tabs, Table, Button } from 'react-bootstrap';
 import MarkBesetztModal from './MarkBesetztModal'; // Import the modal component
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 
-const ShiftAvailability = ({ availabilities, shifts }) => {
+const ShiftAvailability = () => {
+    const { t } = useTranslation();
+    const { currentUser } = useSelector((state) => state.user)
+    const IAM = currentUser.IAM;
     const [showModal, setShowModal] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const [availabilty, setAvailability] = useState([]);
+    const [shift, setShift] = useState([]);
 
+    useEffect(() => {
+        async function fetchData() {
+            const availabilities = await getAvailabilities(IAM);
+            setAvailability(availabilities);
+
+            const shifts = await getShifts();
+            setShift(shifts);
+        }
+
+        fetchData();
+    }, [IAM, currentUser, t]);
+
+    const markBesetzt = (slot) => {
+        setSelectedSlot(slot);
+        setShowModal(true);
+    };
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedSlot(null);
+    };
+
+    //#region Shifts
+    async function getShifts() {
+        const res = await fetch(`/api/v1/shift/fetch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = (await res.json()).data;
+        return data;
+    }
+    const deleteShift = async (id) => {
+        console.log(id);
+        // Implement the logic to delete the shift
+        // You can make an API call to delete the shift
+        const res = await fetch(`/api/v1/shifts/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log(res);
+
+        if (res.status !== 200) {
+            toast.error('Failed to delete shift.');
+            return;
+        }
+
+        if (res.status === 200) {
+            // Refetch data after deletion
+            const data = await getShifts();
+            setShift(data);
+            toast.success('Shift deleted successfully.');
+        }
+    };
+    //#endregion
+
+    //#region Availabilities
+    async function getAvailabilities() {
+        const res = await fetch(`/api/v1/availability/all`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await res.json();
+
+        return data;
+    }
     const deleteAvailability = async (id, IAM) => {
-        console.log(id, IAM);
         try {
             const res = await fetch(`/api/v1/availability/delete/`, {
                 method: 'DELETE',
@@ -26,31 +106,22 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                 return;
             }
 
-            // Reload the page after successful delete
-            window.location.reload();
+            // Refetch data after deletion
+            const availabilities = await getAvailabilities();
+            setAvailability(availabilities);
         } catch (err) {
             // Handle error, show alert, etc.
             console.error(err);
         }
     };
-
-    const markBesetzt = (slot) => {
-        setSelectedSlot(slot);
-        setShowModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedSlot(null);
-    };
-
     const checkOverlap = (time1Start, time1End, time2Start, time2End) => {
         return time1Start < time2End && time1End > time2Start;
     };
+    //#endregion
 
     const overlappingTimeSlots = [];
-    availabilities?.forEach((availability1, index) => {
-        availabilities?.slice(index + 1).forEach((availability2) => {
+    availabilty?.forEach((availability1, index) => {
+        availabilty?.slice(index + 1).forEach((availability2) => {
             if (
                 checkOverlap(
                     new Date(availability1?.startTime),
@@ -98,8 +169,8 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {availabilities?.map((availability, index) => {
-                                    const overlaps = availabilities?.some((otherAvailability) =>
+                                {availabilty?.map((availability, index) => {
+                                    const overlaps = availabilty?.some((otherAvailability) =>
                                         checkOverlap(
                                             new Date(availability?.startTime),
                                             new Date(availability?.endTime),
@@ -173,7 +244,7 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                 </Tab>
                 <Tab eventKey="shifts" title="Shifts">
                     <div className="mt-3">
-                        {!shifts || shifts.length === 0 ? (
+                        {!shift || shift.length === 0 ? (
                             <p>No shifts available.</p>
                         ) : (
                             <Table striped bordered hover>
@@ -189,7 +260,7 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {shifts.map((shift, index) => {
+                                    {shift.map((shift, index) => {
                                         const IAMs = [];
                                         const fullNames = [];
                                         const positions = [];
@@ -239,27 +310,12 @@ const ShiftAvailability = ({ availabilities, shifts }) => {
                 show={showModal}
                 handleClose={handleCloseModal}
                 selectedSlot={selectedSlot}
-                availabilities={availabilities}
+                availabilities={availabilty}
+                setAvailabilities={setAvailability}
+                shifts={shift}
             />
         </div>
     );
 };
 
 export default ShiftAvailability;
-
-const deleteShift = (id) => {
-    // Implement the logic to delete the shift
-    console.log('Delete shift:', id);
-    // You can make an API call to delete the shift
-    const res = fetch(`/api/v1/shifts/delete/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (res.status === 200) {
-        // Success, reload the page
-        window.location.reload();
-    }
-};
