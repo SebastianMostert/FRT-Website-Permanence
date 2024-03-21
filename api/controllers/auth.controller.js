@@ -65,6 +65,23 @@ export const signout = (req, res) => {
   res.clearCookie('access_token').status(200).json('Signout success!');
 };
 
+// Validate
+export const validate = (req, res) => {
+  // Get the token
+  const token = req.cookies.access_token;
+
+  // Make sure token exists
+  if (!token) return next(errorHandler(401, 'You are not authenticated!'));
+
+  // Verify token
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return next(errorHandler(403, 'Token is not valid!'));
+
+    // If it is valid inform the user it is valid with a 200 status
+    res.status(200).json({ valid: true });
+  });
+};
+
 /**
  * Check if IAM is a member IAM
  * @param {string} IAM The IAM of the user

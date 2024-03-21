@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -13,11 +14,57 @@ import './App.css';
 import HeaderRoute from './components/HeaderRoute';
 import { isTinyMobile } from './utils';
 import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { signOut } from './redux/user/userSlice';
+
+function TokenValidator() {
+  const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const location = useLocation();
+
+  // Function to validate token
+  const validateToken = async () => {
+    if (currentUser) {
+      const res = await fetch('/api/v1/auth/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+
+      if (!data.valid) {
+        const handleSignOut = async () => {
+          try {
+            await fetch('/api/v1/auth/signout');
+            dispatch(signOut());
+
+            // Go to home page
+            window.location.href = '/';
+          } catch (error) {
+            console.log(error);
+          }
+        };
+
+        handleSignOut();
+      }
+    }
+  };
+
+  useEffect(() => {
+    validateToken();
+  }, [location.pathname, currentUser]);
+
+  return null;
+}
 
 function App() {
-  if (isTinyMobile()) return <NoMobilePage />
+  if (isTinyMobile()) return <NoMobilePage />;
+
   return (
     <BrowserRouter>
+      <TokenValidator />
       <Routes>
         <Route element={<HeaderRoute />}>
           <Route path='/' element={<Home />} />
