@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card, Container } from 'react-bootstrap';
+import { Form, Row, Col, Card, Container, Button } from 'react-bootstrap';
 
 const Breathing = ({ value = {}, onChange }) => {
     const [showMeasures, setShowMeasures] = useState(false);
@@ -43,6 +43,15 @@ const Breathing = ({ value = {}, onChange }) => {
         }
         onChange('breathing', measure, !value[measure]);
     };
+
+    const handleIncrement = () => {
+        onChange('breathing', 'sauerstoffgabe', parseInt(value.sauerstoffgabe || 0) + 1);
+    };
+
+    const handleDecrement = () => {
+        onChange('breathing', 'sauerstoffgabe', parseInt(value.sauerstoffgabe || 0) - 1);
+    };
+
 
     return (
         <Form.Group className="mb-3">
@@ -126,11 +135,15 @@ const Breathing = ({ value = {}, onChange }) => {
                                         {showSauerstoffgabe && (
                                             <Form.Group className="mb-3">
                                                 <Form.Label>Sauerstoffgabe (l/min)</Form.Label>
-                                                <Form.Control
-                                                    type="number"
-                                                    value={value.sauerstoffgabe || ''}
-                                                    onChange={(e) => onChange('breathing', 'sauerstoffgabe', e.target.value)}
-                                                />
+                                                <div className="input-group">
+                                                    <Button variant="outline-secondary" onClick={handleDecrement}>-</Button>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={value.sauerstoffgabe || ''}
+                                                        onChange={(e) => onChange('breathing', 'sauerstoffgabe', e.target.value)}
+                                                    />
+                                                    <Button variant="outline-secondary" onClick={handleIncrement}>+</Button>
+                                                </div>
                                             </Form.Group>
                                         )}
                                         <Form.Group className="mb-3">
