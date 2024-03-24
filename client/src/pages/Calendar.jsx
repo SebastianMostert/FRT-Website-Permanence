@@ -15,6 +15,7 @@ import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import AvailabilityModal from '../components/Calendar/AvailabilityModal';
 import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
+import ShiftModal from '../components/Calendar/ShiftModal';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -32,8 +33,10 @@ export default function Calendar() {
     const [calendarAvailability, setCalendarAvailability] = useState([]);
     const [calendarShift, setCalendarShift] = useState([]);
 
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [selectedAvailability, setSelectedAvailability] = useState(null);
+    const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+    const [selectedShift, setSelectedShift] = useState(null);
+    const [showShiftModal, setShowShiftModal] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -103,21 +106,17 @@ export default function Calendar() {
             toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
             return;
         } else if (isAvailability) {
-            const event = e.event;
-            calendar.unselect();
-
-            if (event?.extendedProps?.type === 'availability') {
-                setSelectedEvent(event);
-                setShowModal(true);
-            }
+            setSelectedAvailability(event);
+            setShowAvailabilityModal(true);
         } else if (isShift) {
-            toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
+            setSelectedShift(event);
+            setShowShiftModal(true);
             return;
         }
     };
 
     const handleAvailabilityDelete = async (id, IAM) => {
-        setShowModal(false);
+        setShowAvailabilityModal(false);
         try {
             const result = await deleteAvailability(id, IAM, t);
 
@@ -147,10 +146,15 @@ export default function Calendar() {
                 selectable={true}
             />
             <AvailabilityModal
-                show={showModal}
-                handleClose={() => setShowModal(false)}
-                event={selectedEvent}
+                show={showAvailabilityModal}
+                handleClose={() => setShowAvailabilityModal(false)}
+                event={selectedAvailability}
                 handleDelete={handleAvailabilityDelete}
+            />
+            <ShiftModal
+                show={showShiftModal}
+                handleClose={() => setShowShiftModal(false)}
+                event={selectedShift}
             />
         </div>
     );
@@ -200,8 +204,13 @@ async function getExams(user) {
 
             const { endDate, startDate } = convertExamTimeToDate(exam.examDate, exam.startTime, exam.endTime);
 
-            const fullDayStartDate = `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getDate().toString().padStart(2, '0')}`
-            const fullDayEndDate = `${endDate.getFullYear()}-${(endDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}`
+            // Create a date 1 hour before the start date
+            const oneHourBeforeStart = new Date(startDate);
+            oneHourBeforeStart.setHours(oneHourBeforeStart.getHours() - 1);
+
+            // Create a date that ends on the next full hour of the endDate
+            const nextFullHourEndDate = new Date(endDate);
+            nextFullHourEndDate.setMinutes(Math.ceil(endDate.getMinutes() / 60) * 60);
 
             calendarEvents.push({
                 title: exam.name,
@@ -212,8 +221,8 @@ async function getExams(user) {
             });
 
             calendarEvents.push({
-                start: fullDayStartDate,
-                end: fullDayEndDate,
+                start: oneHourBeforeStart,
+                end: nextFullHourEndDate,
                 display: 'background',
                 backgroundColor: '#FF0000',
                 extendedProps: { ...exam, type: 'exam' },
@@ -283,21 +292,29 @@ async function getShifts() {
 
         for (let i = 0; i < data.length; i++) {
             const shift = data[i];
-            for (let i = 0; i < shift.shifts.length; i++) {
-                const element = shift.shifts[i];
+            const startTime = shift.shifts[0].startDate;
+            const endTime = shift.shifts[0].endDate;
+            const id = shift._id
 
-                const memberRes = await getMember(element.IAM)
-                const member = await memberRes.data
-
-                shiftEvents.push({
-                    title: 'Shift',
-                    start: element.startDate,
-                    end: element.endDate,
-                    id: element._id,
-                    backgroundColor: '#00FF00',
-                    extendedProps: { shiftObject: element, userObject: member, type: SHIFT_TYPE },
-                });
+            // Now get all the users of this shift
+            const allUsers = [];
+            for (let j = 0; j < shift.shifts.length; j++) {
+                const element = shift.shifts[j];
+                const IAM = element.IAM
+                const memberRes = await getMember(IAM);
+                const member = await memberRes.data;
+                member.position = element.position
+                allUsers.push(member);
             }
+
+            shiftEvents.push({
+                title: 'Shift',
+                start: startTime,
+                end: endTime,
+                id,
+                backgroundColor: '#00FF00',
+                extendedProps: { shiftObject: shift, users: allUsers, type: SHIFT_TYPE },
+            });
         }
         return shiftEvents;
     } catch (error) {

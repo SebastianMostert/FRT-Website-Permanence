@@ -26,7 +26,7 @@
   "calendar.loading": "Loading calendar events...",
   "calendar.loading.error": "Failed to load calendar events! Verify you've provided the correct class in the profile page!",
   "calendar.loading.success": "Calendar events loaded successfully!",
-  "calendar.unavailable": "You are not available on this day!",
+  "calendar.unavailable": "You are not available at this time!",
   "calendar.availability.delete.success": "Availability deleted successfully!",
   "calendar.availability.delete.error": "Failed to delete availability!",
   "calendar.availability.create.error": "An error occurred while creating your availability!",
