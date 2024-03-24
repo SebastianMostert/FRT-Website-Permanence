@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Badge } from 'react-bootstrap';
-import NFC from 'nfc-react-web';
 
 export default function NFCSignIn() {
     const [nfcData, setNfcData] = useState('');
@@ -9,12 +8,24 @@ export default function NFCSignIn() {
     // Function to handle NFC scan
     const handleNFCScan = async () => {
         try {
-            const nfc = new NFC();
-            await nfc.start();
-            nfc.on('tag', (tag) => {
-                setNfcData(tag.id);
-                nfc.stop();
-            });
+            if ('NFC' in window) {
+                const nfc = window.NFC;
+
+                await nfc.requestPermission();
+                console.log("NFC permission granted.");
+
+                nfc.watch((message) => {
+                    console.log("NFC tag detected!");
+                    console.log("Message:", message);
+
+                    setNfcData(message.data);
+                    nfc.stop();
+                });
+
+                console.log("NFC watching for tags...");
+            } else {
+                throw new Error("Web NFC not supported.");
+            }
         } catch (err) {
             setError(err.message);
         }
