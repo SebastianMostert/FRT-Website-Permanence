@@ -1,7 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Row, Col, Form } from 'react-bootstrap';
 
-const PatientInformation = ({ patientInfo, handlePatientChange }) => {
+const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) => {
+    const disabled = !isEditable;
+
     return (
         <Form.Group>
             <h5>Patient Information</h5>
@@ -10,6 +12,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={6}>
                     <Form.Label>Age</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="number"
                         placeholder="Enter Age"
                         name="age"
@@ -20,6 +24,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={6}>
                     <Form.Label>Gender</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         as="select"
                         name="gender"
                         value={patientInfo.gender}
@@ -36,6 +42,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={6}>
                     <Form.Label>First Name</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="text"
                         placeholder="Enter First Name"
                         name="firstName"
@@ -46,6 +54,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={6}>
                     <Form.Label>Last Name</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="text"
                         placeholder="Enter Last Name"
                         name="lastName"
@@ -58,6 +68,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={12}>
                     <Form.Label>IAM</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="text"
                         placeholder="Enter Patient IAM"
                         name="iam"
@@ -70,6 +82,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange }) => {
                 <Col sm={12}>
                     <Form.Label>Matricule</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="text"
                         placeholder="Enter Patient Matricule"
                         name="matricule"

@@ -23,11 +23,9 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (e) => {
-    console.log('1')
     e.preventDefault();
     try {
       setLoading(true);
-      console.log('2');
 
       // Verify password security
       const _isPasswordValid = await isPasswordValid(formData.password);
@@ -35,16 +33,13 @@ export default function SignUp() {
         setLoading(false);
         return toast.error(`${t("signup.create.failed", { reason: _isPasswordValid.message })}`);
       }
-      console.log('3')
 
       // Verify IAM
       const _isIAMValid = await isIAMValid(formData.IAM);
       if (!_isIAMValid.success) {
-        console.log('4')
         setLoading(false);
         return toast.error(`${t("signup.create.failed", { reason: _isIAMValid.message })}`);
       }
-      console.log('4')
 
       const res = await fetch('/api/v1/auth/signup', {
         method: 'POST',

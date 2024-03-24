@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, Container, Button } from 'react-bootstrap';
 
-const Breathing = ({ value = {}, onChange }) => {
+const Breathing = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
     const [showSauerstoffgabe, setShowSauerstoffgabe] = useState(false);
+
+    const disabled = !isEditable;
 
     useEffect(() => {
         if (value.problem) {
@@ -59,6 +61,8 @@ const Breathing = ({ value = {}, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Problem?"
                         checked={value.problem || false}
@@ -78,6 +82,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Label>Breathing Speed</Form.Label>
                                             <Form.Control
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 as="select"
                                                 value={value.breathingSpeed || ''}
                                                 onChange={(e) => onChange('breathing', 'breathingSpeed', e.target.value)}
@@ -91,6 +97,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Auskultation seitengleich"
                                                 checked={value.auskultationSeitengleich || false}
@@ -101,6 +109,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                             <Form.Label>Thorax</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Stabil"
@@ -109,6 +119,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('thorax', 'Stabil')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Instabil"
@@ -127,6 +139,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         <Form.Label>Measures</Form.Label>
                                         <hr />
                                         <Form.Check
+                                            disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Sauerstoffgabe"
                                             checked={value.sauerstoffgabe || false}
@@ -138,6 +152,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                                 <div className="input-group">
                                                     <Button variant="outline-secondary" onClick={handleDecrement}>-</Button>
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.sauerstoffgabe || ''}
                                                         onChange={(e) => onChange('breathing', 'sauerstoffgabe', e.target.value)}
@@ -148,6 +164,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         )}
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Brille"
                                                 checked={value.brille || false}
@@ -156,6 +174,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Maske"
                                                 checked={value.maske || false}
@@ -164,6 +184,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Beatmungsbeutel"
                                                 checked={value.beatmungsbeutel || false}
@@ -172,6 +194,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Assistierte/kontrollierte Beatmung"
                                                 checked={value.assistierteBeatmung || false}
@@ -180,6 +204,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Hyperventilationsmaske"
                                                 checked={value.hyperventilationsmaske || false}
@@ -188,6 +214,8 @@ const Breathing = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Oberkörperhochlagerung"
                                                 checked={value.oberkörperhochlagerung || false}

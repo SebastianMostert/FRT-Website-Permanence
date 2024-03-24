@@ -9,7 +9,7 @@ const useInputRefs = (length) => {
     );
 };
 
-const MissionNumber = ({ missionNumber, handleMissionNumberChange }) => {
+const MissionNumber = ({ missionNumber, handleMissionNumberChange, isEditable }) => {
     const inputRefs = useInputRefs(10);
 
     const handleInputChange = (index, e) => {
@@ -35,18 +35,20 @@ const MissionNumber = ({ missionNumber, handleMissionNumberChange }) => {
             <InputGroup>
                 {Array.from({ length: 10 }, (_, index) => {
                     const placeholder = index <= 3 ? 'Y' : index <= 5 ? 'M' : index <= 7 ? 'D' : 'X';
+                    const disabled = !isEditable;
                     if (index === 4 || index === 6 || index === 8) {
                         return (
                             <React.Fragment key={index}>
                                 <InputGroup.Text className="text-center" key={index + 10}>-</InputGroup.Text>
                                 <Form.Control
                                     key={index}
+                                    disabled={disabled}
                                     ref={inputRefs[index]}
                                     type="text"
                                     placeholder={placeholder}
                                     maxLength="1"
                                     className="w-10 px-2 text-center"
-                                    style={{ borderRadius: 0 }}
+                                    style={{ borderRadius: 0, cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     value={missionNumber[index] || ''}
                                     onChange={(e) => handleInputChange(index, e)}
                                     onKeyDown={(e) => handleKeyDown(index, e)}
@@ -58,12 +60,13 @@ const MissionNumber = ({ missionNumber, handleMissionNumberChange }) => {
                     return (
                         <Form.Control
                             key={index}
+                            disabled={disabled}
                             ref={inputRefs[index]}
                             type="text"
                             placeholder={placeholder}
                             maxLength="1"
                             className="w-10 px-2 text-center"
-                            style={{ borderRadius: 0 }}
+                            style={{ borderRadius: 0, cursor: disabled ? 'not-allowed' : 'pointer' }}
                             value={missionNumber[index] || ''}
                             onChange={(e) => handleInputChange(index, e)}
                             onKeyDown={(e) => handleKeyDown(index, e)}

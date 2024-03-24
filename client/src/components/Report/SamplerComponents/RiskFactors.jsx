@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
-const RiskFactors = ({ value, onChange }) => {
+const RiskFactors = ({ value, onChange, isEditable }) => {
     const [isRiskFactorsChecked, setIsRiskFactorsChecked] = useState(value.erhoben || false);
+
+    const disabled = !isEditable;
 
     const handleCheckboxChange = (event) => {
         const isChecked = event.target.checked;
@@ -23,6 +25,8 @@ const RiskFactors = ({ value, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Erhoben?"
                         checked={isRiskFactorsChecked}
@@ -32,6 +36,8 @@ const RiskFactors = ({ value, onChange }) => {
             </Row>
             {isRiskFactorsChecked && (
                 <Form.Control
+                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                     as="textarea"
                     rows={3}
                     placeholder="Risk Factors"

@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, Container, FloatingLabel, InputGroup } from 'react-bootstrap';
 
-const Circulation = ({ value = {}, onChange }) => {
+const Circulation = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
+
+    const disabled = !isEditable;
 
     useEffect(() => {
         if (value.problem) {
@@ -60,6 +62,8 @@ const Circulation = ({ value = {}, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Problem?"
                         checked={value.problem || false}
@@ -80,6 +84,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <Form.Label>Puls Regularity</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Regelmäßig"
@@ -88,6 +94,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('pulsRegelmäßig', 'Regelmäßig')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Unregelmäßig"
@@ -101,6 +109,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <Form.Label>Puls tastbar</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Gut tastbar"
@@ -109,6 +119,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('pulsTastbar', 'Gut tastbar')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Schlecht tastbar"
@@ -123,6 +135,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                 <InputGroup>
                                                     <InputGroup.Text>BPM</InputGroup.Text>
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.bpm || ''}
                                                         onChange={(e) => handleInputChange('bpm', e.target.value)}
@@ -136,6 +150,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                 <InputGroup>
                                                     <InputGroup.Text>Blood Sugar</InputGroup.Text>
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.bloodSugar || ''}
                                                         onChange={(e) => handleInputChange('bloodSugar', e.target.value)}
@@ -150,6 +166,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                 <InputGroup>
                                                     <InputGroup.Text>SpO2</InputGroup.Text>
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.spO2 || ''}
                                                         onChange={(e) => handleInputChange('spO2', e.target.value)}
@@ -163,6 +181,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <div className="d-flex align-items-center">
                                                 <FloatingLabel label="SYS" className="mb-3 me-2">
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.sys || ''}
                                                         onChange={(e) => handleInputChange('sys', e.target.value)}
@@ -171,6 +191,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                 <span className="separator">/</span>
                                                 <FloatingLabel label="DIA" className="mb-3 ms-2">
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.dia || ''}
                                                         onChange={(e) => handleInputChange('dia', e.target.value)}
@@ -182,6 +204,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <Form.Label className="me-2">Abdomen</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Weich"
@@ -190,6 +214,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('abdomen', 'Weich')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Hart"
@@ -203,6 +229,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <Form.Label className="me-2">Becken</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Stabil"
@@ -211,6 +239,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('becken', 'Stabil')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Instabil"
@@ -224,6 +254,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                             <Form.Label className="me-2">Oberschenkel</Form.Label>
                                             <div>
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Stabil"
@@ -232,6 +264,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                                     onChange={() => handleRadioChange('oberschenkel', 'Stabil')}
                                                 />
                                                 <Form.Check
+                                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Instabil"
@@ -244,6 +278,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Label>ECG Image</Form.Label>
                                             <Form.Control
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={handleImageChange}
@@ -268,6 +304,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                         <hr />
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Flachlagerung"
                                                 checked={value.flachlagerung || false}
@@ -276,6 +314,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Schocklagerung"
                                                 checked={value.schocklagerung || false}
@@ -284,6 +324,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Stabile Seitenlage"
                                                 checked={value.stabileSeitenlage || false}
@@ -292,6 +334,8 @@ const Circulation = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="(Druck-)Verband/Blutstillung"
                                                 checked={value.druckverband || false}

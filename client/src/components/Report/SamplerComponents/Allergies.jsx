@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
-const Allergies = ({ value, onChange }) => {
+const Allergies = ({ value, onChange, isEditable }) => {
     const [isAllergiesChecked, setIsAllergiesChecked] = useState(value.erhoben || false);
+
+    const disabled = !isEditable;
 
     const handleCheckboxChange = (event) => {
         const isChecked = event.target.checked;
@@ -24,6 +26,8 @@ const Allergies = ({ value, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Erhoben?"
                         checked={value.erhoben || false}
@@ -35,6 +39,8 @@ const Allergies = ({ value, onChange }) => {
                 <div>
                     <Form.Label>Allergies</Form.Label>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         as="textarea"
                         rows={3}
                         value={value.text}

@@ -1,3 +1,5 @@
+import { jsPDF } from 'jspdf'
+
 export async function getClasses() {
     try {
         const res = await fetch(`/api/v1/exam/classes`, {
@@ -129,8 +131,10 @@ export function isTinyMobile() {
 }
 
 export async function getMember(IAM) {
+    let finalIAM = IAM.toLocaleLowerCase();
+
     try {
-        const res = await fetch(`/api/v1/user/fetch/${IAM}`, {
+        const res = await fetch(`/api/v1/user/fetch/${finalIAM}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -145,4 +149,70 @@ export async function getMember(IAM) {
     } catch (error) {
         return { success: false, data: null }
     }
+}
+
+export async function getAllReports() {
+    try {
+        const res = await fetch("/api/v1/report/fetch-all", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await res.json()
+        if (res.status == 200) return { success: true, data: data }
+        return { success: false, data: null }
+    } catch (error) {
+        return { success: false, data: null }
+    }
+}
+
+export async function updateReport(reportData) {
+    console.log(reportData.archived)
+    const res = await fetch(`/api/v1/report/update/${reportData.missionNumber}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+    });
+
+    const data = await res.json();
+    return { success: res.status == 200, data: data };
+}
+
+export function reportPDF(reportData) {
+    // Create a new jsPDF instance
+    const doc = new jsPDF();
+
+    // Add content to the PDF
+    doc.text("This is not fully functional yet", 10, 10);
+
+    // Save the PDF
+    doc.save(`report_${reportData.missionNumber}.pdf`);
+}
+
+export function reportCSV(reportData) {
+    // Create the CSV content with "Not Ready Yet"
+    const csv = "Not Ready Yet\n";
+
+    // Create a Blob object for the CSV data
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    // Create a temporary URL for the Blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `report_${reportData.missionNumber}.csv`);
+
+    // Append the link to the body and trigger the download
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up by removing the link and URL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }

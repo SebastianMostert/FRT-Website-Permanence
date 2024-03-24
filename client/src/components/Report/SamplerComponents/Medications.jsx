@@ -2,23 +2,25 @@
 import { useState } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const Medications = ({ value, onChange }) => {
+const Medications = ({ value, onChange, isEditable }) => {
   const [medicineList, setMedicineList] = useState(value.text || '');
   const [medicineListImage, setMedicineListImage] = useState(value.medicineListImage || null);
   const [showImageInput, setShowImageInput] = useState(value.medicineHasImage || false);
   const [isHistoryChecked, setIsHistoryChecked] = useState(value.erhoben || false);
 
-  const handleErhobenChange = (event) => {
-      const isChecked = event.target.checked;
-      setIsHistoryChecked(isChecked);
+  const disabled = !isEditable;
 
-      if (!isChecked) {
-          onChange('medications', 'text', '');
-          onChange('medications', 'erhoben', false);
-      } else {
-          onChange('medications', 'text', value.text);
-          onChange('medications', 'erhoben', true);
-      }
+  const handleErhobenChange = (event) => {
+    const isChecked = event.target.checked;
+    setIsHistoryChecked(isChecked);
+
+    if (!isChecked) {
+      onChange('medications', 'text', '');
+      onChange('medications', 'erhoben', false);
+    } else {
+      onChange('medications', 'text', value.text);
+      onChange('medications', 'erhoben', true);
+    }
   };
 
   const handleMedicineListChange = (event) => {
@@ -55,6 +57,8 @@ const Medications = ({ value, onChange }) => {
       <Row className="mb-3 align-items-center">
         <Col xs="auto">
           <Form.Check
+            disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
             type="checkbox"
             label="Erhoben?"
             checked={value.erhoben || false}
@@ -67,6 +71,8 @@ const Medications = ({ value, onChange }) => {
           <Form.Group className="mb-3">
             <Form.Label>Medications List</Form.Label>
             <Form.Control
+              disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
               as="textarea"
               rows={3}
               value={medicineList}
@@ -75,6 +81,8 @@ const Medications = ({ value, onChange }) => {
             <Row className="mt-3">
               <Col>
                 <Form.Check
+                  disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                   type="checkbox"
                   label="Image of Medication Added?"
                   checked={showImageInput}
@@ -84,6 +92,8 @@ const Medications = ({ value, onChange }) => {
                   <div>
                     <Form.Label>Upload Picture of Medicine List</Form.Label>
                     <Form.Control
+                      disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}

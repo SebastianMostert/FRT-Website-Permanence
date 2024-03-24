@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
 import Reports from './pages/Reports';
+import Report from './pages/Report';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -72,6 +73,7 @@ function App() {
           <Route path='/sign-up' element={<SignUp />} />
           <Route element={<PrivateRoute />}>
             <Route path='/reports' element={<Reports />} />
+            <Route exact path="/report/:missionNumber" element={<Report />} />
             <Route path='/calendar' element={<Calendar />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/admin' element={<AdminDashboard />} />

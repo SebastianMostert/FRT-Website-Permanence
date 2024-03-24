@@ -1,28 +1,29 @@
-import { useState } from 'react';
-import { Container, Form, Button, Accordion } from 'react-bootstrap';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
+import { Container, Form, Button, Accordion, Placeholder } from 'react-bootstrap';
 import FirstResponders from './FirstResponders';
 import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
 import jsPDF from 'jspdf';
 import MissionNumber from '../Inputs/MissionNumber';
+import { updateReport } from '../../utils';
 
-const ReportForm = () => {
-    const [missionNumber, setMissionNumber] = useState('');
-    const [firstResponders, setFirstResponders] = useState([
+const defaultValues = {
+    firstRespondersValues: [
         { position: 'Chef Agres', iam: '' },
         { position: 'Equipier Bin', iam: '' },
         { position: 'Stagiaire Bin', iam: '' },
-    ]);
-    const [patientInfo, setPatientInfo] = useState({
+    ],
+    patientInfoValues: {
         age: '',
         gender: '',
         firstName: '',
         lastName: '',
         iam: '',
         matricule: '',
-    });
-    const [abcdeData, setAbcdeData] = useState({
+    },
+    ABCDEValues: {
         criticalBleeding: {
             problem: false,
             tourniquet: false,
@@ -93,8 +94,8 @@ const ReportForm = () => {
             bodycheck: false,
             bodyDiagramLetters: [],
         },
-    });
-    const [samplerData, setSamplerData] = useState({
+    },
+    samplerValues: {
         symptoms: {
             text: '',
             erhoben: false,
@@ -127,7 +128,17 @@ const ReportForm = () => {
             text: '',
             erhoben: false,
         },
-    });
+    }
+}
+
+const ReportForm = ({ _missionNumber, isEditable }) => {
+    const [missionNumber, setMissionNumber] = useState(_missionNumber);
+    const [firstResponders, setFirstResponders] = useState(defaultValues.firstRespondersValues);
+    const [patientInfo, setPatientInfo] = useState(defaultValues.patientInfoValues);
+    const [abcdeSchema, setAbcdeData] = useState(defaultValues.ABCDEValues);
+    const [samplerSchema, setSamplerData] = useState(defaultValues.samplerValues);
+    const [dataLoaded, setDataLoaded] = useState(false);
+    const [isNewReport, setIsNewReport] = useState(false);
 
     const handleResponderChange = (index, event) => {
         const updatedResponders = [...firstResponders];
@@ -143,9 +154,9 @@ const ReportForm = () => {
     const handleABCDEChange = (field, subField, value) => {
         console.log(field, subField, value);
         setAbcdeData({
-            ...abcdeData,
+            ...abcdeSchema,
             [field]: {
-                ...abcdeData[field],
+                ...abcdeSchema[field],
                 [subField]: value,
             },
         });
@@ -153,9 +164,9 @@ const ReportForm = () => {
 
     const handleSamplerChange = (field, subField, value) => {
         setSamplerData({
-            ...samplerData,
+            ...samplerSchema,
             [field]: {
-                ...samplerData[field],
+                ...samplerSchema[field],
                 [subField]: value,
             },
         });
@@ -165,19 +176,139 @@ const ReportForm = () => {
         setMissionNumber(newMissionNumber.split(''));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         // Gather all the data
+        let finalMissionNumber;
+        // If the mission number is an array join it
+        if (Array.isArray(missionNumber)) {
+            finalMissionNumber = missionNumber.join('');
+        } else {
+            finalMissionNumber = missionNumber;
+        }
+
         const reportData = {
-            missionNumber,
+            missionNumber: finalMissionNumber,
             firstResponders,
             patientInfo,
-            abcdeData,
-            samplerData,
+            abcdeSchema,
+            samplerSchema,
         };
 
-        console.log(reportData);
+        if (isNewReport) {
+            // Send the data to the server
+            const res = await fetch(`/api/v1/report/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reportData),
+            });
+
+            const data = await res.json();
+            console.log(data);
+            setIsNewReport(false);
+        } else {
+            // Send the data to the server
+            const data = await updateReport(reportData);
+            console.log(data);
+        }
     };
+
+    const getReportData = async (missionNumber) => {
+        let finalMissionNumber;
+        // If the mission number is an array join it
+        if (Array.isArray(missionNumber)) {
+            finalMissionNumber = missionNumber.join('');
+        } else {
+            finalMissionNumber = missionNumber;
+        }
+
+        const res = await fetch(`/api/v1/report/fetch/${finalMissionNumber}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await res.json();
+        console.log(data);
+        return data;
+    }
+
+    useEffect(() => {
+        if (missionNumber.length === 10 && !isNaN(parseInt(missionNumber))) {
+            getReportData(missionNumber).then((data) => {
+                // If there is not a report for this mission number, mark this report as new
+                if (!data) {
+                    setIsNewReport(true);
+                } else {
+                    setIsNewReport(false);
+                }
+
+                setFirstResponders(data?.firstResponders || defaultValues.firstRespondersValues);
+                setPatientInfo(data?.patientInfo || defaultValues.patientInfoValues);
+                setAbcdeData(data?.abcdeSchema || defaultValues.ABCDEValues);
+                setSamplerData(data?.samplerSchema || defaultValues.samplerValues);
+                setDataLoaded(true);
+            });
+        }
+    }, [missionNumber]);
+
+    if (!dataLoaded) {
+        return (
+            <Container>
+                <h2 className="mt-4 mb-3">First Responder Report</h2>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Mission Number</Form.Label>
+                        <Placeholder as={Form.Control} animation='wave' bg='secondary' />
+                    </Form.Group>
+
+                    <Accordion defaultActiveKey="0">
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>First Responders Information</Accordion.Header>
+                            <Accordion.Body>
+                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
+
+                    <Accordion defaultActiveKey="1">
+                        <Accordion.Item eventKey="1">
+                            <Accordion.Header>Patient Information</Accordion.Header>
+                            <Accordion.Body>
+                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
+
+                    <Accordion defaultActiveKey="1">
+                        <Accordion.Item eventKey="1">
+                            <Accordion.Header>(c) ABCDE Schema</Accordion.Header>
+                            <Accordion.Body>
+                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
+
+                    <Accordion defaultActiveKey="1">
+                        <Accordion.Item eventKey="1">
+                            <Accordion.Header>SAMPLER Schema</Accordion.Header>
+                            <Accordion.Body>
+                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
+
+                    <Button variant="secondary" type="submit">
+                        Submit
+                    </Button>
+                </Form>
+            </Container>
+        );
+    }
+
 
     return (
         <Container>
@@ -186,6 +317,7 @@ const ReportForm = () => {
                 <Form.Group className="mb-3">
                     <Form.Label>Mission Number</Form.Label>
                     <MissionNumber
+                        isEditable={isEditable}
                         missionNumber={missionNumber}
                         handleMissionNumberChange={handleMissionNumberChange}
                     />
@@ -196,6 +328,7 @@ const ReportForm = () => {
                         <Accordion.Header>First Responders Information</Accordion.Header>
                         <Accordion.Body>
                             <FirstResponders
+                                isEditable={isEditable}
                                 firstResponders={firstResponders}
                                 handleResponderChange={handleResponderChange}
                             />
@@ -208,6 +341,7 @@ const ReportForm = () => {
                         <Accordion.Header>Patient Information</Accordion.Header>
                         <Accordion.Body>
                             <PatientInformation
+                                isEditable={isEditable}
                                 patientInfo={patientInfo}
                                 handlePatientChange={handlePatientChange}
                             />
@@ -220,7 +354,8 @@ const ReportForm = () => {
                         <Accordion.Header>(c) ABCDE Schema</Accordion.Header>
                         <Accordion.Body>
                             <ABCDESchema
-                                abcdeData={abcdeData}
+                                isEditable={isEditable}
+                                abcdeData={abcdeSchema}
                                 handleABCDEChange={handleABCDEChange}
                             />
                         </Accordion.Body>
@@ -232,7 +367,8 @@ const ReportForm = () => {
                         <Accordion.Header>SAMPLER Schema</Accordion.Header>
                         <Accordion.Body>
                             <SamplerSchema
-                                samplerData={samplerData}
+                                isEditable={isEditable}
+                                samplerData={samplerSchema}
                                 handleSamplerChange={handleSamplerChange}
                             />
                         </Accordion.Body>

@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card } from 'react-bootstrap';
 import BodyDiagram from './BodyDiagram';
 
-const ExposureEnvironment = ({ value = {}, onChange }) => {
+const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
+
+    const disabled = !isEditable;
 
     useEffect(() => {
         if (value.problem) {
@@ -44,6 +46,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Problem?"
                         checked={value.problem || false}
@@ -60,6 +64,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             <Form.Group className="mb-3">
                                 <Form.Label>Schmerz: {value.schmerzskala || 0}/10</Form.Label>
                                 <Form.Range
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="range"
                                     label="Schmerzskala"
                                     min={0}
@@ -71,6 +77,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Check
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Body Check"
                                     checked={value.bodycheck || false}
@@ -80,13 +88,15 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             <Form.Group className="mb-3">
                                 <Form.Label>Weitere Verletzungen/Umfeld/sonstiges</Form.Label>
                                 <Form.Control
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     as="textarea"
                                     rows={3}
                                     value={value.weitereVerletzungen || ''}
                                     onChange={(e) => handleInputChange('weitereVerletzungen', e.target.value)}
                                 />
                             </Form.Group>
-                            <BodyDiagram letters={value} onChange={onChange} />
+                            <BodyDiagram letters={value} onChange={onChange} isEditable={isEditable} />
                         </Card.Body>
                     </Card>
                     <Card className="mb-3">
@@ -95,6 +105,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             <hr />
                             <Form.Group className="mb-3">
                                 <Form.Check
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Wärmeerhalt"
                                     checked={value.wärmeerhalt || false}
@@ -103,6 +115,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Check
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Wundversorgung"
                                     checked={value.wundversorgung || false}
@@ -111,6 +125,8 @@ const ExposureEnvironment = ({ value = {}, onChange }) => {
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Check
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Extremitätenschienung"
                                     checked={value.extremitätenschienung || false}

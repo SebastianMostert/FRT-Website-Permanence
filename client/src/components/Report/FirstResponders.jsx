@@ -1,7 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Row, Col, Form } from 'react-bootstrap';
 
-const FirstResponders = ({ firstResponders, handleResponderChange }) => {
+const FirstResponders = ({ firstResponders, handleResponderChange, isEditable }) => {
+    const disabled = !isEditable;
+
     return (
         <Form.Group>
             <h5>First Responders Information</h5>
@@ -11,6 +13,8 @@ const FirstResponders = ({ firstResponders, handleResponderChange }) => {
                     <Col sm={8} className="mx-auto">
                         <Form.Label>{responder.position}</Form.Label>
                         <Form.Control
+                            disabled={disabled}
+                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                             type="text"
                             placeholder="Enter IAM"
                             value={responder.iam}

@@ -1,28 +1,36 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { Button, Card, Accordion, Modal, Badge } from 'react-bootstrap';
+import { Button, Card, Accordion, Modal, ButtonGroup, DropdownButton, Dropdown } from 'react-bootstrap';
 
-const IncidentReportCard = ({ missionNumber, onEdit, onDelete, onExportPDF, onArchive, users, currentUser }) => {
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+const IncidentReportCard = ({
+    report,
+    onEdit,
+    onExport,
+    onArchive,
+    currentUser,
+}) => {
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportType, setExportType] = useState('pdf');
+
+    const missionNumber = report.missionNumber.toString();
+    const archived = report.archived;
+    const users = report.users;
 
     const handleEdit = () => {
         onEdit();
     };
 
-    const handleDelete = () => {
-        setShowDeleteModal(true);
-    };
-
-    const handleConfirmDelete = () => {
-        onDelete();
-        setShowDeleteModal(false);
-    };
-
-    const handleExportPDF = () => {
-        onExportPDF();
+    const handleExport = () => {
+        onExport(report, exportType);
+        setShowExportModal(false);
     };
 
     const handleArchive = () => {
+        onArchive();
+    };
+
+    const handleUnarchive = () => {
+        // Call the onArchive function, as it's the same function to toggle archive/unarchive
         onArchive();
     };
 
@@ -44,9 +52,14 @@ const IncidentReportCard = ({ missionNumber, onEdit, onDelete, onExportPDF, onAr
 
     // Check if the current user is one of the First Responders
     const isCurrentUserFirstResponder = users.some(user => user.IAM === currentUser.IAM);
+    
+    // Check if the incident is from today
+    const isToday = new Date().toLocaleDateString() === `${missionInfo.day}/${missionInfo.month}/${missionInfo.year}`;
+
+    const isEditable = !archived && isCurrentUserFirstResponder && isToday;
 
     return (
-        <Card className="custom-card mb-4">
+        <Card>
             <Card.Body>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
@@ -83,25 +96,72 @@ const IncidentReportCard = ({ missionNumber, onEdit, onDelete, onExportPDF, onAr
                 </div>
 
                 <div className="text-center mt-4">
-                    {isCurrentUserFirstResponder ? (
-                        <Button variant="primary" onClick={handleEdit} className="me-2">Edit</Button>
+                    {isEditable ? (
+                        <Button variant="primary" onClick={handleEdit} className="me-2">
+                            Edit
+                        </Button>
                     ) : (
-                        <Button variant="info" onClick={handleEdit} className="me-2">View</Button>
+                        <Button variant="info" onClick={handleEdit} className="me-2">
+                            View
+                        </Button>
                     )}
-                    <Button variant="danger" onClick={handleDelete} className="me-2">Delete</Button>
-                    <Button variant="success" onClick={handleExportPDF} className="me-2">Export as PDF</Button>
-                    <Button variant="info" onClick={handleArchive}>Archive</Button>
+
+                    <ButtonGroup className="me-2">
+                        <Button variant="success" onClick={() => setShowExportModal(true)}>
+                            Export
+                        </Button>
+                        <DropdownButton
+                            as={ButtonGroup}
+                            title=""
+                            id="bg-nested-dropdown"
+                            variant="success"
+                            align="end"
+                        >
+                            <Dropdown.Item onClick={() => { setExportType('pdf'); setShowExportModal(true); }}>PDF</Dropdown.Item>
+                            <Dropdown.Item onClick={() => { setExportType('csv'); setShowExportModal(true); }}>CSV</Dropdown.Item>
+                        </DropdownButton>
+                    </ButtonGroup>
+
+                    {archived ? (
+                        <Button variant="info" onClick={handleUnarchive}>
+                            Unarchive
+                        </Button>
+                    ) : (
+                        <Button variant="info" onClick={handleArchive}>
+                            Archive
+                        </Button>
+                    )}
                 </div>
             </Card.Body>
 
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} className="custom-modal" centered>
+            <Modal show={showExportModal} onHide={() => setShowExportModal(false)} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm Delete</Modal.Title>
+                    <Modal.Title>Select Export Type</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Are you sure you want to delete this report?</Modal.Body>
+                <Modal.Body>
+                    <p>Choose the export format:</p>
+                    <ButtonGroup>
+                        <Button
+                            variant={exportType === 'pdf' ? 'primary' : 'outline-primary'}
+                            onClick={() => setExportType('pdf')}
+                        >
+                            PDF
+                        </Button>
+                        <Button
+                            variant={exportType === 'csv' ? 'primary' : 'outline-primary'}
+                            onClick={() => setExportType('csv')}
+                        >
+                            CSV
+                        </Button>
+                    </ButtonGroup>
+                </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-                    <Button variant="danger" onClick={handleConfirmDelete}>Delete</Button>
+                    <Button variant="secondary" onClick={() => setShowExportModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="success" onClick={handleExport}>
+                        Export as {exportType.toUpperCase()}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </Card>

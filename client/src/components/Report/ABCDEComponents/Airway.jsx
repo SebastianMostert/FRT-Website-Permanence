@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, Container } from 'react-bootstrap';
 
-const Airway = ({ value = {}, onChange }) => {
+const Airway = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
+
+    const disabled = !isEditable;
 
     useEffect(() => {
         if (value.problem) {
@@ -35,10 +37,12 @@ const Airway = ({ value = {}, onChange }) => {
 
     return (
         <Form.Group className="mb-3">
-        <Form.Label>Airway</Form.Label>
+            <Form.Label>Airway</Form.Label>
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Problem?"
                         checked={value.problem || false}
@@ -58,6 +62,8 @@ const Airway = ({ value = {}, onChange }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Label>Airway: Free/Obstructed</Form.Label>
                                             <Form.Control
+                                                disabled={disabled}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 as="select"
                                                 value={value.airway || ''}
                                                 onChange={(e) => onChange('airway', 'airway', e.target.value)}
@@ -69,6 +75,8 @@ const Airway = ({ value = {}, onChange }) => {
                                         </Form.Group>
                                         <Form.Group className="mb-3">
                                             <Form.Check
+                                                disabled={disabled}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Cervical spine trauma"
                                                 checked={value.cervicalSpineTrauma || false}
@@ -86,30 +94,40 @@ const Airway = ({ value = {}, onChange }) => {
                                         <Form.Label>Measures</Form.Label>
                                         <hr />
                                         <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Esmarch"
                                             checked={value.esmarch || false}
                                             onChange={() => handleMeasureChange('esmarch')}
                                         />
                                         <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Guedel"
                                             checked={value.guedel || false}
                                             onChange={() => handleMeasureChange('guedel')}
                                         />
                                         <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Wendl"
                                             checked={value.wendl || false}
                                             onChange={() => handleMeasureChange('wendl')}
                                         />
                                         <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Absaugen/manuelles Freiräumen"
                                             checked={value.absaugen || false}
                                             onChange={() => handleMeasureChange('absaugen')}
                                         />
                                         <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Stiffneck/HWS Immobilisation"
                                             checked={value.stiffneck || false}

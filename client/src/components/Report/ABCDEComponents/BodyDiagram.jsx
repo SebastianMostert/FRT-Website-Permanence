@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Image, Container, Row, Col, Button, Form } from 'react-bootstrap';
 
-const BodyDiagram = ({ value, onChange }) => {
+const BodyDiagram = ({ value, onChange, isEditable }) => {
     const [letters, setLetters] = useState(value?.letters || []);
     const [clickedPosition, setClickedPosition] = useState({ x: 0, y: 0 });
     const [selectedOption, setSelectedOption] = useState('');
+    const disabled = !isEditable;
 
     useEffect(() => {
         setLetters(value?.letters || []);
@@ -67,6 +68,8 @@ const BodyDiagram = ({ value, onChange }) => {
                         />
                         {(letters || []).map((item) => (
                             <Button
+                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 key={item.id}
                                 variant="danger"
                                 style={{
@@ -96,6 +99,8 @@ const BodyDiagram = ({ value, onChange }) => {
                         <Form.Group controlId="formSelect">
                             <Form.Label>Select an option:</Form.Label>
                             <Form.Control
+                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 as="select"
                                 value={selectedOption}
                                 onChange={(e) => {
@@ -110,7 +115,8 @@ const BodyDiagram = ({ value, onChange }) => {
                                 ))}
                             </Form.Control>
                         </Form.Group>
-                        <Button variant="primary" onClick={handleAddLetter}>
+                        <Button disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }} variant="primary" onClick={handleAddLetter}>
                             Add Letter
                         </Button>
                     </Form>
@@ -125,6 +131,8 @@ const BodyDiagram = ({ value, onChange }) => {
                                 {options.find((opt) => opt.value === item.letter)?.label}
                                 {' '} at ({Math.floor(item.x)}, {Math.floor(item.y)})
                                 <Button
+                                    disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     variant="danger"
                                     size="sm"
                                     style={{ marginLeft: '10px' }}

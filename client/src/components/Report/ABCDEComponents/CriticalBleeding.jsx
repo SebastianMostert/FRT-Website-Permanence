@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, Container } from 'react-bootstrap';
 
-const CriticalBleeding = ({ value = {}, onChange }) => {
+const CriticalBleeding = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
+
+    const disabled = !isEditable;
 
     useEffect(() => {
         if (value.problem) {
@@ -34,6 +36,8 @@ const CriticalBleeding = ({ value = {}, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Problem?"
                         checked={value.problem || false}
@@ -51,6 +55,8 @@ const CriticalBleeding = ({ value = {}, onChange }) => {
                                         <Form.Label>Measures</Form.Label>
                                         <hr />
                                         <Form.Check
+                                            disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Tourniquet"
                                             checked={value.tourniquet || false}
@@ -63,6 +69,8 @@ const CriticalBleeding = ({ value = {}, onChange }) => {
                                                 </Col>
                                                 <Col xs="auto">
                                                     <Form.Control
+                                                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="time"
                                                         value={value.tourniquetTime || ''}
                                                         onChange={(e) =>
@@ -73,6 +81,8 @@ const CriticalBleeding = ({ value = {}, onChange }) => {
                                             </Row>
                                         )}
                                         <Form.Check
+                                            disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Manuelle Kompression/Blutstillung"
                                             checked={value.manualCompression || false}

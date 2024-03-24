@@ -152,6 +152,10 @@ const reportSchema = new mongoose.Schema({
             erhoben: bool,
         },
     },
+    archived: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const Report = mongoose.model('Report', reportSchema);

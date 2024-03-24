@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const LastOralIntake = ({ value, onChange }) => {
+const LastOralIntake = ({ value, onChange, isEditable }) => {
     const [isInputVisible, setIsInputVisible] = useState(value.erhoben || false);
+
+    const disabled = !isEditable;
 
     const handleCheckboxChange = (event) => {
         const isChecked = event.target.checked;
@@ -29,6 +31,8 @@ const LastOralIntake = ({ value, onChange }) => {
             <Row className="mb-3 align-items-center">
                 <Col xs="auto">
                     <Form.Check
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="checkbox"
                         label="Erhoben?"
                         checked={isInputVisible}
@@ -41,6 +45,8 @@ const LastOralIntake = ({ value, onChange }) => {
                     <Row className="align-items-center mt-3">
                         <Col>
                             <Form.Select
+                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 aria-label="Select Liquid or Solid"
                                 value={value.type || ''}
                                 onChange={(e) => handleInputChange('type', e.target.value)}
@@ -52,6 +58,8 @@ const LastOralIntake = ({ value, onChange }) => {
                         </Col>
                         <Col>
                             <Form.Control
+                                disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 type="time"
                                 value={value.time || ''}
                                 onChange={(e) => handleInputChange('time', e.target.value)}
@@ -59,6 +67,8 @@ const LastOralIntake = ({ value, onChange }) => {
                         </Col>
                     </Row>
                     <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         as="textarea"
                         rows={3}
                         placeholder="Details"

@@ -1,9 +1,10 @@
 import Report from '../models/report.model.js';
 
 export const createReport = async (req, res, next) => {
-    const { reportData } = req.body
+    const body = req.body
+    
     try {
-        const newReport = new Report({ ...reportData });
+        const newReport = new Report(body);
         await newReport.save();
         res.status(201).json({ message: 'Report created successfully' });
     } catch (error) {
@@ -12,10 +13,24 @@ export const createReport = async (req, res, next) => {
     }
 }
 
+export const updateReport = async (req, res, next) => {
+    const id = req.params.id
+    const body = req.body
+
+    try {
+        await Report.findOneAndUpdate({ missionNumber: id }, body, { new: true });
+        res.status(200).json({ message: 'Report updated successfully' });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 export const getReport = async (req, res, next) => {
     const id = req.params.id
+    
     try {
-        const report = await Report.findById(id);
+        const report = await Report.findOne({ missionNumber: id });
         res.status(200).json(report);
     } catch (error) {
         console.log(error);
