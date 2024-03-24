@@ -17,6 +17,12 @@ export const updateUser = async (req, res, next) => {
     return next(errorHandler(401, 'You can update only your account!'));
   }
   try {
+    // Fetch the user
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return next(errorHandler(404, 'User not found.'));
+    }
+
     if (body.password) {
       body.password = bcryptjs.hashSync(body.password, 10);
     }
@@ -26,27 +32,49 @@ export const updateUser = async (req, res, next) => {
       body.experience.FR = body.experienceFR || body.experience.FR;
     }
 
-    const training = [];
-    if (body.trainingSAP1) training.push('SAP 1');
-    if (body.trainingSAP2) training.push('SAP 2');
+    const firstAidCourse = (body?.firstAidCourse !== undefined) ? body.firstAidCourse : user.firstAidCourse;
+    const firstName = (body?.firstName !== undefined) ? body.firstName : user.firstName;
+    const lastName = (body?.lastName !== undefined) ? body.lastName : user.lastName;
+    const studentClass = (body?.studentClass !== undefined) ? body.studentClass : user.studentClass;
+    const experience = (body?.experience !== undefined) ? body.experience : user.experience;
+    const email = (body?.email !== undefined) ? body.email : user.email;
+    const training = (body?.training !== undefined) ? body.training : user.training;
+    const administratifPosition = (body && body.administratifPosition !== undefined) ? body.administratifPosition : user.administratifPosition;
+    const IAM = (body?.IAM !== undefined) ? body.IAM : user.IAM;
+    const llisPosition = (body?.llisPosition !== undefined) ? body.llisPosition : user.llisPosition;
+    const verified = (body?.verified !== undefined) ? body.verified : user.verified;
+
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
-          firstName: body.firstName,
-          lastName: body.lastName,
-
-          studentClass: body.studentClass,
+          firstAidCourse,
+          firstName,
+          lastName,
+          studentClass,
           password: body.password,
-          profilePicture: body.profilePicture,
-          experience: body.experience,
-          email: body.email,
+          experience,
+          email,
           training,
+          operationalPosition: checkOperationalPosition(
+            firstAidCourse,
+            training,
+            experience.RTW,
+            experience.FR
+          ),
+          administratifPosition,
+          IAM,
+          llisPosition,
+          verified,
         },
       },
       { new: true }
     );
+
+    // Save the updated user
+    await updatedUser.save();
+
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
@@ -104,4 +132,19 @@ export const notifyUser = async (req, res, next) => {
 
 
   return res.status(200).json({ info });
+};
+
+const checkOperationalPosition = (firstAidCourse, training, rtwExperience, frExperience) => {
+  const hasFirstAidCourse = firstAidCourse;
+  const hasSAP1 = training.includes('SAP 1');
+  const hasSAP2 = training.includes('SAP 2');
+  const hasRTWExperience = rtwExperience >= 100;
+  const hasFRExperience = frExperience >= 300;
+
+  if (!hasFirstAidCourse) return 'None';
+  else if (hasSAP2) return 'Chef Agres';
+  else if (hasSAP1 && (hasRTWExperience || hasFRExperience)) return 'Chef Agres';
+  else if (hasSAP1) return 'Equipier Bin.';
+  else if (hasFirstAidCourse) return 'Stagiaire Bin.';
+  else return 'None';
 };

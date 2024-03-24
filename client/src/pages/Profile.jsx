@@ -24,6 +24,7 @@ export default function Profile() {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
   const [classOptions, setClassOptions] = useState([]);
+  const [trainingFirstAidCourse, setTrainingFirstAidCourse] = useState(false);
   const [trainingSAP1, setTrainingSAP1] = useState(false);
   const [trainingSAP2, setTrainingSAP2] = useState(false);
   const { currentUser, loading } = useSelector((state) => state.user)
@@ -39,11 +40,7 @@ export default function Profile() {
           console.error(error);
         }
       };
-
-      console.log(currentUser.training)
-      console.log(currentUser.training?.includes('SAP 1'))
-      console.log(currentUser.training?.includes('SAP 2'))
-
+      setTrainingFirstAidCourse(currentUser.firstAidCourse);
       setTrainingSAP1(currentUser.training?.includes('SAP 1'));
       setTrainingSAP2(currentUser.training?.includes('SAP 2'));
       fetchData();
@@ -67,13 +64,29 @@ export default function Profile() {
 
   const handleTrainingChange = (e) => {
     const { id, checked } = e.target;
+    const trainings = [];
 
-    if (id === 'trainingSAP1') {
+    if (id === 'trainingFirstAidCourse') {
+      setTrainingFirstAidCourse(checked)
+
+      if (trainingSAP1) trainings.push('SAP 1');
+      if (trainingSAP2) trainings.push('SAP 2');
+
+      setFormData({ ...formData, training: trainings, firstAidCourse: checked });
+    } else if (id === 'trainingSAP1') {
       setTrainingSAP1(checked)
-      setFormData({ ...formData, trainingSAP1: checked, trainingSAP2 });
+
+      if (checked) trainings.push('SAP 1');
+      if (trainingSAP2) trainings.push('SAP 2');
+
+      setFormData({ ...formData, training: trainings });
     } else if (id === 'trainingSAP2') {
       setTrainingSAP2(checked)
-      setFormData({ ...formData, trainingSAP1, trainingSAP2: checked });
+
+      if (trainingSAP1) trainings.push('SAP 1');
+      if (checked) trainings.push('SAP 2');
+
+      setFormData({ ...formData, training: trainings });
     }
   };
 
@@ -102,8 +115,6 @@ export default function Profile() {
         ...currentUser,  // Keep existing user data
         ...formData,    // Include the changed fields
       };
-
-      console.log(updatedUserData);
 
       //#region Verify password, class, training
       // Verify password security
@@ -285,6 +296,14 @@ export default function Profile() {
           <FormLabel className="mb-3 text-lg">
             {t('profile.multi.dropdown.training.label')}
           </FormLabel>
+          <Form.Check
+            checked={trainingFirstAidCourse}
+            label="First Aid Course"
+            type='checkbox'
+            name='group1'
+            id={`trainingFirstAidCourse`}
+            onChange={handleTrainingChange}
+          />
           <Form.Check
             checked={trainingSAP1}
             label="SAP 1"

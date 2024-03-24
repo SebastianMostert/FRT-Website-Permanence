@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
     }, // Done
     firstAidCourse: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     operationalPosition: {
       type: String,
