@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
-import SignIn from './pages/SignIn';
+import SignIn from './pages/SignIn/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import PrivateRoute from './components/PrivateRoute';
@@ -76,8 +76,10 @@ function App() {
             <Route exact path="/report/:missionNumber" element={<Report />} />
             <Route path='/calendar' element={<Calendar />} />
             <Route path='/profile' element={<Profile />} />
-            <Route path='/admin' element={<AdminDashboard />} />
           </Route>
+        </Route>
+        <Route element={<PrivateRoute />}>
+          <Route path='/admin' element={<AdminDashboard />} />
         </Route>
         <Route path='*' element={<NotFoundPage />} />
       </Routes>

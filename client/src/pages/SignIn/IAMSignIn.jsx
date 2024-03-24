@@ -5,13 +5,13 @@ import {
   signInStart,
   signInSuccess,
   signInFailure,
-} from '../redux/user/userSlice';
+} from '../../redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Form, Button, InputGroup } from 'react-bootstrap';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 
-export default function SignIn() {
+export default function IAMSignIn() {
   const { t } = useTranslation();
   const toastId = React.useRef(null);
 

@@ -3,64 +3,55 @@ import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { getMember } from '../utils';
 
-const MarkBesetztModal = ({ show, handleClose, selectedSlot, setAvailability, shifts }) => {
+const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUsers = async () => {
-            if (selectedSlot) {
-                const iamList = selectedSlot.IAM.split(', ');
-                const availabilityIdsList = selectedSlot.availabilityIds.split(', ');
+            // Split date into day, month, and year
+            const [day, month, year] = date.split('/');
 
-                const date = selectedSlot.date;
-                const startTime = selectedSlot.startTime;
-                const endTime = selectedSlot.endTime;
+            // Split startTime and endTime into hours and minutes
+            const [startHour, startMinute] = startTime.split(':');
+            const [endHour, endMinute] = endTime.split(':');
 
-                // Split date into day, month, and year
-                const [day, month, year] = date.split('/');
+            // Create startDate and endDate
+            const startDate = new Date(year, month - 1, day, startHour, startMinute);
+            const endDate = new Date(year, month - 1, day, endHour, endMinute);
 
-                // Split startTime and endTime into hours and minutes
-                const [startHour, startMinute] = startTime.split(':');
-                const [endHour, endMinute] = endTime.split(':');
-
-                // Create startDate and endDate
-                const startDate = new Date(year, month - 1, day, startHour, startMinute);
-                const endDate = new Date(year, month - 1, day, endHour, endMinute);
-
-                console.log(startDate);
-                console.log(endDate);
+            console.log(startDate);
+            console.log(endDate);
 
 
-                const users = await Promise.all(
-                    iamList.map(async (iam, index) => {
-                        const res = await getMember(iam);
-                        if (res.success) {
-                            const availabilityId = availabilityIdsList[index].trim().replace(`${iam}: `, '');
+            const users = await Promise.all(
+                IAMList.map(async (iam, index) => {
+                    const res = await getMember(iam);
+                    if (res.success) {
+                        const availabilityId = availabilityIdsList[index].trim().replace(`${iam}: `, '');
 
-                            return {
-                                IAM: res.data.IAM,
-                                firstName: res.data.firstName || 'Unknown',
-                                lastName: res.data.lastName || 'User',
-                                position: '',
-                                selected: true, // Initially all users are selected
-                                availabilityId: availabilityId, // Add availability ID
-                                operationalPosition: res.data.operationalPosition,
-                                startDate,
-                                endDate
-                            };
-                        }
-                        return null;
-                    })
-                );
+                        return {
+                            IAM: res.data.IAM,
+                            firstName: res.data.firstName || 'Unknown',
+                            lastName: res.data.lastName || 'User',
+                            position: '',
+                            selected: true, // Initially all users are selected
+                            availabilityId: availabilityId, // Add availability ID
+                            operationalPosition: res.data.operationalPosition,
+                            startDate,
+                            endDate
+                        };
+                    }
+                    return null;
+                })
+            );
 
-                setSelectedUsers(users.filter((user) => user !== null));
-                setLoading(false);
-            }
+            setSelectedUsers(users.filter((user) => user !== null));
+            setLoading(false);
         };
 
         fetchUsers();
-    }, [selectedSlot]);
+    }, [IAMList, availabilityIdsList, date, endTime, startTime]);
 
     const handleSelectPosition = (event, userIAM) => {
         const { value } = event.target;
