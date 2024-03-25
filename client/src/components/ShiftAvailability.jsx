@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import AllShiftsCalendar from './Admin/AllShiftsCalendar';
-import Calendar from './Calendar/Calendar';
 
 const ShiftAvailability = ({ selectedTable }) => {
     const { t } = useTranslation();
@@ -151,20 +150,7 @@ const ShiftAvailability = ({ selectedTable }) => {
         });
     });
 
-    const calendarEvents = overlappingTimeSlots.map((availability) => {
-        return {
-            title: availability.IAM,
-            start: availability.date + 'T' + availability.startTime,
-            end: availability.date + 'T' + availability.endTime,
-            status: availability.status,
-            availabilityIds: availability.availabilityIds,
-        };
-    });
-
-    const allShiftsTable = (
-        
-        <AllShiftsCalendar availabilty={availabilty} deleteAvailability={deleteAvailability} />
-    );
+    const allShiftsTable = <AllShiftsCalendar availabilty={availabilty} deleteAvailability={deleteAvailability} />
 
     const overlappingTimeSlotsTable = (
         <div className="mt-3">
