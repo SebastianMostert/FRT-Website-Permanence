@@ -20,10 +20,6 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
             const startDate = new Date(year, month - 1, day, startHour, startMinute);
             const endDate = new Date(year, month - 1, day, endHour, endMinute);
 
-            console.log(startDate);
-            console.log(endDate);
-
-
             const users = await Promise.all(
                 IAMList.map(async (iam, index) => {
                     const res = await getMember(iam);
@@ -79,6 +75,7 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
 
         const valid = validateShift(chefsCount, equipiersCount, stagiairesCount);
 
+        console.log(valid);
         if (!valid.isValid) {
             alert(valid.message);
             return;
@@ -129,12 +126,11 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
             }
         }
         createShiftDB(selectedUsersWithPosition);
-
-        console.log('Creating shift with selected users:', selectedUsersWithPosition);
         handleClose();
     };
 
     const validateShift = (chefsCount, equipiersCount, stagiairesCount) => {
+        console.log(chefsCount, equipiersCount, stagiairesCount);
         if (chefsCount + equipiersCount + stagiairesCount < 2 || chefsCount + equipiersCount + stagiairesCount > 3) return { isValid: false, message: 'Each shift must have at least 2 and at most 3 positions.' };
         if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1) return { isValid: true, message: '' };
         if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0) return { isValid: true, message: '' };
@@ -149,7 +145,8 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
             if (shiftStart <= shiftStart && shiftEnd > shiftStart && shiftEnd <= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
             if (shiftStart > shiftStart && shiftStart < shiftEnd && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
         }
-        return { isValid: true, message: '' };
+
+        return { isValid: false, message: 'This shift is not valid.' };
     };
 
     const deleteAvailability = async (id, IAM) => {
@@ -313,8 +310,6 @@ const notifyUser = async (shift, allShifts) => {
         }),
     });
     const json = await res2.json();
-
-    console.log(json);
     return json;
 }
 
@@ -339,7 +334,6 @@ const getAvailabilities = async (id) => {
                 'Content-Type': 'application/json',
             },
         });
-        console.log(res);
 
         const data = await res.json();
 
@@ -352,6 +346,13 @@ const getAvailabilities = async (id) => {
 const createAvailability = async (data) => {
     const { IAM, startTime, endTime } = data;
 
+    console.log(IAM, startTime, endTime);
+    // Ensure start and endtime arent the same
+    if (startTime.getTime() === endTime.getTime()) {
+        console.error('Start and end time cannot be the same.');
+        return;
+    }
+    
     try {
         const res = await fetch('/api/v1/availability/create', {
             method: 'POST',
