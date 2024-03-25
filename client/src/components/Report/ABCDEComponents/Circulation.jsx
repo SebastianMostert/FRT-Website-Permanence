@@ -29,7 +29,6 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
             updatedValue.oberschenkel = '';
             updatedValue.ecgImage = '';
             updatedValue.spO2 = '';
-            updatedValue.bloodSugar = '';
         }
 
         onChange('circulation', 'problem', isChecked);
@@ -85,7 +84,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <div>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Regelmäßig"
@@ -95,7 +94,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Unregelmäßig"
@@ -110,7 +109,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <div>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Gut tastbar"
@@ -120,7 +119,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Schlecht tastbar"
@@ -136,7 +135,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                     <InputGroup.Text>BPM</InputGroup.Text>
                                                     <Form.Control
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.bpm || ''}
                                                         onChange={(e) => handleInputChange('bpm', e.target.value)}
@@ -148,26 +147,10 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                         <Form.Group className="mb-3">
                                             <div className="d-flex align-items-center">
                                                 <InputGroup>
-                                                    <InputGroup.Text>Blood Sugar</InputGroup.Text>
-                                                    <Form.Control
-                                                        disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                        type="number"
-                                                        value={value.bloodSugar || ''}
-                                                        onChange={(e) => handleInputChange('bloodSugar', e.target.value)}
-                                                        className="ml-2"
-                                                    />
-                                                    <InputGroup.Text>mg/dL</InputGroup.Text>
-                                                </InputGroup>
-                                            </div>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <div className="d-flex align-items-center">
-                                                <InputGroup>
                                                     <InputGroup.Text>SpO2</InputGroup.Text>
                                                     <Form.Control
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.spO2 || ''}
                                                         onChange={(e) => handleInputChange('spO2', e.target.value)}
@@ -182,7 +165,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 <FloatingLabel label="SYS" className="mb-3 me-2">
                                                     <Form.Control
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.sys || ''}
                                                         onChange={(e) => handleInputChange('sys', e.target.value)}
@@ -192,7 +175,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 <FloatingLabel label="DIA" className="mb-3 ms-2">
                                                     <Form.Control
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="number"
                                                         value={value.dia || ''}
                                                         onChange={(e) => handleInputChange('dia', e.target.value)}
@@ -205,7 +188,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <div>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Weich"
@@ -215,7 +198,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Hart"
@@ -230,7 +213,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <div>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Stabil"
@@ -240,7 +223,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Instabil"
@@ -255,7 +238,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <div>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Stabil"
@@ -265,7 +248,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     inline
                                                     type="radio"
                                                     label="Instabil"
@@ -279,7 +262,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                             <Form.Label>ECG Image</Form.Label>
                                             <Form.Control
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={handleImageChange}
@@ -305,7 +288,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Flachlagerung"
                                                 checked={value.flachlagerung || false}
@@ -315,7 +298,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Schocklagerung"
                                                 checked={value.schocklagerung || false}
@@ -325,7 +308,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="Stabile Seitenlage"
                                                 checked={value.stabileSeitenlage || false}
@@ -335,7 +318,7 @@ const Circulation = ({ value = {}, onChange, isEditable }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="checkbox"
                                                 label="(Druck-)Verband/Blutstillung"
                                                 checked={value.druckverband || false}

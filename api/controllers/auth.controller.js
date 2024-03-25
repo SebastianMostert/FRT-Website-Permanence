@@ -30,7 +30,6 @@ export const signup = async (req, res, next) => {
 // Sign In
 export const signin = async (req, res, next) => {
   let { IAM, password } = req.body;
-  console.log(req.body);
   IAM = IAM.toLowerCase(); // Convert IAM to lowercase
 
   try {

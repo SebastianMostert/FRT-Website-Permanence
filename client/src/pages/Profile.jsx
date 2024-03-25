@@ -12,7 +12,7 @@ import {
   signOut,
 } from '../redux/user/userSlice';
 import { toast } from 'react-toastify';
-import { getSelectMenuClass, isClassValid, isPasswordValid, isTrainingValid } from '../utils';
+import { getSelectMenuClass, isClassValid, isPasswordValid } from '../utils';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstrap';
@@ -132,16 +132,6 @@ export default function Profile() {
         const _isClassValid = await isClassValid(updatedUserData.studentClass);
         if (!_isClassValid.success) {
           const msg = `${t('profile.update.failed', { reason: _isClassValid.message })}`
-          dispatch(updateUserFailure(msg));
-          return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
-        }
-      }
-
-      // Verify training
-      if (updatedUserData.training) {
-        const _isTrainingValid = await isTrainingValid(updatedUserData.training);
-        if (!_isTrainingValid.success) {
-          const msg = `${t('profile.update.failed', { reason: _isTrainingValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }

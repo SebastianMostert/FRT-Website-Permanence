@@ -65,7 +65,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                                 <Form.Label>Schmerz: {value.schmerzskala || 0}/10</Form.Label>
                                 <Form.Range
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="range"
                                     label="Schmerzskala"
                                     min={0}
@@ -78,7 +78,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                             <Form.Group className="mb-3">
                                 <Form.Check
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Body Check"
                                     checked={value.bodycheck || false}
@@ -89,7 +89,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                                 <Form.Label>Weitere Verletzungen/Umfeld/sonstiges</Form.Label>
                                 <Form.Control
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     as="textarea"
                                     rows={3}
                                     value={value.weitereVerletzungen || ''}
@@ -106,7 +106,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                             <Form.Group className="mb-3">
                                 <Form.Check
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Wärmeerhalt"
                                     checked={value.wärmeerhalt || false}
@@ -116,7 +116,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                             <Form.Group className="mb-3">
                                 <Form.Check
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Wundversorgung"
                                     checked={value.wundversorgung || false}
@@ -126,7 +126,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                             <Form.Group className="mb-3">
                                 <Form.Check
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     type="checkbox"
                                     label="Extremitätenschienung"
                                     checked={value.extremitätenschienung || false}

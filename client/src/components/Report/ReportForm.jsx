@@ -5,7 +5,6 @@ import FirstResponders from './FirstResponders';
 import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
-import jsPDF from 'jspdf';
 import MissionNumber from '../Inputs/MissionNumber';
 import { updateReport } from '../../utils';
 
@@ -64,7 +63,6 @@ const defaultValues = {
             oberschenkel: '',
             ecgImage: '',
             spO2: '',
-            bloodSugar: '',
         },
         disability: {
             problem: false,
@@ -81,8 +79,11 @@ const defaultValues = {
             time: false,
             speech: false,
             face: false,
+            fastDetails: "",
             pupillenRightLicht: false,
             pupillenLeftLicht: false,
+            temperature: "",
+            bloodSugar: '',
         },
         exposureEnvironment: {
             problem: false,
@@ -308,7 +309,6 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
             </Container>
         );
     }
-
 
     return (
         <Container>

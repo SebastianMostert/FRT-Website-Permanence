@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card, Container } from 'react-bootstrap';
+import { Form, Row, Col, Card, Container, FloatingLabel } from 'react-bootstrap';
 
 const CriticalBleeding = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
@@ -56,33 +56,30 @@ const CriticalBleeding = ({ value = {}, onChange, isEditable }) => {
                                         <hr />
                                         <Form.Check
                                             disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Tourniquet"
                                             checked={value.tourniquet || false}
                                             onChange={() => handleMeasureChange('tourniquet')}
                                         />
                                         {value.tourniquet && (
-                                            <Row className="mb-3 align-items-center">
-                                                <Col xs="auto">
-                                                    <Form.Label>Time:</Form.Label>
-                                                </Col>
-                                                <Col xs="auto">
+                                            <Form.Group >
+                                                <FloatingLabel label="Applied at">
                                                     <Form.Control
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                         type="time"
                                                         value={value.tourniquetTime || ''}
                                                         onChange={(e) =>
                                                             onChange('criticalBleeding', 'tourniquetTime', e.target.value)
                                                         }
                                                     />
-                                                </Col>
-                                            </Row>
+                                                </FloatingLabel>
+                                            </Form.Group>
                                         )}
                                         <Form.Check
                                             disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="Manuelle Kompression/Blutstillung"
                                             checked={value.manualCompression || false}

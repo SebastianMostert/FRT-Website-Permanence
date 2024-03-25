@@ -111,11 +111,6 @@ export async function isIAMValid(IAM) {
     if (!IAM.match(/^[a-zA-Z]{5}[0-9]{3}$/)) return { success: false, message: 'Invalid IAM! The IAM must follow the format: 5 letters followed by 3 digits' };
     return { success: true, message: '' };
 }
-
-export async function isTrainingValid(trainingStr) {
-    console.log(trainingStr)
-    return { success: true, message: '' };
-}
 //#endregion
 
 export function isMobile() {

@@ -46,7 +46,7 @@ const LastOralIntake = ({ value, onChange, isEditable }) => {
                         <Col>
                             <Form.Select
                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 aria-label="Select Liquid or Solid"
                                 value={value.type || ''}
                                 onChange={(e) => handleInputChange('type', e.target.value)}
@@ -59,7 +59,7 @@ const LastOralIntake = ({ value, onChange, isEditable }) => {
                         <Col>
                             <Form.Control
                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 type="time"
                                 value={value.time || ''}
                                 onChange={(e) => handleInputChange('time', e.target.value)}

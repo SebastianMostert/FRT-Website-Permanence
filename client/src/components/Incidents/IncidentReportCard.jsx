@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { Button, Card, Accordion, Modal, ButtonGroup, DropdownButton, Dropdown } from 'react-bootstrap';
+import { Button, Card, Accordion, Modal, ButtonGroup, DropdownButton, Dropdown, InputGroup } from 'react-bootstrap';
+
 
 const IncidentReportCard = ({
     report,
@@ -96,6 +97,8 @@ const IncidentReportCard = ({
                 </div>
 
                 <div className="text-center mt-4">
+                    <InputGroup>
+                    </InputGroup>
                     {isEditable ? (
                         <Button variant="primary" onClick={handleEdit} className="me-2">
                             Edit

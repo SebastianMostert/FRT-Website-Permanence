@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card, Table, InputGroup } from 'react-bootstrap';
+import { Form, Row, Col, Card, Table, InputGroup, FloatingLabel } from 'react-bootstrap';
 
 const Disability = ({ value = {}, onChange, isEditable }) => {
     const [showMeasures, setShowMeasures] = useState(false);
@@ -40,6 +40,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
             updatedValue.pupillenLeftLicht = false;
             updatedValue.pupillenRightLicht = false;
             updatedValue.temperature = '';
+            updatedValue.bloodSugar = '';
         }
 
         onChange('disability', 'problem', isChecked);
@@ -179,11 +180,17 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                     <Form.Label>Diagnostic</Form.Label>
                                     <hr />
                                     <Form.Group className="mb-3">
+                                        {renderBewegungTable()}
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        {renderPupillenTable()}
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
                                         <Form.Label>AVPU</Form.Label>
                                         <div>
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 inline
                                                 type="radio"
                                                 label="Alert"
@@ -193,7 +200,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                             />
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 inline
                                                 type="radio"
                                                 label="Voice"
@@ -203,7 +210,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                             />
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 inline
                                                 type="radio"
                                                 label="Pain"
@@ -213,7 +220,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                             />
                                             <Form.Check
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 inline
                                                 type="radio"
                                                 label="Unresponsive"
@@ -224,13 +231,9 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                         </div>
                                     </Form.Group>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Movement</Form.Label>
-                                        {renderBewegungTable()}
-                                    </Form.Group>
-                                    <Form.Group className="mb-3">
                                         <Form.Check
                                             disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="DMS Extremitäten problem?"
                                             checked={value.dmsExtremitäten || false}
@@ -240,7 +243,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                             <>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Durchblutung"
                                                     checked={value.durchblutung || false}
@@ -248,7 +251,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Motorik"
                                                     checked={value.motorik || false}
@@ -256,7 +259,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Sensorik"
                                                     checked={value.sensorik || false}
@@ -268,7 +271,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                     <Form.Group className="mb-3">
                                         <Form.Check
                                             disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
                                             label="FAST-Problem"
                                             checked={value.fastProblem || false}
@@ -278,7 +281,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                             <>
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Face"
                                                     checked={value.face || false}
@@ -286,7 +289,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Arms"
                                                     checked={value.arms || false}
@@ -294,7 +297,7 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Speech"
                                                     checked={value.speech || false}
@@ -302,31 +305,69 @@ const Disability = ({ value = {}, onChange, isEditable }) => {
                                                 />
                                                 <Form.Check
                                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                     type="checkbox"
                                                     label="Time"
                                                     checked={value.time || false}
                                                     onChange={() => handleMeasureChange('time')}
+                                                    className="mb-3"
                                                 />
+                                                {value.time && (
+                                                    <Form.Group className="mb-3">
+                                                        <FloatingLabel label="Symptom Onset">
+                                                            <Form.Control
+                                                                disabled={disabled}
+                                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                                type="time"
+                                                                value={value.fastSymptomOnset || ''}
+                                                                onChange={(e) => handleInputChange('fastSymptomOnset', e.target.value)}
+                                                            />
+                                                        </FloatingLabel>
+                                                    </Form.Group>
+                                                )}
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>FAST Details</Form.Label>
+                                                    <Form.Control
+                                                        disabled={disabled}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        as="textarea"
+                                                        rows={3}
+                                                        value={value.fastDetails || ''}
+                                                        onChange={(e) => handleInputChange('fastDetails', e.target.value)}
+                                                    />
+                                                </Form.Group>
                                             </>
                                         )}
                                     </Form.Group>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Pupillen right / left</Form.Label>
-                                        {renderPupillenTable()}
-                                    </Form.Group>
+
                                     <Form.Group className="mb-3">
                                         <InputGroup>
                                             <InputGroup.Text>Temperature</InputGroup.Text>
                                             <Form.Control
                                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                                 type="number"
                                                 value={value.temperature || ''}
                                                 onChange={(e) => handleInputChange('temperature', e.target.value)}
                                             />
                                             <InputGroup.Text>°C</InputGroup.Text>
                                         </InputGroup>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <div className="d-flex align-items-center">
+                                            <InputGroup>
+                                                <InputGroup.Text>Blood Sugar</InputGroup.Text>
+                                                <Form.Control
+                                                    disabled={disabled}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    type="number"
+                                                    value={value.bloodSugar || ''}
+                                                    onChange={(e) => handleInputChange('bloodSugar', e.target.value)}
+                                                    className="ml-2"
+                                                />
+                                                <InputGroup.Text>mg/dL</InputGroup.Text>
+                                            </InputGroup>
+                                        </div>
                                     </Form.Group>
                                 </Card.Body>
                             </Card>

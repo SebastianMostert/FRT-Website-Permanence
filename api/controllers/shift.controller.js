@@ -24,7 +24,6 @@ export const createShift = async (req, res, next) => {
     }
 
     // Create the shifts
-    console.log(shifts);
     const createdShifts = await Shift.create({ shifts: shifts });
 
     res.status(201).json({ success: true, data: createdShifts });
