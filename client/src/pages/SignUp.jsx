@@ -5,6 +5,7 @@ import { isIAMValid, isPasswordValid } from '../utils';
 import { Form, Button, InputGroup, FloatingLabel, Col, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
+import { apiSignUp } from '../APICalls/apiCalls';
 
 export default function SignUp() {
   const { t } = useTranslation();
@@ -41,15 +42,7 @@ export default function SignUp() {
         return toast.error(`${t("signup.create.failed", { reason: _isIAMValid.message })}`);
       }
 
-      const res = await fetch('/api/v1/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
+      const data = await apiSignUp(formData);
       setLoading(false);
       if (data.success === false) {
         toast.error(`${t('signup.create.error')}`);

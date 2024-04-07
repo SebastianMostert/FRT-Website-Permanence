@@ -1,32 +1,25 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Table, Button, Placeholder, Card } from 'react-bootstrap';
 import MarkBesetztModal from './MarkBesetztModal'; // Import the modal component
 import { toast } from 'react-toastify';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import AllShiftsCalendar from './Admin/AllShiftsCalendar';
+import { apiDeleteAvailability, apiDeleteShift, useFetchAvailabilities, useFetchShifts } from '../APICalls/apiCalls';
 
 const ShiftAvailability = ({ selectedTable }) => {
-    const { t } = useTranslation();
-    const { currentUser } = useSelector((state) => state.user)
-    const IAM = currentUser.IAM;
     const [showModal, setShowModal] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [availabilty, setAvailability] = useState([]);
-    const [shift, setShift] = useState([]);
 
-    useEffect(() => {
-        async function fetchData() {
-            const availabilities = await getAvailabilities(IAM);
-            setAvailability(availabilities);
+    const { data: availabilty, error: availabilityError } = useFetchAvailabilities();
+    const { data: shift, error: shiftError } = useFetchShifts();
 
-            const shifts = await getShifts();
-            setShift(shifts);
-        }
+    if (availabilityError) {
+        toast.error('An error occurred while fetching availabilities: ' + availabilityError.message);
+    }
 
-        fetchData();
-    }, [IAM, currentUser, t]);
+    if (shiftError) {
+        toast.error('An error occurred while fetching shifts: ' + shiftError.message);
+    }
 
     const markBesetzt = (slot) => {
         setSelectedSlot(slot);
@@ -38,75 +31,27 @@ const ShiftAvailability = ({ selectedTable }) => {
     };
 
     //#region Shifts
-    async function getShifts() {
-        const res = await fetch(`/api/v1/shift/fetch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = (await res.json()).data;
-        return data;
-    }
     const deleteShift = async (id) => {
-        console.log(id);
         // Implement the logic to delete the shift
         // You can make an API call to delete the shift
-        const res = await fetch(`/api/v1/shift/delete/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const res = await apiDeleteShift(id);
 
         if (res.status !== 200) {
             toast.error('Failed to delete shift.');
             return;
         }
-
-        if (res.status === 200) {
-            // Refetch data after deletion
-            const data = await getShifts();
-            setShift(data);
-            toast.success('Shift deleted successfully.');
-        }
     };
     //#endregion
 
     //#region Availabilities
-    async function getAvailabilities() {
-        const res = await fetch(`/api/v1/availability/all`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await res.json();
-
-        return data;
-    }
     const deleteAvailability = async (id, IAM) => {
         try {
-            const res = await fetch(`/api/v1/availability/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ IAM: IAM, id: id }),
-            });
-
-            const data = await res.json();
+            const data = await apiDeleteAvailability(IAM, id);
 
             if (data?.success !== true) {
                 // Handle error, show alert, etc.
                 return;
             }
-
-            // Refetch data after deletion
-            const availabilities = await getAvailabilities();
-            setAvailability(availabilities);
         } catch (err) {
             // Handle error, show alert, etc.
             console.error(err);
@@ -315,7 +260,6 @@ const ShiftAvailability = ({ selectedTable }) => {
             <MarkBesetztModal
                 show={showModal}
                 handleClose={handleCloseModal}
-                setAvailabilities={setAvailability}
                 availabilities={availabilty}
                 shifts={shift}
                 IAMList={selectedSlot?.IAM.split(', ')}

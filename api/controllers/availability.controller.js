@@ -1,5 +1,6 @@
 import Availability from '../models/availability.model.js';
 import { errorHandler } from '../utils/error.js';
+import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 // Create availability
 export const createAvailability = async (req, res, next) => {
@@ -11,6 +12,7 @@ export const createAvailability = async (req, res, next) => {
         await newAvailability.save();
 
         res.status(201).json({ message: 'Availability created successfully', success: true, availability: newAvailability });
+        sendReportsUpdated('availabilities_updated');
     } catch (error) {
         console.log(error);
         next(errorHandler(500, 'Internal Server Error'));
@@ -65,6 +67,7 @@ export const deleteAvailability = async (req, res, next) => {
 
         if (deleted.deletedCount > 0) {
             return res.status(200).json({ message: 'Availability deleted successfully', success: true });
+            sendReportsUpdated('availabilities_updated');
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {

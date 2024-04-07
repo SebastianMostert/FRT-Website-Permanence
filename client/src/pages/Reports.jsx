@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Form, Button, Col, Row, Container, InputGroup, FormControl, FloatingLabel } from "react-bootstrap";
 import IncidentReportCard from "../components/Incidents/IncidentReportCard";
-import { getAllReports, getMember, reportCSV, reportPDF, updateReport } from "../utils";
+import { getMember, reportCSV, reportPDF, updateReport } from "../utils";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useFetchAllReports } from "../APICalls/apiCalls";
 
 const Reports = () => {
-  const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
   const [searchYear, setSearchYear] = useState("");
   const [searchMonth, setSearchMonth] = useState("");
@@ -21,18 +21,11 @@ const Reports = () => {
   const roles = currentUser?.roles;
   const isAdmin = roles?.includes("admin");
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      const res = await getAllReports();
-      const { success, data } = res;
+  const { data: reports, error } = useFetchAllReports();
 
-      if (!success) return toast('An error occurred while fetching reports');
-
-      setReports(data);
-    };
-
-    fetchReports();
-  }, [refreshTrigger]); // Trigger refresh when refreshTrigger changes
+  if(error) {
+    toast.error(`An error occured while fetching the reports: ${error.message}`);
+  }
 
   // Function to refresh reports
   const refreshReports = () => {

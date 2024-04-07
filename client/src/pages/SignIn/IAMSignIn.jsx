@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Form, Button, InputGroup } from 'react-bootstrap';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
+import { apiSignIn } from '../../APICalls/apiCalls';
 
 export default function IAMSignIn() {
   const { t } = useTranslation();
@@ -36,21 +37,15 @@ export default function IAMSignIn() {
       toastId.current = toast.info(`${t('signin.loading')}`, {
         autoClose: false,
       });
-      dispatch(signInStart()); const res = await fetch('/api/v1/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.success === false) {
+      dispatch(signInStart());
+      const res = await apiSignIn(formData);
+      if (res.success === false) {
         toast.update(toastId.current, {
           type: 'error',
           autoClose: 5000,
-          render: `${t('signin.failed', { reason: data.message })}`,
+          render: `${t('signin.failed', { reason: res.json.message })}`,
         });
-        dispatch(signInFailure(data));
+        dispatch(signInFailure(res.json));
         return;
       }
       toast.update(toastId.current, {
@@ -58,7 +53,7 @@ export default function IAMSignIn() {
         autoClose: 5000,
         render: `${t('signin.success')}`,
       });
-      dispatch(signInSuccess(data));
+      dispatch(signInSuccess(res.json));
       navigate('/');
     } catch (error) {
       toast.update(toastId.current, {

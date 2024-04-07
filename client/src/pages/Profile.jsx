@@ -16,6 +16,7 @@ import { getSelectMenuClass, isClassValid, isPasswordValid } from '../utils';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstrap';
+import { apiDeleteUser, apiSignOut, apiUpdateUser } from '../APICalls/apiCalls';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -138,15 +139,7 @@ export default function Profile() {
       }
       //#endregion
 
-      const res = await fetch(`/api/v1/user/update/${currentUser._id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUserData),
-      });
-
-      const data = await res.json();
+      const data = await apiUpdateUser(updatedUserData)
       if (data.success === false) {
         toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('profile.update.failed', { reason: data.message })}` });
         dispatch(updateUserFailure(data));
@@ -164,10 +157,7 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/v1/user/delete/${currentUser._id}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
+      const data = await apiDeleteUser(currentUser._id);
       if (data.success === false) {
         dispatch(deleteUserFailure(data));
         return;
@@ -180,7 +170,7 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/v1/auth/signout');
+      await apiSignOut();
       dispatch(signOut())
       toast.info(`${t('profile.signed.out')}`);
     } catch (error) {

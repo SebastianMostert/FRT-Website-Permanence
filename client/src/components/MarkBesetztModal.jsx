@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { getMember } from '../utils';
 import { toast } from 'react-toastify';
+import { apiCreateAvailability, apiCreateShift, apiDeleteAvailability, apiFetchAvailability, apiNotifyUser } from '../APICalls/apiCalls';
 
-const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
+const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -163,15 +164,7 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
 
     const deleteAvailability = async (id, IAM) => {
         try {
-            const res = await fetch(`/api/v1/availability/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ IAM: IAM, id: id }),
-            });
-
-            const data = await res.json();
+            const data = await apiDeleteAvailability(IAM, id);
 
             if (data?.success !== true) {
                 return;
@@ -260,19 +253,14 @@ export default MarkBesetztModal;
 
 
 const createShiftDB = async (data) => {
-    for (let i = 0; i < data.length; i++) {
-        const element = data[i];
-        notifyUser(element, data);
-    }
     try {
-        const res = await fetch('/api/v1/shift/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ shifts: data }),
-        });
-        const json = await res.json();
+
+        for (let i = 0; i < data.length; i++) {
+            const element = data[i];
+            notifyUser(element, data);
+        }
+
+        const json = await apiCreateShift(data);
         return json;
     } catch (err) {
         console.error(err);
@@ -306,22 +294,15 @@ const notifyUser = async (shift, allShifts) => {
     const startTimeStr = formatTime(new Date(startDate));
     const endTimeStr = formatTime(new Date(endDate));
 
-
-    const res2 = await fetch('/api/v1/user/notify', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            emailBody: {
-                to: email,
-                subject: 'Permanence Notification',
-                text: `Hello ${firstName} ${lastName},\n\nYou have been assigned to a shift on the ${formattedStartDate} from ${startTimeStr} to ${endTimeStr}.\n\nYou're assigned as a "${position}".\n\nYour partner(s) are:\n${partnerInfo.firstNames.map((name, index) => `${name} ${partnerInfo.lastNames[index]} as a "${partnerInfo.positions[index]}"`).join('\n')}`,
-            }
-        }),
+    const res2 = await apiNotifyUser({
+        to: email,
+        subject: 'Permanence Notification',
+        text: `Hello ${firstName} ${lastName},\n\nYou have been assigned to a shift on the ${formattedStartDate} from ${startTimeStr} to ${endTimeStr}.\n\nYou're assigned as a "${position}".\n\nYour partner(s) are:\n${partnerInfo.firstNames.map((name, index) => `${name} ${partnerInfo.lastNames[index]} as a "${partnerInfo.positions[index]}"`).join('\n')}`,
     });
-    const json = await res2.json();
-    return json;
+
+    if (!res2.success) {
+        toast.error('Failed to notify user');
+    }
 }
 
 const formatDate = (date) => {
@@ -339,14 +320,7 @@ const formatTime = (date) => {
 
 const getAvailabilities = async (id) => {
     try {
-        const res = await fetch(`/api/v1/availability/get-by-id/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await res.json();
+        const data = await apiFetchAvailability(id);
 
         return data;
     } catch (err) {
@@ -355,20 +329,8 @@ const getAvailabilities = async (id) => {
 }
 
 const createAvailability = async (data) => {
-    const { IAM, startTime, endTime } = data;
-
-    console.log(IAM, startTime, endTime);
-    // Ensure start and endtime arent the same
-
     try {
-        const res = await fetch('/api/v1/availability/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM, startTime, endTime }),
-        });
-        const json = await res.json();
+        const json = await apiCreateAvailability(data);
         return json;
     } catch (err) {
         console.error(err);

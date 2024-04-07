@@ -1,15 +1,11 @@
 import { jsPDF } from 'jspdf'
+import { apiFetchUser, apiFetchClasses, apiUpdateReport } from './APICalls/apiCalls'
 
 export async function getClasses() {
     try {
-        const res = await fetch(`/api/v1/exam/classes`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        const json = await apiFetchClasses();
 
-        return { success: true, data: await res.json() }
+        return { success: true, data: json }
     } catch (error) {
         return { success: false, data: null }
     }
@@ -129,52 +125,24 @@ export async function getMember(IAM) {
     let finalIAM = IAM.toLocaleLowerCase();
 
     try {
-        const res = await fetch(`/api/v1/user/fetch/${finalIAM}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        const data = await apiFetchUser(finalIAM);
 
-        const data = await res.json()
         const document = data._doc;
         if (!document) return { success: false, data: null }
-        if (res.status == 200) return { success: true, data: document }
-        return { success: false, data: null }
-    } catch (error) {
-        return { success: false, data: null }
-    }
-}
-
-export async function getAllReports() {
-    try {
-        const res = await fetch("/api/v1/report/fetch-all", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        const data = await res.json()
-        if (res.status == 200) return { success: true, data: data }
-        return { success: false, data: null }
+        return { success: true, data: document }
     } catch (error) {
         return { success: false, data: null }
     }
 }
 
 export async function updateReport(reportData) {
-    console.log(reportData.archived)
-    const res = await fetch(`/api/v1/report/update/${reportData.missionNumber}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(reportData),
-    });
-
-    const data = await res.json();
-    return { success: res.status == 200, data: data };
+    try {
+        const data = await apiUpdateReport(reportData);
+        return { success: true, data: data }
+    } catch (err) {
+        console.error(err);
+        return { success: false, data: null }
+    }
 }
 
 export function reportPDF(reportData) {

@@ -1,4 +1,5 @@
 import Shift from '../models/shift.model.js';
+import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 export const createShift = async (req, res, next) => {
   const { shifts } = req.body;
@@ -27,6 +28,7 @@ export const createShift = async (req, res, next) => {
     const createdShifts = await Shift.create({ shifts: shifts });
 
     res.status(201).json({ success: true, data: createdShifts });
+    sendReportsUpdated('shifts_updated')
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create shifts.', error: error.message });
   }
@@ -46,6 +48,7 @@ export const deleteShift = async (req, res, next) => {
     await Shift.findByIdAndDelete(id);
 
     res.status(200).json({ success: true, message: 'Shift deleted successfully.' });
+    sendReportsUpdated('shifts_updated')
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete shift.', error: error.message });
   }

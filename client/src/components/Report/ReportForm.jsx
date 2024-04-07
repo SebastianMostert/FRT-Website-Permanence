@@ -7,6 +7,7 @@ import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
 import MissionNumber from '../Inputs/MissionNumber';
 import { updateReport } from '../../utils';
+import { apiCreateReport, apiFetchReport } from '../../APICalls/apiCalls';
 
 const defaultValues = {
     firstRespondersValues: [
@@ -197,22 +198,11 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
         };
 
         if (isNewReport) {
-            // Send the data to the server
-            const res = await fetch(`/api/v1/report/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(reportData),
-            });
-
-            const data = await res.json();
-            console.log(data);
+            await apiCreateReport(reportData);
             setIsNewReport(false);
         } else {
             // Send the data to the server
-            const data = await updateReport(reportData);
-            console.log(data);
+            await updateReport(reportData);
         }
     };
 
@@ -224,16 +214,8 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
         } else {
             finalMissionNumber = missionNumber;
         }
-
-        const res = await fetch(`/api/v1/report/fetch/${finalMissionNumber}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await res.json();
-        console.log(data);
+        
+        const data = await apiFetchReport(finalMissionNumber);
         return data;
     }
 

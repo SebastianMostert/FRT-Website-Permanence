@@ -18,6 +18,7 @@ import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
 import Reports from './pages/Reports';
 import Report from './pages/Report';
+import { apiSignOut, apiValidate, useInitialDataFetch, useWebSocketMessages } from './APICalls/apiCalls';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -27,18 +28,23 @@ function TokenValidator() {
   // Function to validate token
   const validateToken = async () => {
     if (currentUser) {
-      const res = await fetch('/api/v1/auth/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await res.json();
+      const res = await apiValidate();
+
+      if (!res.success) {
+        await apiSignOut();
+        dispatch(signOut());
+
+        // Go to home page
+        window.location.href = '/';
+        return;
+      }
+
+      const data = res.json;
 
       if (!data.valid) {
         const handleSignOut = async () => {
           try {
-            await fetch('/api/v1/auth/signout');
+            await apiSignOut();
             dispatch(signOut());
 
             // Go to home page
@@ -61,6 +67,11 @@ function TokenValidator() {
 }
 
 function App() {
+  const { currentUser} = useSelector((state) => state.user);
+
+  useWebSocketMessages();
+  useInitialDataFetch(currentUser);
+
   if (isTinyMobile()) return <NoMobilePage />;
 
   return (

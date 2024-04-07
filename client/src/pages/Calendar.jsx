@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { getMember, isSmallMobile, verifyClass } from '../utils';
+import { getMember, isSmallMobile } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -16,6 +16,9 @@ import { useTranslation } from 'react-i18next';
 import AvailabilityModal from '../components/Calendar/AvailabilityModal';
 import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 import ShiftModal from '../components/Calendar/ShiftModal';
+import { apiCreateAvailability, apiDeleteAvailability, apiFetchAvailabilityByIAM, useFetchExam, useFetchShifts } from '../APICalls/apiCalls';
+import LoadingPage from './LoadingPage';
+import ExamModal from '../components/Modals/ExamModal';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -26,7 +29,6 @@ const SHIFT_TYPE = 'shift';
 export default function Calendar() {
     const { t } = useTranslation();
     const { currentUser } = useSelector((state) => state.user)
-    const toastIdLoading = useRef(null);
     const IAM = currentUser.IAM;
 
     const [calendarEvent, setCalendarEvent] = useState([]);
@@ -37,30 +39,34 @@ export default function Calendar() {
     const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
     const [showShiftModal, setShowShiftModal] = useState(false);
+    const [showExamModal, setShowExamModal] = useState(false);
+    const [selectedExam, setSelectedExam] = useState(null);
+
+    const { data: shifts, error: errorShift, isLoading: loadingShift } = useFetchShifts();
+    const { data: exams, error: errorExam, isLoading: loadingExam } = useFetchExam(IAM, currentUser.studentClass);
+
+
+    if (errorShift || errorExam) {
+        toast.error(`${t('calendar.loading.error')}`);
+    }
 
     useEffect(() => {
         async function fetchData() {
-            toastIdLoading.current = toast.info(`${t('calendar.loading')}`, { autoClose: false });
 
-            const calendarEvents = await getExams(currentUser);
-
-            if (!calendarEvents.success) {
-                toast.error(`${t('calendar.loading.error')}`);
-            }
+            const calendarEvents = await getExams(exams);
 
             const calendarAvailabilities = await getAvailabilities(IAM);
-            const calendarShifts = await getShifts();
+            const calendarShifts = await getShifts(shifts) || [];
 
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
             setCalendarShift(calendarShifts);
-
-            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('calendar.loading.success')}` });
         }
 
         fetchData();
-    }, [IAM, currentUser]);
+    }, [IAM, currentUser, exams, shifts, t, loadingShift, loadingExam]);
 
+    if (loadingShift || loadingExam) return <LoadingPage />
     if (!currentUser?.IAM) {
         return <NotAuthorized />
     }
@@ -103,7 +109,8 @@ export default function Calendar() {
         calendar.refetchEvents();
 
         if (isExam) {
-            toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
+            setSelectedExam(event);
+            setShowExamModal(true);
             return;
         } else if (isAvailability) {
             setSelectedAvailability(event);
@@ -156,6 +163,11 @@ export default function Calendar() {
                 handleClose={() => setShowShiftModal(false)}
                 event={selectedShift}
             />
+            <ExamModal
+                show={showExamModal}
+                handleClose={() => setShowExamModal(false)}
+                event={selectedExam}
+            />
         </div>
     );
 }
@@ -183,20 +195,10 @@ function convertExamTimeToDate(examDate, startTime, endTime) {
     return { startDate, endDate };
 }
 
-async function getExams(user) {
-    // Check class
-    const hasClass = await verifyClass(user.studentClass);
-
-    if (!hasClass.success) {
-        return { success: false, data: [] }
-    }
-
+async function getExams(examsData) {
     try {
         const calendarEvents = []
-        const examResponse = await fetch(`/api/v1/exam/user/${user.IAM}`, { method: "post" });
 
-        console.log(examResponse);
-        const examsData = await examResponse.json();
         const exams = examsData.exams;
 
         for (let i = 0; i < exams.length; i++) {
@@ -239,14 +241,8 @@ async function getExams(user) {
 async function getAvailabilities(IAM) {
     try {
         const availabilityEvents = [];
-        const res = await fetch(`/api/v1/availability/get/${IAM}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
 
-        const data = await res.json()
+        const data = await apiFetchAvailabilityByIAM(IAM)
 
         for (let i = 0; i < data.length; i++) {
             const availability = data[i];
@@ -278,20 +274,12 @@ async function getAvailabilities(IAM) {
     }
 }
 
-async function getShifts() {
+async function getShifts(shifts) {
     try {
         const shiftEvents = [];
-        const res = await fetch(`/api/v1/shift/fetch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
 
-        const data = (await res.json()).data
-
-        for (let i = 0; i < data.length; i++) {
-            const shift = data[i];
+        for (let i = 0; i < shifts.length; i++) {
+            const shift = shifts[i];
             const startTime = shift.shifts[0].startDate;
             const endTime = shift.shifts[0].endDate;
             const id = shift._id
@@ -324,15 +312,7 @@ async function getShifts() {
 
 async function createAvailability(start, end, user, t) {
     try {
-        const res = await fetch('/api/v1/availability/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: user.IAM, startTime: start, endTime: end }),
-        })
-
-        const data = await res.json()
+        const data = await apiCreateAvailability({ IAM: user.IAM, startTime: start, endTime: end });
 
         if (data?.success != true) {
             toast.error(`${t('calendar.availability.create.error')}`);
@@ -348,15 +328,7 @@ async function createAvailability(start, end, user, t) {
 
 async function deleteAvailability(id, IAM, t) {
     try {
-        const res = await fetch(`/api/v1/availability/delete/`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: IAM, id: id }),
-        })
-
-        const data = await res.json()
+        const data = await apiDeleteAvailability(IAM, id);
 
         if (data?.success != true) return { success: false, message: `${t('calendar.availability.delete.success')}` }
         return { success: true }
