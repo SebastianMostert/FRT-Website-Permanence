@@ -75,7 +75,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
 
         const valid = validateShift(chefsCount, equipiersCount, stagiairesCount);
 
-        console.log(valid);
         if (!valid.isValid) {
             alert(valid.message);
             return;
@@ -141,7 +140,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
     };
 
     const validateShift = (chefsCount, equipiersCount, stagiairesCount) => {
-        console.log(chefsCount, equipiersCount, stagiairesCount);
         if (chefsCount + equipiersCount + stagiairesCount < 2 || chefsCount + equipiersCount + stagiairesCount > 3) return { isValid: false, message: 'Each shift must have at least 2 and at most 3 positions.' };
         if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1) return { isValid: true, message: '' };
         if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0) return { isValid: true, message: '' };
@@ -350,9 +348,6 @@ const getAvailabilities = async (id) => {
 
 const createAvailability = async (data) => {
     const { IAM, startTime, endTime } = data;
-
-    console.log(IAM, startTime, endTime);
-    // Ensure start and endtime arent the same
 
     try {
         const res = await fetch('/api/v1/availability/create', {

@@ -50,7 +50,6 @@ const ShiftAvailability = ({ selectedTable }) => {
         return data;
     }
     const deleteShift = async (id) => {
-        console.log(id);
         // Implement the logic to delete the shift
         // You can make an API call to delete the shift
         const res = await fetch(`/api/v1/shift/delete/${id}`, {

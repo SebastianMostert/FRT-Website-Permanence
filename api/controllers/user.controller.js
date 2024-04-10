@@ -78,7 +78,7 @@ export const updateUser = async (req, res, next) => {
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(errorHandler(500, 'An error occurred while updating user.'));
   }
 };
@@ -92,7 +92,7 @@ export const deleteUser = async (req, res, next) => {
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json('User has been deleted...');
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(errorHandler(500, 'An error occurred while deleting user.'));
   }
 };
@@ -108,7 +108,7 @@ export const fetchUser = async (req, res, next) => {
     const { password, ...rest } = user[0];
     res.status(200).json(rest);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };

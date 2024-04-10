@@ -12,7 +12,6 @@ const ShiftModal = ({ show, handleClose, event }) => {
     const endDate = new Date(end).toLocaleString();
 
     const hasUsers = extendedProps && users && users.length > 0;
-    console.log(hasUsers)
 
     // Now get the users
     const userList = hasUsers ? (

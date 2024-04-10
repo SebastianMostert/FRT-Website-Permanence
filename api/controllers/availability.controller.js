@@ -12,7 +12,7 @@ export const createAvailability = async (req, res, next) => {
 
         res.status(201).json({ message: 'Availability created successfully', success: true, availability: newAvailability });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -25,7 +25,7 @@ export const getAvailabilities = async (req, res, next) => {
 
         res.status(200).json(availabilities);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -36,7 +36,7 @@ export const getAvailabilityByID = async (req, res, next) => {
         const availability = await Availability.findById(id);
         res.status(200).json(availability);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 }
@@ -47,7 +47,7 @@ export const getAllAvailabilities = async (req, res, next) => {
         const availabilities = await Availability.find();
         res.status(200).json(availabilities);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -68,7 +68,7 @@ export const deleteAvailability = async (req, res, next) => {
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };

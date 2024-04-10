@@ -159,7 +159,6 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     };
 
     const handleABCDEChange = (field, subField, value) => {
-        console.log(field, subField, value);
         setAbcdeData({
             ...abcdeSchema,
             [field]: {

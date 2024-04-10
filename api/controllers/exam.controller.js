@@ -60,7 +60,7 @@ export const getExamsByUser = async (req, res, next) => {
             throw errorHandler(404, 'No class found for this user!');
         }
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(error);
     }
 };
@@ -92,7 +92,7 @@ export const getClasses = async (req, res, next) => {
             ],
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(error);
     }
 };

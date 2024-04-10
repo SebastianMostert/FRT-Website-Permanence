@@ -85,8 +85,7 @@ const Reports = () => {
     }
     newReportData.archived = !reportData.archived;
 
-    const data = await updateReport(newReportData);
-    console.log(data);
+    await updateReport(newReportData);
     refreshReports(); // Trigger refresh after (un)archive
   };
 

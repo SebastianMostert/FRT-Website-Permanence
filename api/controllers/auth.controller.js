@@ -22,7 +22,7 @@ export const signup = async (req, res, next) => {
     await newUser.save();
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(error);
   }
 };
@@ -55,7 +55,7 @@ export const signin = async (req, res, next) => {
       .status(200)
       .json(rest);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(error);
   }
 };

@@ -45,7 +45,7 @@ export default function Profile() {
       setTrainingSAP2(currentUser.training?.includes('SAP 2'));
       fetchData();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }, []);
 
@@ -55,10 +55,9 @@ export default function Profile() {
 
   const handleClassChange = (selectedClass) => {
     try {
-      console.log(selectedClass);
       setFormData({ ...formData, studentClass: selectedClass });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -100,7 +99,7 @@ export default function Profile() {
         setFormData({ ...formData, [id]: value });
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   };
 

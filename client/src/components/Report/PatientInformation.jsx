@@ -10,8 +10,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
 
     const [ageInputEnabled, setAgeInputEnabled] = useState(!disabled);
 
-    console.log('Patient Information: ', patientInfo);
-
     const { feedback: iamFeedback, showFeedback: iamShowFeedback, minLength: iamMinLength } = isValidIamInput(patientInfo.iam, t);
     const { feedback: matriculeFeedback, showFeedback: matriculeShowFeedback, minLength: matriculeMinLength } = isValidMatriculeInput(patientInfo.matricule, t);
 

@@ -83,7 +83,6 @@ export default function Calendar() {
         const handleResize = () => {
             // Set initialView based on screen size
             if (window.innerWidth < 768) {
-                console.log('mobile')
                 setMobileView(true);
             } else {
                 setMobileView(false);
@@ -360,7 +359,6 @@ async function getExams(user) {
         const calendarEvents = []
         const examResponse = await fetch(`/api/v1/exam/user/${user.IAM}`, { method: "post" });
 
-        console.log(examResponse);
         const examsData = await examResponse.json();
         const exams = examsData.exams;
 
@@ -439,7 +437,7 @@ async function getAvailabilities(IAM) {
 
         return availabilityEvents;
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 
@@ -483,7 +481,7 @@ async function getShifts() {
         }
         return shiftEvents;
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 

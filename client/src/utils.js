@@ -156,7 +156,6 @@ export async function getAllReports() {
 }
 
 export async function updateReport(reportData) {
-    console.log(reportData.archived)
     const res = await fetch(`/api/v1/report/update/${reportData.missionNumber}`, {
         method: 'POST',
         headers: {

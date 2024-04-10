@@ -4,11 +4,10 @@ import luJson from './lu/index';
 import deJson from './de/index';
 
 const translations = {
-    ...enJson,
-    ...frJson,
-    ...luJson,
-    ...deJson
+    en: { ...enJson },
+    fr: { ...frJson },
+    de: { ...deJson },
+    lu: { ...luJson },
 };
 
-console.log(translations)
 export default translations

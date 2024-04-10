@@ -18,8 +18,6 @@ const MultiSelectDropdown = ({ selectedValues, onChange, options, id, label }) =
         _value = [];
     }
 
-    console.log(_value)
-
     return (
         <>
             <InputLabel text={label} />
