@@ -1,0 +1,16 @@
+{
+    "calendar.loading": "Loading calendar events...",
+    "calendar.loading.error": "Failed to load calendar events! Verify you've provided the correct class in the profile page!",
+    "calendar.loading.success": "Calendar events loaded successfully!",
+    "calendar.unavailable": "You are not available at this time!",
+    "calendar.availability.delete.success": "Availability deleted successfully!",
+    "calendar.availability.delete.error": "Failed to delete availability!",
+    "calendar.availability.create.error": "An error occurred while creating your availability!",
+    "calendar.availability.create.success": "You have been marked as available from {{startTime}} to {{endTime}}",
+    "calendar.button.today": "Today",
+    "calendar.button.year": "Year",
+    "calendar.button.month": "Month",
+    "calendar.button.week": "Week",
+    "calendar.button.day": "Day",
+    "calendar.button.create_availability": "Create Availability"
+}

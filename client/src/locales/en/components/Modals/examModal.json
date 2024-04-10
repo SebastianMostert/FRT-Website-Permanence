@@ -1,0 +1,17 @@
+{
+    "exam_modal.title": "Exam Information Modal",
+    "exam_modal.time_span": "Time Span:",
+    "exam_modal.date": "Date:",
+    "exam_modal.teacher_iam": "Teacher IAM:",
+    "exam_modal.exam_type": "Exam Type:",
+    "exam_modal.subject": "Subject:",
+    "exam_modal.classes": "Class(es):",
+    "exam_modal.rooms": "Room(s):",
+    "exam_modal.name": "Name:",
+    "exam_modal.exam_date": "Exam Date:",
+    "exam_modal.description": "Description:",
+    "exam_modal.remove_exam.label": "Remove Exam",
+    "exam_modal.remove_exam.label.just_this": "Just this exam",
+    "exam_modal.remove_exam.label.subject": "All exams of this subject",
+    "exam_modal.remove_exam.label.teacher": "All exams of this teacher"
+}

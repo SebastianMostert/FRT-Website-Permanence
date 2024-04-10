@@ -1,0 +1,13 @@
+{
+    "airway.diagnostic.state.label": "Airway: Free/Obstructed",
+    "airway.diagnostic.state.select": "Select",
+    "airway.diagnostic.state.free": "Free",
+    "airway.diagnostic.state.obstructed": "Obstructed",
+    "airway.diagnostic.cervical_spine_trauma": "Cervical spine trauma",
+
+    "airway.measures.esmarch": "Esmarch",
+    "airway.measures.guedel": "Guedel",
+    "airway.measures.wendl": "Wendl",
+    "airway.measures.suction_manual": "Suction/manual clearing",
+    "airway.measures.stifneck": "Stifneck / cervical spine immobilization"
+}

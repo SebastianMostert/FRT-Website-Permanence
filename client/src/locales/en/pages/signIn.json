@@ -1,0 +1,14 @@
+{
+    "sign_in.loading": "Signing in...",
+    "sign_in.failed": "Failed to sign in: {{reason}}",
+    "sign_in.success": "Successfully signed in",
+    "sign_in.title": "Sign In",
+    "sign_in.email": "Email",
+    "sign_in.password": "Password",
+    "sign_in.forgot.password": "Forgot Password?",
+    "sign_in.noaccount": "Don't have an account?",
+    "sign_in.signup": "Sign up",
+    "sign_in.error": "Something went wrong!",
+    "sign_in.no_account": "Don't have an account?",
+    "sign_in": "Sign In"
+}

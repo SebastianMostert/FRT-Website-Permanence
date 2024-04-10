@@ -1,0 +1,5 @@
+{
+    "critical_bleeding.measure.tourniquet": "Tourniquet",
+    "critical_bleeding.measure.tourniquet.time": "Applied at",
+    "critical_bleeding.measure.manual_compression": "Manual compression/hemostasis"
+}

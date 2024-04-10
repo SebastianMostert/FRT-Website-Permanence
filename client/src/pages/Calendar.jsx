@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import moment from 'moment';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { getMember, isSmallMobile, verifyClass } from '../utils';
+import { createAvailability, formatDate, getMember, validateDate, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -16,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import AvailabilityModal from '../components/Calendar/AvailabilityModal';
 import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 import ShiftModal from '../components/Calendar/ShiftModal';
+import ExamModal from '../components/Modals/ExamModal';
+import CreateAvailabilityModal from '../components/Modals/CreateAvailabilityModal';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -27,6 +28,7 @@ export default function Calendar() {
     const { t } = useTranslation();
     const { currentUser } = useSelector((state) => state.user)
     const toastIdLoading = useRef(null);
+    const toastIdRefreshing = useRef(null);
     const IAM = currentUser.IAM;
 
     const [calendarEvent, setCalendarEvent] = useState([]);
@@ -38,14 +40,29 @@ export default function Calendar() {
     const [selectedShift, setSelectedShift] = useState(null);
     const [showShiftModal, setShowShiftModal] = useState(false);
 
+    const [showExamModal, setShowExamModal] = useState(false);
+    const [selectedExam, setSelectedExam] = useState(null);
+
+    const [showCreateAvailabilityModal, setShowCreateAvailabilityModal] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
+
+    const [mobileView, setMobileView] = useState(window.innerWidth < 768);
+
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
+    const [refreshTriggerAvailability, setRefreshTriggerAvailability] = useState(false);
+    const [refreshTriggerExam, setRefreshTriggerExam] = useState(false);
+    const [refreshTriggerShift, setRefreshTriggerShift] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
         async function fetchData() {
-            toastIdLoading.current = toast.info(`${t('calendar.loading')}`, { autoClose: false });
+            toastIdLoading.current = toast.info(`${t('toast.calendar.loading')}`, { autoClose: false });
+            setIsLoading(true);
 
             const calendarEvents = await getExams(currentUser);
 
             if (!calendarEvents.success) {
-                toast.error(`${t('calendar.loading.error')}`);
+                toast.error(`${t('toast.calendar.loading.error')}`);
             }
 
             const calendarAvailabilities = await getAvailabilities(IAM);
@@ -55,41 +72,135 @@ export default function Calendar() {
             setCalendarAvailability(calendarAvailabilities);
             setCalendarShift(calendarShifts);
 
-            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('calendar.loading.success')}` });
+            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('toast.calendar.loading.success')}` });
+            setIsLoading(false);
         }
 
         fetchData();
-    }, [IAM, currentUser]);
+    }, [IAM, currentUser, t]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            // Set initialView based on screen size
+            if (window.innerWidth < 768) {
+                console.log('mobile')
+                setMobileView(true);
+            } else {
+                setMobileView(false);
+            }
+        };
+
+        // Call handleResize initially
+        handleResize();
+
+        // Add event listener for window resize
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!refreshTrigger && !refreshTriggerAvailability && !refreshTriggerExam && !refreshTriggerShift) return;
+        async function fetchData() {
+            setIsLoading(true);
+
+            // Check what needs refreshing
+            if (refreshTriggerExam) {
+                toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
+                const calendarEvents = await getExams(currentUser);
+
+                if (!calendarEvents.success) {
+                    toast.error(`${t('toast.calendar.refreshing.error')}`);
+                }
+
+                setCalendarEvent(calendarEvents.data);
+            }
+
+            if (refreshTriggerAvailability) {
+                toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.availabilities')}`, { autoClose: false });
+                const calendarAvailabilities = await getAvailabilities(IAM);
+                setCalendarAvailability(calendarAvailabilities);
+            }
+
+            if (refreshTriggerShift) {
+                toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.shifts')}`, { autoClose: false });
+                const calendarShifts = await getShifts();
+                setCalendarShift(calendarShifts);
+            }
+
+            toast.update(toastIdRefreshing.current, { type: 'success', autoClose: 5000, render: `${t('toast.calendar.refreshing.success')}` });
+            setIsLoading(false);
+        }
+
+        fetchData();
+        setRefreshTrigger(false);
+        setRefreshTriggerAvailability(false);
+        setRefreshTriggerExam(false);
+        setRefreshTriggerShift(false);
+    }, [IAM, currentUser, refreshTrigger, refreshTriggerAvailability, refreshTriggerExam, refreshTriggerShift, t]);
 
     if (!currentUser?.IAM) {
         return <NotAuthorized />
     }
 
-    if (isSmallMobile()) return <NoMobilePage />
+    const refreshDataAvailability = () => {
+        setRefreshTriggerAvailability((prev) => !prev);
+    };
+
+    const refreshDataExam = () => {
+        setRefreshTriggerExam((prev) => !prev);
+    };
+
+    //const refreshDataShift = () => {
+    //    setRefreshTriggerShift((prev) => !prev);
+    //};
 
     const handleSelect = async (e) => {
         const calendar = e.view.calendar;
         calendar.unselect();
+
+        if (isLoading) return;
+
         const start = new Date(e.start);
         const end = new Date(e.end);
 
-        const createdAvailability = await createAvailability(start, end, currentUser, t);
+        const date = `${start.getMonth() + 1}-${start.getDate()}-${start.getFullYear()}`;
+        const startTime = start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const endTime = end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-        if (!createdAvailability.success) return;
+        const { isValid, event } = validateDate(date, startTime, endTime);
 
-        const availability = createdAvailability.data;
-        if (!availability) return;
+        if (isValid) {
+            const createdAvailability = await createAvailability(start, end, currentUser, t);
 
-        const newAvailabilityEvent = {
-            title: 'Available',
-            start: availability.startTime,
-            end: availability.endTime,
-            backgroundColor: '#0000FF',
-            id: availability._id,
-            extendedProps: { type: AVAILABILITY_TYPE, ...availability, user: currentUser },
-        };
+            if (!createdAvailability.success) return;
 
-        setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
+            const availability = createdAvailability.data;
+            if (!availability) return;
+
+            const newAvailabilityEvent = {
+                title: 'Available',
+                start: availability.startTime,
+                end: availability.endTime,
+                backgroundColor: '#0000FF',
+                id: availability._id,
+                extendedProps: { type: AVAILABILITY_TYPE, ...availability, user: currentUser },
+            };
+
+            setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
+            refreshDataAvailability();
+        } else {
+            // Display an error message or handle invalid date/time range
+            const { extendedProps } = event;
+            if (!extendedProps) return;
+            const { type } = extendedProps;
+            if (!type) return;
+
+            toast.error(`${t(`toast.availability.overlap.${type}`)}`);
+        }
     };
 
     const handleEventClick = async (e) => {
@@ -103,11 +214,13 @@ export default function Calendar() {
         calendar.refetchEvents();
 
         if (isExam) {
-            toast.error(`${t('calendar.unavailable')}`, { theme: 'colored' });
+            setSelectedExam(event);
+            setShowExamModal(true);
             return;
         } else if (isAvailability) {
             setSelectedAvailability(event);
             setShowAvailabilityModal(true);
+            return;
         } else if (isShift) {
             setSelectedShift(event);
             setShowShiftModal(true);
@@ -122,12 +235,13 @@ export default function Calendar() {
 
             if (result.success) {
                 setCalendarAvailability(calendarAvailability.filter((event) => event.id !== id));
-                toast.success(`${t('calendar.availability.delete.success')}`);
+                toast.success(`${t('toast.calendar.availability.delete.success')}`);
+                refreshDataAvailability();
             } else {
-                toast.error(`${t('calendar.availability.delete.error')}`);
+                toast.error(`${t('toast.calendar.availability.delete.error')}`);
             }
         } catch (err) {
-            toast.error(`${t('calendar.availability.delete.error')}`);
+            toast.error(`${t('toast.calendar.availability.delete.error')}`);
         }
     };
 
@@ -136,28 +250,79 @@ export default function Calendar() {
         localStorage.setItem(VIEW_TYPE_KEY, viewType);
     };
 
-    return (
-        <div className="calendar-container">
-            <CalendarComponent
-                events={[...calendarEvent, ...calendarAvailability, ...calendarShift]}
-                handleEventClick={handleEventClick}
-                handleSelect={handleSelect}
-                handleViewDidMount={handleViewDidMount}
-                selectable={true}
-            />
-            <AvailabilityModal
-                show={showAvailabilityModal}
-                handleClose={() => setShowAvailabilityModal(false)}
-                event={selectedAvailability}
-                handleDelete={handleAvailabilityDelete}
-            />
-            <ShiftModal
-                show={showShiftModal}
-                handleClose={() => setShowShiftModal(false)}
-                event={selectedShift}
-            />
-        </div>
-    );
+    const handleDateClick = (dateClicked) => {
+        if (!dateClicked.allDay) return false;
+        const date = new Date(dateClicked.date);
+
+        const dateStr = formatDate(date);
+        const { isValid, event } = validateDate(date);
+
+
+        if (!isValid) {
+            const type = event.extendedProps.type;
+            toast.error(`${t(`toast.availability.overlap.${type}`)}`);
+        } else {
+            setSelectedDate(dateStr);
+            setShowCreateAvailabilityModal(true);
+        }
+
+    };
+
+    const calendarAndModal = (
+        <>
+            {
+                mobileView ? <div id="oopss">
+                    <NoMobilePage />
+                </div> : <div className="calendar-container">
+                    <CalendarComponent
+                        events={[...calendarEvent, ...calendarAvailability, ...calendarShift]}
+                        handleEventClick={handleEventClick}
+                        handleSelect={handleSelect}
+                        handleViewDidMount={handleViewDidMount}
+                        selectable={true}
+                        customButtons={{
+                            createAvailabilityButton: {
+                                text: `${t('calendar.button.create_availability')}`,
+
+                                click: () => {
+                                    setShowCreateAvailabilityModal(true);
+                                }
+                            }
+                        }}
+                        loading={isLoading}
+                        handleDateClick={handleDateClick}
+                    />
+                    <AvailabilityModal
+                        show={showAvailabilityModal}
+                        handleClose={() => setShowAvailabilityModal(false)}
+                        event={selectedAvailability}
+                        handleDelete={handleAvailabilityDelete}
+                    />
+                    <ShiftModal
+                        show={showShiftModal}
+                        handleClose={() => setShowShiftModal(false)}
+                        event={selectedShift}
+                    />
+                    <ExamModal
+                        event={selectedExam}
+                        handleClose={() => setShowExamModal(false)}
+                        show={showExamModal}
+                        refreshData={refreshDataExam}
+                    />
+                    <CreateAvailabilityModal
+                        show={showCreateAvailabilityModal}
+                        handleClose={() => setShowCreateAvailabilityModal(false)}
+                        events={calendarEvent}
+                        currentUser={currentUser}
+                        refreshData={() => refreshDataAvailability()}
+                        selectedDate={selectedDate}
+                    />
+                </div>
+            }
+        </>
+    )
+
+    return calendarAndModal;
 }
 
 function convertExamTimeToDate(examDate, startTime, endTime) {
@@ -322,30 +487,6 @@ async function getShifts() {
     }
 }
 
-async function createAvailability(start, end, user, t) {
-    try {
-        const res = await fetch('/api/v1/availability/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: user.IAM, startTime: start, endTime: end }),
-        })
-
-        const data = await res.json()
-
-        if (data?.success != true) {
-            toast.error(`${t('calendar.availability.create.error')}`);
-            return { success: false, data: null }
-        }
-        toast.success(`${t('calendar.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
-        return { success: true, data: data.availability }
-    } catch (error) {
-        toast.error(`${t('calendar.availability.create.error')}`);
-        return { success: false, data: null }
-    }
-}
-
 async function deleteAvailability(id, IAM, t) {
     try {
         const res = await fetch(`/api/v1/availability/delete/`, {
@@ -358,7 +499,7 @@ async function deleteAvailability(id, IAM, t) {
 
         const data = await res.json()
 
-        if (data?.success != true) return { success: false, message: `${t('calendar.availability.delete.success')}` }
+        if (data?.success != true) return { success: false, message: `${t('toast.calendar.availability.delete.success')}` }
         return { success: true }
     } catch (err) {
         return { success: false, message: err.message }

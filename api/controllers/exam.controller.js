@@ -79,7 +79,17 @@ export const getClasses = async (req, res, next) => {
 
         res.json({
             message: 'All available classes',
-            classes,
+            classes: [
+                ...classes,
+                {
+                    id: 9999,
+                    name: 'teacher',
+                    longName: 'Teacher',
+                    active: true,
+                    did: 9999,
+                    teacher1: 9999
+                }
+            ],
         });
     } catch (error) {
         console.log(error);

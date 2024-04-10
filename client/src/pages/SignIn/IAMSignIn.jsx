@@ -33,7 +33,7 @@ export default function IAMSignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      toastId.current = toast.info(`${t('signin.loading')}`, {
+      toastId.current = toast.info(`${t('toast.sign_in.loading')}`, {
         autoClose: false,
       });
       dispatch(signInStart()); const res = await fetch('/api/v1/auth/signin', {
@@ -48,7 +48,7 @@ export default function IAMSignIn() {
         toast.update(toastId.current, {
           type: 'error',
           autoClose: 5000,
-          render: `${t('signin.failed', { reason: data.message })}`,
+          render: `${t('toast.sign_in.failed', { reason: data.message })}`,
         });
         dispatch(signInFailure(data));
         return;
@@ -56,7 +56,7 @@ export default function IAMSignIn() {
       toast.update(toastId.current, {
         type: 'success',
         autoClose: 5000,
-        render: `${t('signin.success')}`,
+        render: `${t('toast.sign_in.success')}`,
       });
       dispatch(signInSuccess(data));
       navigate('/');
@@ -64,7 +64,7 @@ export default function IAMSignIn() {
       toast.update(toastId.current, {
         type: 'error',
         autoClose: 5000,
-        render: `${t('signin.failed', { reason: error.message })}`,
+        render: `${t('toast.sign_in.failed', { reason: error.message })}`,
       });
       dispatch(signInFailure(error));
     }
@@ -73,7 +73,7 @@ export default function IAMSignIn() {
   return (
     <>
       <div className='p-3 max-w-lg mx-auto'>
-        <h1 className='text-3xl text-center font-semibold my-7'>{t('signin.title')}</h1>
+        <h1 className='text-3xl text-center font-semibold my-7'>{t('sign_in.title')}</h1>
         <Form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           <Form.Group controlId='IAM'>
             <Form.Control
@@ -87,7 +87,7 @@ export default function IAMSignIn() {
             <InputGroup className='mb-3'>
               <Form.Control
                 type={showPassword ? 'text' : 'password'}
-                placeholder={t('signin.password')}
+                placeholder={t('sign_in.password')}
                 className={`bg-slate-100 p-3 rounded-lg ${showPassword ? 'text-black' : ''}`}
                 onChange={handleChange}
               />
@@ -110,17 +110,17 @@ export default function IAMSignIn() {
             disabled={loading}
             className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
           >
-            {loading ? `${t('submit.btn.loading')}` : `${t('signin.title')}`}
+            {loading ? `${t('button.loading')}` : `${t('sign_in')}`}
           </Button>
         </Form>
         <div className='flex gap-2 mt-5'>
-          <p>{t('signin.noaccount')}</p>
+          <p>{t('sign_in.no_account')}</p>
           <Link to='/sign-up'>
-            <span className='text-blue-500'>{t('signin.signup')}</span>
+            <span className='text-blue-500'>{t('sign_up')}</span>
           </Link>
         </div>
         <p className='text-red-700 mt-5'>
-          {error ? error.message || `${t('signin.error')}` : ''}
+          {error ? error.message || `${t('sign_in.error')}` : ''}
         </p>
       </div>
     </>

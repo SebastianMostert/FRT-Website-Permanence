@@ -1,0 +1,11 @@
+{
+    "incidents.mission_date": "Mission Date",
+    "incidents.incident_number": "Incident",
+    "incidents.responders": "First Responders",
+    "incidents.student_class": "Class:",
+    "incidents.button.edit": "Edit",
+    "incidents.button.view": "View",
+    "incidents.button.export": "Export",
+    "incidents.button.archive": "Archive",
+    "incidents.button.unarchive": "Unarchive"
+}

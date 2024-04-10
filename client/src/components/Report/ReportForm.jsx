@@ -7,12 +7,14 @@ import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
 import MissionNumber from '../Inputs/MissionNumber';
 import { updateReport } from '../../utils';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 
 const defaultValues = {
     firstRespondersValues: [
         { position: 'Chef Agres', iam: '' },
-        { position: 'Equipier Bin', iam: '' },
-        { position: 'Stagiaire Bin', iam: '' },
+        { position: 'Equipier Bin.', iam: '' },
+        { position: 'Stagiaire Bin.', iam: '' },
     ],
     patientInfoValues: {
         age: '',
@@ -43,7 +45,8 @@ const defaultValues = {
             breathingSpeed: '',
             auskultationSeitengleich: false,
             thorax: '',
-            sauerStoffgabe: '',
+            sauerStoffgabe: false,
+            sauerstoffgabeLiters: '',
             brille: false,
             maske: false,
             beatmungsbeutel: false,
@@ -132,7 +135,7 @@ const defaultValues = {
     }
 }
 
-const ReportForm = ({ _missionNumber, isEditable }) => {
+const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     const [missionNumber, setMissionNumber] = useState(_missionNumber);
     const [firstResponders, setFirstResponders] = useState(defaultValues.firstRespondersValues);
     const [patientInfo, setPatientInfo] = useState(defaultValues.patientInfoValues);
@@ -141,9 +144,12 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
     const [dataLoaded, setDataLoaded] = useState(false);
     const [isNewReport, setIsNewReport] = useState(false);
 
-    const handleResponderChange = (index, event) => {
-        const updatedResponders = [...firstResponders];
-        updatedResponders[index].iam = event.target.value;
+    const [validated, setValidated] = useState(false);
+
+    const { t } = useTranslation();
+
+    const handleResponderChange = (updatedResponders) => {
+
         setFirstResponders(updatedResponders);
     };
 
@@ -178,42 +184,66 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
     };
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
-        // Gather all the data
-        let finalMissionNumber;
-        // If the mission number is an array join it
-        if (Array.isArray(missionNumber)) {
-            finalMissionNumber = missionNumber.join('');
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            toast.error(`${t('toast.report.create.error.invalid')}`);
         } else {
-            finalMissionNumber = missionNumber;
+            event.preventDefault();
+
+            // Gather all the data
+            let finalMissionNumber;
+            // If the mission number is an array join it
+            if (Array.isArray(missionNumber)) {
+                finalMissionNumber = missionNumber.join('');
+            } else {
+                finalMissionNumber = missionNumber;
+            }
+
+            const reportData = {
+                missionNumber: finalMissionNumber,
+                firstResponders,
+                patientInfo,
+                abcdeSchema,
+                samplerSchema,
+            };
+
+            if (isNewReport) {
+                try {
+                    // Send the data to the server
+                    const res = await fetch(`/api/v1/report/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(reportData),
+                    });
+
+                    const success = res.status < 300;
+
+                    if (!success) toast.error(`${t('toast.report.create.error')}`);
+                    else {
+                        toast.success(`${t('toast.report.create.success')}`);
+                        setIsNewReport(false);
+                    }
+
+                } catch (err) {
+                    toast.error(`${t('toast.report.create.error')}`);
+                    console.error(err);
+                }
+
+            } else {
+                // Send the data to the server
+                const { success } = await updateReport(reportData);
+
+                if (!success) toast.error(`${t('toast.report.update.error')}`);
+                else toast.success(`${t('toast.report.update.success')}`);
+            }
         }
 
-        const reportData = {
-            missionNumber: finalMissionNumber,
-            firstResponders,
-            patientInfo,
-            abcdeSchema,
-            samplerSchema,
-        };
-
-        if (isNewReport) {
-            // Send the data to the server
-            const res = await fetch(`/api/v1/report/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(reportData),
-            });
-
-            const data = await res.json();
-            console.log(data);
-            setIsNewReport(false);
-        } else {
-            // Send the data to the server
-            const data = await updateReport(reportData);
-            console.log(data);
-        }
+        setValidated(true);
     };
 
     const getReportData = async (missionNumber) => {
@@ -233,7 +263,6 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
         });
 
         const data = await res.json();
-        console.log(data);
         return data;
     }
 
@@ -244,6 +273,7 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
                 if (!data) {
                     setIsNewReport(true);
                 } else {
+                    if (data?.archived) setIsEditable(false);
                     setIsNewReport(false);
                 }
 
@@ -254,21 +284,21 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
                 setDataLoaded(true);
             });
         }
-    }, [missionNumber]);
+    }, [missionNumber, setIsEditable]);
 
     if (!dataLoaded) {
         return (
             <Container>
-                <h2 className="mt-4 mb-3">First Responder Report</h2>
+                <h2 className="mt-4 mb-3">{t('report.title')}</h2>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Mission Number</Form.Label>
+                        <Form.Label>{t('report.mission_number')}</Form.Label>
                         <Placeholder as={Form.Control} animation='wave' bg='secondary' />
                     </Form.Group>
 
                     <Accordion defaultActiveKey="0">
                         <Accordion.Item eventKey="0">
-                            <Accordion.Header>First Responders Information</Accordion.Header>
+                            <Accordion.Header>{t('report.first_responders.title')}</Accordion.Header>
                             <Accordion.Body>
                                 <Placeholder as={Form.Control} animation='wave' bg='secondary' />
                             </Accordion.Body>
@@ -277,7 +307,7 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
 
                     <Accordion defaultActiveKey="1">
                         <Accordion.Item eventKey="1">
-                            <Accordion.Header>Patient Information</Accordion.Header>
+                            <Accordion.Header>{t('report.patient.title')}</Accordion.Header>
                             <Accordion.Body>
                                 <Placeholder as={Form.Control} animation='wave' bg='secondary' />
                             </Accordion.Body>
@@ -286,7 +316,7 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
 
                     <Accordion defaultActiveKey="1">
                         <Accordion.Item eventKey="1">
-                            <Accordion.Header>(c) ABCDE Schema</Accordion.Header>
+                            <Accordion.Header>{t('report.abcde.title')}</Accordion.Header>
                             <Accordion.Body>
                                 <Placeholder as={Form.Control} animation='wave' bg='secondary' />
                             </Accordion.Body>
@@ -295,7 +325,7 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
 
                     <Accordion defaultActiveKey="1">
                         <Accordion.Item eventKey="1">
-                            <Accordion.Header>SAMPLER Schema</Accordion.Header>
+                            <Accordion.Header>{t('report.sampler.title')}</Accordion.Header>
                             <Accordion.Body>
                                 <Placeholder as={Form.Control} animation='wave' bg='secondary' />
                             </Accordion.Body>
@@ -303,83 +333,90 @@ const ReportForm = ({ _missionNumber, isEditable }) => {
                     </Accordion>
 
                     <Button variant="secondary" type="submit">
-                        Submit
+                        {t('button.submit')}
                     </Button>
                 </Form>
             </Container>
         );
     }
 
+    const reportFormSubcomponents = {
+        firstResponders: {
+            body: (
+                <FirstResponders
+                    isEditable={isEditable}
+                    firstResponders={firstResponders}
+                    handleResponderChange={handleResponderChange}
+                />
+            ),
+            header: t('report.first_responders.title'),
+        },
+        patientInfo: {
+            body: (
+                <PatientInformation
+                    isEditable={isEditable}
+                    patientInfo={patientInfo}
+                    handlePatientChange={handlePatientChange}
+                />
+            ),
+            header: t('report.patient.title'),
+        },
+        abcdeSchema: {
+            body: (
+                <ABCDESchema
+                    isEditable={isEditable}
+                    abcdeData={abcdeSchema}
+                    handleABCDEChange={handleABCDEChange}
+                />
+            ),
+            header: t('report.abcde.title'),
+        },
+        samplerSchema: {
+            body: (
+                <SamplerSchema
+                    isEditable={isEditable}
+                    samplerData={samplerSchema}
+                    handleSamplerChange={handleSamplerChange}
+                />
+            ),
+            header: t('report.sampler.title'),
+        },
+    };
+
+    const CustomAccordion = ({ body, header }) => {
+        return (
+            <Accordion defaultActiveKey="0">
+                <Accordion.Item eventKey="0">
+                    <Accordion.Header>{header}</Accordion.Header>
+                    <Accordion.Body>
+                        {body}
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+        );
+    }
+
     return (
         <Container>
-            <h2 className="mt-4 mb-3">First Responder Report</h2>
-            <Form onSubmit={handleSubmit}>
+            <h2 className="mt-4 mb-3">{t('report.title')}</h2>
+            <Form onSubmit={handleSubmit} noValidate validated={validated}>
                 <Form.Group className="mb-3">
-                    <Form.Label>Mission Number</Form.Label>
+                    <Form.Label>{t('report.mission_number')}</Form.Label>
                     <MissionNumber
-                        isEditable={isEditable}
                         missionNumber={missionNumber}
                         handleMissionNumberChange={handleMissionNumberChange}
                     />
                 </Form.Group>
 
-                <Accordion defaultActiveKey="0">
-                    <Accordion.Item eventKey="0">
-                        <Accordion.Header>First Responders Information</Accordion.Header>
-                        <Accordion.Body>
-                            <FirstResponders
-                                isEditable={isEditable}
-                                firstResponders={firstResponders}
-                                handleResponderChange={handleResponderChange}
-                            />
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
+                {Object.keys(reportFormSubcomponents).map((key) => {
+                    return CustomAccordion(reportFormSubcomponents[key]);
+                })}
 
-                <Accordion defaultActiveKey="1">
-                    <Accordion.Item eventKey="1">
-                        <Accordion.Header>Patient Information</Accordion.Header>
-                        <Accordion.Body>
-                            <PatientInformation
-                                isEditable={isEditable}
-                                patientInfo={patientInfo}
-                                handlePatientChange={handlePatientChange}
-                            />
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-
-                <Accordion defaultActiveKey="1">
-                    <Accordion.Item eventKey="1">
-                        <Accordion.Header>(c) ABCDE Schema</Accordion.Header>
-                        <Accordion.Body>
-                            <ABCDESchema
-                                isEditable={isEditable}
-                                abcdeData={abcdeSchema}
-                                handleABCDEChange={handleABCDEChange}
-                            />
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-
-                <Accordion defaultActiveKey="1">
-                    <Accordion.Item eventKey="1">
-                        <Accordion.Header>SAMPLER Schema</Accordion.Header>
-                        <Accordion.Body>
-                            <SamplerSchema
-                                isEditable={isEditable}
-                                samplerData={samplerSchema}
-                                handleSamplerChange={handleSamplerChange}
-                            />
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-
-                <Button variant="primary" type="submit">
-                    Submit
+                <Button variant="success" type="submit" className='w-full mt-2 mb-5' disabled={!isEditable} >
+                    {t('button.submit')}
                 </Button>
             </Form>
-        </Container>
+        </Container >
     );
 };
 

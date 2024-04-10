@@ -1,8 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { Image, Container, Row, Col, Button, Form } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 const BodyDiagram = ({ value, onChange, isEditable }) => {
+    const { t } = useTranslation();
     const [letters, setLetters] = useState(value?.letters || []);
     const [clickedPosition, setClickedPosition] = useState({ x: 0, y: 0 });
     const [selectedOption, setSelectedOption] = useState('');
@@ -47,11 +49,11 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
     };
 
     const options = [
-        { value: 'T', label: 'Trauma' },
-        { value: 'F', label: 'Fracture (suspected)' },
-        { value: 'I', label: 'Internal pain' },
-        { value: 'B', label: 'Bleeding' },
-        { value: 'V', label: 'Burn/Corrosion' },
+        { value: 'T', label: `(T) ${t('abcde.body_diagram.select_injury.trauma')}` },
+        { value: 'F', label: `(F) ${t('abcde.body_diagram.select_injury.suspected_fracture')}` },
+        { value: 'I', label: `(I) ${t('abcde.body_diagram.select_injury.internal_pain')}` },
+        { value: 'B', label: `(B) ${t('abcde.body_diagram.select_injury.bleeding')}` },
+        { value: 'V', label: `(V) ${t('abcde.body_diagram.select_injury.burn_corrosion')}` },
     ];
 
     return (
@@ -63,13 +65,12 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
                             src="https://i.imgur.com/Y6opjHy.png"
                             alt="Clickable Image"
                             onClick={handleClick}
-                            style={{ cursor: 'crosshair' }}
+                            style={{ cursor: disabled ? 'not-allowed' : 'crosshair' }}
                             fluid
                         />
                         {(letters || []).map((item) => (
                             <Button
                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 key={item.id}
                                 variant="danger"
                                 style={{
@@ -84,6 +85,7 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
                                     textAlign: 'center',
                                     lineHeight: '20px',
                                     fontSize: '12px', // Adjust font size
+                                    cursor: disabled ? 'not-allowed' : 'pointer'
                                 }}
                                 onClick={() => handleDeleteLetter(item.id)}
                             >
@@ -97,17 +99,17 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
                 <Col>
                     <Form>
                         <Form.Group controlId="formSelect">
-                            <Form.Label>Select an option:</Form.Label>
+                            <Form.Label>{t('abcde.body_diagram.select_injury.label')}</Form.Label>
                             <Form.Control
                                 disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 as="select"
                                 value={selectedOption}
                                 onChange={(e) => {
                                     setSelectedOption(e.target.value);
                                 }}
                             >
-                                <option value="">Select</option>
+                                <option value="">{t('abcde.body_diagram.select_injury.select')}</option>
                                 {options.map((option) => (
                                     <option key={option.value} value={option.value}>
                                         {option.label}
@@ -116,15 +118,15 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
                             </Form.Control>
                         </Form.Group>
                         <Button disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }} variant="primary" onClick={handleAddLetter}>
-                            Add Letter
+                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }} variant="primary" onClick={handleAddLetter}>
+                            {t('abcde.body_diagram.add_injury')}
                         </Button>
                     </Form>
                 </Col>
             </Row>
             <Row>
                 <Col>
-                    <Form.Label>Letters:</Form.Label>
+                    <Form.Label>{t('abcde.body_diagram.injuries.label')}</Form.Label>
                     <ul>
                         {(letters || []).map((item) => (
                             <li key={item.id}>
@@ -132,10 +134,9 @@ const BodyDiagram = ({ value, onChange, isEditable }) => {
                                 {' '} at ({Math.floor(item.x)}, {Math.floor(item.y)})
                                 <Button
                                     disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     variant="danger"
                                     size="sm"
-                                    style={{ marginLeft: '10px' }}
+                                    style={{ marginLeft: '10px', cursor: disabled ? 'not-allowed' : 'pointer' }}
                                     onClick={() => handleDeleteLetter(item.id)}
                                 >
                                     Delete

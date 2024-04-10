@@ -1,0 +1,8 @@
+{
+    "report.title": "Report",
+    "report.mission_number": "Mission Number",
+    "report.first_responders.title": "First Responders Information",
+    "report.patient.title": "Patient Information",
+    "report.abcde.title": "(c) ABCDE Schema",
+    "report.sampler.title": "SAMPLER Schema"
+}

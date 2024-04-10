@@ -1,30 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
 import { Form, Row, Col, Card, Container, FloatingLabel } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 const CriticalBleeding = ({ value = {}, onChange, isEditable }) => {
-    const [showMeasures, setShowMeasures] = useState(false);
-
+    const { t } = useTranslation();
     const disabled = !isEditable;
-
-    useEffect(() => {
-        if (value.problem) {
-            setShowMeasures(true);
-        }
-    }, [value]);
-
-    const handleCheckboxChange = (event) => {
-        const isChecked = event.target.checked;
-        setShowMeasures(isChecked);
-
-        const updatedValue = { ...value, problem: isChecked };
-        if (!isChecked) {
-            updatedValue.tourniquet = false;
-            updatedValue.tourniquetTime = '';
-        }
-
-        onChange('criticalBleeding', 'problem', isChecked);
-    };
 
     const handleMeasureChange = (measure) => {
         onChange('criticalBleeding', measure, !value[measure]);
@@ -32,66 +12,52 @@ const CriticalBleeding = ({ value = {}, onChange, isEditable }) => {
 
     return (
         <Form.Group className="mb-3">
-            <Form.Label>Critical Bleeding</Form.Label>
-            <Row className="mb-3 align-items-center">
-                <Col xs="auto">
-                    <Form.Check
-                        disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                        type="checkbox"
-                        label="Problem?"
-                        checked={value.problem || false}
-                        onChange={handleCheckboxChange}
-                    />
-                </Col>
-            </Row>
-            {showMeasures && (
-                <Card body>
-                    <Container>
-                        <Row>
-                            <Col>
-                                <Card className="mb-3">
-                                    <Card.Body>
-                                        <Form.Label>Measures</Form.Label>
-                                        <hr />
-                                        <Form.Check
-                                            disabled={disabled}
-                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                            type="checkbox"
-                                            label="Tourniquet"
-                                            checked={value.tourniquet || false}
-                                            onChange={() => handleMeasureChange('tourniquet')}
-                                        />
-                                        {value.tourniquet && (
-                                            <Form.Group >
-                                                <FloatingLabel label="Applied at">
-                                                    <Form.Control
-                                                        disabled={disabled}
-                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                        type="time"
-                                                        value={value.tourniquetTime || ''}
-                                                        onChange={(e) =>
-                                                            onChange('criticalBleeding', 'tourniquetTime', e.target.value)
-                                                        }
-                                                    />
-                                                </FloatingLabel>
-                                            </Form.Group>
-                                        )}
-                                        <Form.Check
-                                            disabled={disabled}
-                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                            type="checkbox"
-                                            label="Manuelle Kompression/Blutstillung"
-                                            checked={value.manualCompression || false}
-                                            onChange={() => handleMeasureChange('manualCompression')}
-                                        />
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
-                </Card>
-            )}
+            <Card body>
+                <Container>
+                    <Row>
+                        <Col>
+                            <Card className="mb-3">
+                                <Card.Body>
+                                    <Form.Label>{t('abcde.category.measures')}</Form.Label>
+                                    <hr />
+                                    <Form.Check
+                                        disabled={disabled}
+                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                        type="checkbox"
+                                        label={t('critical_bleeding.measure.tourniquet')}
+                                        checked={value.tourniquet || false}
+                                        onChange={() => handleMeasureChange('tourniquet')}
+                                    />
+                                    {value.tourniquet && (
+                                        <Form.Group >
+                                            <FloatingLabel label={t('critical_bleeding.measure.tourniquet.time')}>
+                                                <Form.Control
+                                                    disabled={disabled}
+                                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                    type="time"
+                                                    value={value.tourniquetTime || ''}
+                                                    onChange={(e) =>
+                                                        onChange('criticalBleeding', 'tourniquetTime', e.target.value)
+                                                    }
+                                                    required={value.tourniquet}
+                                                />
+                                            </FloatingLabel>
+                                        </Form.Group>
+                                    )}
+                                    <Form.Check
+                                        disabled={disabled}
+                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                        type="checkbox"
+                                        label={t('critical_bleeding.measure.manual_compression')}
+                                        checked={value.manualCompression || false}
+                                        onChange={() => handleMeasureChange('manualCompression')}
+                                    />
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Container>
+            </Card>
         </Form.Group>
     );
 };

@@ -33,7 +33,7 @@ export default function Profile() {
     try {
       const fetchData = async () => {
         try {
-          const response = await getSelectMenuClass(); // Use your actual fetching function
+          const response = await getSelectMenuClass(t); // Use your actual fetching function
           setClassOptions(response);
 
         } catch (error) {
@@ -107,8 +107,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      { t('profile.update.loading') }
-      toastId.current = toast.info(`${t('profile.update.loading')}`, { autoClose: false });
+      toastId.current = toast.info(`${t('toast.profile.update.loading')}`, { autoClose: false });
       dispatch(updateUserStart());
 
       const updatedUserData = {
@@ -119,9 +118,9 @@ export default function Profile() {
       //#region Verify password, class, training
       // Verify password security
       if (updatedUserData.password) {
-        const _isPasswordValid = await isPasswordValid(updatedUserData.password);
+        const _isPasswordValid = await isPasswordValid(updatedUserData.password, t);
         if (!_isPasswordValid.success) {
-          const msg = `${t('profile.update.failed', { reason: _isPasswordValid.message })}`
+          const msg = `${t('toast.profile.update.failed', { reason: _isPasswordValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }
@@ -129,9 +128,9 @@ export default function Profile() {
 
       // Verify class
       if (updatedUserData.studentClass) {
-        const _isClassValid = await isClassValid(updatedUserData.studentClass);
+        const _isClassValid = await isClassValid(updatedUserData.studentClass, t);
         if (!_isClassValid.success) {
-          const msg = `${t('profile.update.failed', { reason: _isClassValid.message })}`
+          const msg = `${t('toast.profile.update.failed', { reason: _isClassValid.message })}`
           dispatch(updateUserFailure(msg));
           return toast.update(toastId.current, { type: 'error', autoClose: 5000, render: msg });
         }
@@ -148,15 +147,15 @@ export default function Profile() {
 
       const data = await res.json();
       if (data.success === false) {
-        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('profile.update.failed', { reason: data.message })}` });
+        toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('toast.profile.update.failed', { reason: data.message })}` });
         dispatch(updateUserFailure(data));
         return;
       }
 
-      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `${t('profile.update.success')}` });
+      toast.update(toastId.current, { type: 'success', autoClose: 5000, render: `${t('toast.profile.update.success')}` });
       dispatch(updateUserSuccess(data));
     } catch (error) {
-      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('profile.update.failed', { reason: error.message })}` });
+      toast.update(toastId.current, { type: 'error', autoClose: 5000, render: `${t('toast.profile.update.failed', { reason: error.message })}` });
       dispatch(updateUserFailure(error));
     }
   };
@@ -182,9 +181,9 @@ export default function Profile() {
     try {
       await fetch('/api/v1/auth/signout');
       dispatch(signOut())
-      toast.info(`${t('profile.signed.out')}`);
+      toast.info(`${t('toast.profile.signed_out')}`);
     } catch (error) {
-      toast.info(`${t('profile.signed.error')}`);
+      toast.info(`${t('toast.profile.signed_out.error')}`);
     }
   };
 
@@ -197,13 +196,13 @@ export default function Profile() {
             <Col>
               <Form.Group controlId='firstName'>
                 <FloatingLabel
-                  label={t('profile.first.name')}
+                  label={t('profile.first_name')}
                   className="mb-3"
                 >
                   <Form.Control
                     type='text'
                     defaultValue={formData.firstName || currentUser.firstName}
-                    placeholder={t('profile.first.name')}
+                    placeholder={t('profile.first_name')}
                     onChange={handleChange}
                     id='firstName'
                   />
@@ -213,7 +212,7 @@ export default function Profile() {
             <Col>
               <Form.Group controlId='lastName'>
                 <FloatingLabel
-                  label={t('profile.last.name')}
+                  label={t('profile.last_name')}
                   className="mb-3"
                 >
                   <Form.Control
@@ -269,7 +268,7 @@ export default function Profile() {
 
         <Form.Group controlId='studentClass'>
           <FloatingLabel
-            label={t('profile.dropdown.class.label')}
+            label={t('profile.class.label')}
             className="mb-3"
           >
             <Form.Select id='studentClass' onChange={handleChange} value={formData.studentClass || currentUser.studentClass}>
@@ -284,11 +283,11 @@ export default function Profile() {
 
         <Form.Group controlId='training'>
           <FormLabel className="mb-3 text-lg">
-            {t('profile.multi.dropdown.training.label')}
+            {t('profile.training.label')}
           </FormLabel>
           <Form.Check
             checked={trainingFirstAidCourse}
-            label="First Aid Course"
+            label={t('profile.training.first_aid_course')}
             type='checkbox'
             name='group1'
             id={`trainingFirstAidCourse`}
@@ -331,7 +330,7 @@ export default function Profile() {
           disabled={loading}
           className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
         >
-          {loading ? `${t('submit.btn.loading')}` : `${t('submit.btn.update')}`}
+          {loading ? `${t('button.loading')}` : `${t('button.update')}` }
         </Button>
       </Form>
       <div className='flex justify-between mt-5'>
@@ -339,10 +338,10 @@ export default function Profile() {
           onClick={handleDeleteAccount}
           className='text-red-700 cursor-pointer'
         >
-          {t('profile.delete.account')}
+          {t('profile.delete')}
         </span>
         <span onClick={handleSignOut} className='text-red-700 cursor-pointer'>
-          {t('profile.sign.out')}
+          {t('profile.sign_out')}
         </span>
       </div>
     </div>

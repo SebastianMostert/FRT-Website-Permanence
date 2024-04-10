@@ -1,0 +1,7 @@
+{
+    "sign_up.have_account": "Have an account?",
+    "sign_up.create.failed": "Failed to create an account: {{reason}}",
+    "sign_up.create.error": "An error occurred while creating your account",
+    "sign_up.create.success": "Your account has been created successfully",
+    "sign_up": "Sign Up"
+}

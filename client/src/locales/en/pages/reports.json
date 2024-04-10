@@ -1,0 +1,11 @@
+{
+    "reports.search.title": "Search",
+    "reports.search.year": "Year",
+    "reports.search.month": "Month",
+    "reports.search.day": "Day",
+    "reports.search.incident_number": "Incident #",
+    "reports.title": "Reports",
+    "reports.button.show_unarchived": "Show Unarchived",
+    "reports.button.show_archived": "Show Archived",
+    "reports.button.create": "Create Report"
+}

@@ -1,0 +1,16 @@
+{
+    "profile.title": "Profile",
+    "profile.first_name": "First Name",
+    "profile.last_name": "Last Name",
+    "profile.experience.rtw": "Experience RTW /h",
+    "profile.experience.fr": "Experience FR /h",
+    "profile.class.label": "Student Class",
+    "profile.training.label": "Training",
+    "profile.training.first_aid_course": "First Aid Course",
+    "profile.email": "Email",
+
+    "profile.delete": "Delete Profile",
+    "profile.sign_out": "Sign Out",
+    "profile.signed_out": "Successfully signed out!",
+    "profile.signed_out.error": "An error occurred while signing out!"
+}

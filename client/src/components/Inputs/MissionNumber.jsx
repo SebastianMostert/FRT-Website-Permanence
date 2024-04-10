@@ -9,7 +9,7 @@ const useInputRefs = (length) => {
     );
 };
 
-const MissionNumber = ({ missionNumber, handleMissionNumberChange, isEditable }) => {
+const MissionNumber = ({ missionNumber, handleMissionNumberChange }) => {
     const inputRefs = useInputRefs(10);
 
     const handleInputChange = (index, e) => {
@@ -35,7 +35,7 @@ const MissionNumber = ({ missionNumber, handleMissionNumberChange, isEditable })
             <InputGroup>
                 {Array.from({ length: 10 }, (_, index) => {
                     const placeholder = index <= 3 ? 'Y' : index <= 5 ? 'M' : index <= 7 ? 'D' : 'X';
-                    const disabled = !isEditable;
+                    const disabled = true;
                     if (index === 4 || index === 6 || index === 8) {
                         return (
                             <React.Fragment key={index}>
@@ -70,6 +70,7 @@ const MissionNumber = ({ missionNumber, handleMissionNumberChange, isEditable })
                             value={missionNumber[index] || ''}
                             onChange={(e) => handleInputChange(index, e)}
                             onKeyDown={(e) => handleKeyDown(index, e)}
+                            required
                         />
                     )
                 })

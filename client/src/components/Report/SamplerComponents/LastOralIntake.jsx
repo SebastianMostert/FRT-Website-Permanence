@@ -1,25 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 const LastOralIntake = ({ value, onChange, isEditable }) => {
-    const [isInputVisible, setIsInputVisible] = useState(value.erhoben || false);
-
+    const { t } = useTranslation();
     const disabled = !isEditable;
-
-    const handleCheckboxChange = (event) => {
-        const isChecked = event.target.checked;
-        setIsInputVisible(isChecked);
-
-        if (!isChecked) {
-            onChange('lastOralIntake', 'type', '');
-            onChange('lastOralIntake', 'time', '');
-            onChange('lastOralIntake', 'details', '');
-            onChange('lastOralIntake', 'erhoben', false);
-        } else {
-            onChange('lastOralIntake', 'erhoben', true);
-        }
-    };
 
     const handleInputChange = (field, fieldValue) => {
         onChange('lastOralIntake', field, fieldValue);
@@ -27,57 +12,39 @@ const LastOralIntake = ({ value, onChange, isEditable }) => {
 
     return (
         <Form.Group className="mb-3">
-            <Form.Label>Past Medical History</Form.Label>
-            <Row className="mb-3 align-items-center">
-                <Col xs="auto">
-                    <Form.Check
+            <Row className="align-items-center mt-3">
+                <Col>
+                    <Form.Select
                         disabled={disabled}
                         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                        type="checkbox"
-                        label="Erhoben?"
-                        checked={isInputVisible}
-                        onChange={handleCheckboxChange}
-                    />
+                        value={value.type || ''}
+                        onChange={(e) => handleInputChange('type', e.target.value)}
+                    >
+                        <option value="">{t('sampler.last_oral_intake.select.label')}</option>
+                        <option value="liquid">{t('sampler.last_oral_intake.select.liquid')}</option>
+                        <option value="solid">{t('sampler.last_oral_intake.select.solid')}</option>
+                    </Form.Select>
                 </Col>
-            </Row>
-            {isInputVisible && (
-                <>
-                    <Row className="align-items-center mt-3">
-                        <Col>
-                            <Form.Select
-                                disabled={disabled}
-                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                aria-label="Select Liquid or Solid"
-                                value={value.type || ''}
-                                onChange={(e) => handleInputChange('type', e.target.value)}
-                            >
-                                <option value="">Select Liquid or Solid</option>
-                                <option value="liquid">Liquid</option>
-                                <option value="solid">Solid</option>
-                            </Form.Select>
-                        </Col>
-                        <Col>
-                            <Form.Control
-                                disabled={disabled}
-                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                type="time"
-                                value={value.time || ''}
-                                onChange={(e) => handleInputChange('time', e.target.value)}
-                            />
-                        </Col>
-                    </Row>
+                <Col>
                     <Form.Control
                         disabled={disabled}
                         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                        as="textarea"
-                        rows={3}
-                        placeholder="Details"
-                        value={value.details || ''}
-                        onChange={(e) => handleInputChange('details', e.target.value)}
-                        className="mt-3"
+                        type="time"
+                        value={value.time || ''}
+                        onChange={(e) => handleInputChange('time', e.target.value)}
                     />
-                </>
-            )}
+                </Col>
+            </Row>
+            <Form.Control
+                disabled={disabled}
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                as="textarea"
+                rows={3}
+                placeholder={t('sampler.last_oral_intake.placeholder')}
+                value={value.details || ''}
+                onChange={(e) => handleInputChange('details', e.target.value)}
+                className="mt-3"
+            />
         </Form.Group>
     );
 };

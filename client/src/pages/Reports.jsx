@@ -5,6 +5,7 @@ import { getAllReports, getMember, reportCSV, reportPDF, updateReport } from "..
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Reports = () => {
   const [reports, setReports] = useState([]);
@@ -17,6 +18,7 @@ const Reports = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(false); // State for refresh
   const { currentUser } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
+  const { t } = useTranslation();
 
   const roles = currentUser?.roles;
   const isAdmin = roles?.includes("admin");
@@ -26,13 +28,13 @@ const Reports = () => {
       const res = await getAllReports();
       const { success, data } = res;
 
-      if (!success) return toast('An error occurred while fetching reports');
+      if (!success) return toast(t("toast.reports.fetch.error"));
 
       setReports(data);
     };
 
     fetchReports();
-  }, [refreshTrigger]); // Trigger refresh when refreshTrigger changes
+  }, [refreshTrigger, t]); // Trigger refresh when refreshTrigger changes
 
   // Function to refresh reports
   const refreshReports = () => {
@@ -190,10 +192,10 @@ const Reports = () => {
       <Row>
         <Col md={4} lg={3}>
           <div className="mt-3 mb-3" style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "8px", background: "#f9f9f9" }}>
-            <h4 style={{ marginBottom: "15px" }}>Search</h4>
+            <h4 style={{ marginBottom: "15px" }}>{t('reports.search.title')}</h4>
             <Form>
               <InputGroup className="mb-3">
-                <FloatingLabel label="Year">
+                <FloatingLabel label={t('reports.search.year')}>
                   <FormControl
                     type="text"
                     minLength={4}
@@ -202,7 +204,7 @@ const Reports = () => {
                     onChange={(e) => setSearchYear(e.target.value)}
                   />
                 </FloatingLabel>
-                <FloatingLabel label="Month">
+                <FloatingLabel label={t('reports.search.month')}>
                   <FormControl
                     type="text"
                     minLength={2}
@@ -211,7 +213,7 @@ const Reports = () => {
                     onChange={(e) => setSearchMonth(e.target.value)}
                   />
                 </FloatingLabel>
-                <FloatingLabel label="Day">
+                <FloatingLabel label={t('reports.search.day')}>
                   <FormControl
                     type="text"
                     minLength={2}
@@ -222,7 +224,7 @@ const Reports = () => {
                 </FloatingLabel>
               </InputGroup>
               <InputGroup className="mb-3">
-                <FloatingLabel label="Incident #">
+                <FloatingLabel label={t('reports.search.incident_number')}>
                   <FormControl
                     type="text"
                     value={searchNumber}
@@ -231,17 +233,17 @@ const Reports = () => {
                 </FloatingLabel>
               </InputGroup>
               <Button variant={showArchived ? "outline-primary" : "primary"} onClick={handleToggleArchived} className="mt-3">
-                {showArchived ? "Show Unarchived" : "Show Archived"}
+                {showArchived ? t('reports.button.show_archived') : t('reports.button.show_unarchived')}
               </Button>
               <Button variant="success" onClick={handleCreateNewReport} className="mt-3 ms-2">
-                Create New Report
+                {t('reports.button.create')}
               </Button>
             </Form>
           </div>
         </Col>
 
         <Col md={8} lg={9}>
-          <h1>Reports</h1>
+          <h1>{t('reports.title')}</h1>
           <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {filteredReports.map((report, index) => (
               <div key={index} className="col">

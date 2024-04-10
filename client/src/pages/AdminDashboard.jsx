@@ -5,6 +5,7 @@ import AdminSidebar from '../components/Admin/AdminSidebar';
 import ShiftAvailability from '../components/ShiftAvailability';
 import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 import { isMobile } from '../utils';
+import Dashboard from '../Admin/pages/Dashboard';
 
 const AdminDashboard = () => {
     const { currentUser } = useSelector((state) => state.user);
@@ -27,11 +28,12 @@ const AdminDashboard = () => {
             />
             <div className="ml-5">
                 {selectedNavItem === '#home' && <h1> Home </h1>}
-                {selectedNavItem === '#availabilities' && <ShiftAvailability selectedTable={'availabilities'}/>}
-                {selectedNavItem === '#overlapping' && <ShiftAvailability selectedTable={'overlapping'}/>}
-                {selectedNavItem === '#shifts' && <ShiftAvailability selectedTable={'shifts'}/>}
+                {selectedNavItem === '#availabilities' && <ShiftAvailability selectedTable={'availabilities'} />}
+                {selectedNavItem === '#overlapping' && <ShiftAvailability selectedTable={'overlapping'} />}
+                {selectedNavItem === '#shifts' && <ShiftAvailability selectedTable={'shifts'} />}
             </div>
         </div>
+        // <Dashboard />
     );
 };
 

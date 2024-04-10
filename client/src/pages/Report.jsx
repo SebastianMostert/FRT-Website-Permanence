@@ -33,7 +33,7 @@ const Report = () => {
 
   return (
     <div className='max-w-4xl mx-auto'>
-      <ReportForm _missionNumber={missionNumber} isEditable={isEditable} />
+      <ReportForm _missionNumber={missionNumber} isEditable={isEditable} setIsEditable={setIsEditable} />
     </div>
   );
 };

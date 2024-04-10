@@ -1,0 +1,21 @@
+{
+    "breathing.diagnostic.respiration_rate.label": "Respiration Rate",
+    "breathing.diagnostic.respiration_rate.select": "Select",
+    "breathing.diagnostic.respiration_rate.apnea": "Apnea",
+    "breathing.diagnostic.respiration_rate.bradypnea": "Bradypnea",
+    "breathing.diagnostic.respiration_rate.eupnea": "Eupnea",
+    "breathing.diagnostic.respiration_rate.tachypnea": "Tachypnea",
+    "breathing.diagnostic.auscultation_equal": "Auscultation Equal",
+    "breathing.diagnostic.thorax.label": "Thorax",
+    "breathing.diagnostic.thorax.stable": "Stable",
+    "breathing.diagnostic.thorax.unstable": "Unstable",
+
+
+    "breathing.measures.oxygen_administered.label": "Oxygen administration",
+    "breathing.measures.nasal_cannula": "Nasal cannula",
+    "breathing.measures.oxygen_mask": "Oxygen mask",
+    "breathing.measures.ambu": "Ambu bag",
+    "breathing.measures.assisted_breathing": "Assisted/Controlled breathing",
+    "breathing.measures.hyperventilation_mask": "Hyperventilation mask",
+    "breathing.measures.upper_body_elevation": "Upper body elevation"
+}

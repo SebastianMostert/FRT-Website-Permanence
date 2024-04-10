@@ -1,0 +1,19 @@
+{
+    "abcde.category.measures": "Measures",
+    "abcde.category.diagnostic": "Diagnostic",
+    "abcde.critical_bleeding.title": "Critical Bleeding",
+    "abcde.airway.title": "Airway",
+    "abcde.breathing.title": "Breathing",
+    "abcde.circulation.title": "Circulation",
+    "abcde.disability.title": "Disability",
+    "abcde.exposure_environment.title": "Exposure Environment",
+    "abcde.body_diagram.select_injury.label": "Select an option:",
+    "abcde.body_diagram.select_injury.select": "Select",
+    "abcde.body_diagram.select_injury.trauma": "Trauma",
+    "abcde.body_diagram.select_injury.internal_pain": "Internal Pain",
+    "abcde.body_diagram.select_injury.suspected_fracture": "Suspected Fracture",
+    "abcde.body_diagram.select_injury.bleeding": "Bleeding",
+    "abcde.body_diagram.select_injury.burn_corrosion": "Burn / Corrosion",
+    "abcde.body_diagram.add_injury": "Add Injury",
+    "abcde.body_diagram.injuries.label": "Injuries:"
+}

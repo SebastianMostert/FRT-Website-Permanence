@@ -1,39 +1,14 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card, Container, Button } from 'react-bootstrap';
+import { useState } from 'react';
+import { Form, Row, Col, Card, Container } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import IncreaseDecreaseButton from '../../Inputs/IncreaseDecreaseButton';
 
 const Breathing = ({ value = {}, onChange, isEditable }) => {
-    const [showMeasures, setShowMeasures] = useState(false);
+    const { t } = useTranslation();
     const [showSauerstoffgabe, setShowSauerstoffgabe] = useState(false);
 
     const disabled = !isEditable;
-
-    useEffect(() => {
-        if (value.problem) {
-            setShowMeasures(true);
-        }
-    }, [value]);
-
-    const handleCheckboxChange = (event) => {
-        const isChecked = event.target.checked;
-        setShowMeasures(isChecked);
-
-        const updatedValue = { ...value, problem: isChecked };
-        if (!isChecked) {
-            updatedValue.breathingSpeed = '';
-            updatedValue.auskultationSeitengleich = false;
-            updatedValue.thorax = '';
-            updatedValue.sauerstoffgabe = '';
-            updatedValue.brille = false;
-            updatedValue.maske = false;
-            updatedValue.beatmungsbeutel = false;
-            updatedValue.assistierteBeatmung = false;
-            updatedValue.hyperventilationsmaske = false;
-            updatedValue.oberkörperhochlagerung = false;
-        }
-
-        onChange('breathing', 'problem', isChecked);
-    };
 
     const handleRadioChange = (field, value) => {
         onChange('breathing', field, value);
@@ -46,190 +21,180 @@ const Breathing = ({ value = {}, onChange, isEditable }) => {
         onChange('breathing', measure, !value[measure]);
     };
 
-    const handleIncrement = () => {
-        onChange('breathing', 'sauerstoffgabe', parseInt(value.sauerstoffgabe || 0) + 1);
-    };
-
-    const handleDecrement = () => {
-        onChange('breathing', 'sauerstoffgabe', parseInt(value.sauerstoffgabe || 0) - 1);
-    };
-
-
     return (
         <Form.Group className="mb-3">
-            <Form.Label>Breathing</Form.Label>
-            <Row className="mb-3 align-items-center">
-                <Col xs="auto">
-                    <Form.Check
-                        disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                        type="checkbox"
-                        label="Problem?"
-                        checked={value.problem || false}
-                        onChange={handleCheckboxChange}
-                    />
-                </Col>
-            </Row>
-            {showMeasures && (
-                <Card body>
-                    <Container>
-                        <Row>
-                            <Col>
-                                <Card className="mb-3">
-                                    <Card.Body>
-                                        <Form.Label>Diagnostic</Form.Label>
-                                        <hr />
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Breathing Speed</Form.Label>
-                                            <Form.Control
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                as="select"
-                                                value={value.breathingSpeed || ''}
-                                                onChange={(e) => onChange('breathing', 'breathingSpeed', e.target.value)}
-                                            >
-                                                <option value="">Select</option>
-                                                <option value="Aupnoe (Keine)">Aupnoe (Keine)</option>
-                                                <option value="Bradypnoe (langsam)">Bradypnoe (langsam)</option>
-                                                <option value="Eupnoe (normal)">Eupnoe (normal)</option>
-                                                <option value="Tachypnoe (schnell)">Tachypnoe (schnell)</option>
-                                            </Form.Control>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Auskultation seitengleich"
-                                                checked={value.auskultationSeitengleich || false}
-                                                onChange={() => handleMeasureChange('auskultationSeitengleich')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Thorax</Form.Label>
-                                            <div>
-                                                <Form.Check
-                                                    disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                    inline
-                                                    type="radio"
-                                                    label="Stabil"
-                                                    name="thorax"
-                                                    checked={value.thorax === 'Stabil'}
-                                                    onChange={() => handleRadioChange('thorax', 'Stabil')}
-                                                />
-                                                <Form.Check
-                                                    disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                    inline
-                                                    type="radio"
-                                                    label="Instabil"
-                                                    name="thorax"
-                                                    checked={value.thorax === 'Instabil'}
-                                                    onChange={() => handleRadioChange('thorax', 'Instabil')}
-                                                />
-                                            </div>
-                                        </Form.Group>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <Col>
-                                <Card className="mb-3">
-                                    <Card.Body>
-                                        <Form.Label>Measures</Form.Label>
-                                        <hr />
+            <Card body>
+                <Container>
+                    <Row>
+                        <Col>
+                            <Card className="mb-3">
+                                <Card.Body>
+                                    <Form.Label>{t('abcde.category.diagnostic')}</Form.Label>
+                                    <hr />
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>{t('breathing.diagnostic.respiration_rate.label')}</Form.Label>
+                                        <Form.Control
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            as="select"
+                                            value={value.breathingSpeed || ''}
+                                            onChange={(e) => onChange('breathing', 'breathingSpeed', e.target.value)}
+                                        >
+                                            <option value="">{t('breathing.diagnostic.respiration_rate.select')}</option>
+                                            <option value="Aupnoe (Keine)">{t('breathing.diagnostic.respiration_rate.apnea')}</option>
+                                            <option value="Bradypnoe (langsam)">{t('breathing.diagnostic.respiration_rate.bradypnea')}</option>
+                                            <option value="Eupnoe (normal)">{t('breathing.diagnostic.respiration_rate.eupnea')}</option>
+                                            <option value="Tachypnoe (schnell)">{t('breathing.diagnostic.respiration_rate.tachypnea')}</option>
+                                        </Form.Control>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
                                         <Form.Check
                                             disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                             type="checkbox"
-                                            label="Sauerstoffgabe"
-                                            checked={value.sauerstoffgabe || false}
-                                            onChange={() => handleMeasureChange('sauerstoffgabe')}
+                                            label={t('breathing.diagnostic.auscultation_equal')}
+                                            checked={value.auskultationSeitengleich || false}
+                                            onChange={() => handleMeasureChange('auskultationSeitengleich')}
                                         />
-                                        {showSauerstoffgabe && (
-                                            <Form.Group className="mb-3">
-                                                <Form.Label>Sauerstoffgabe (l/min)</Form.Label>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>{t('breathing.diagnostic.thorax.label')}</Form.Label>
+                                        <div>
+                                            <Form.Check
+                                                disabled={disabled}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                inline
+                                                type="radio"
+                                                label={t('breathing.diagnostic.thorax.stable')}
+                                                name="thorax"
+                                                checked={value.thorax === 'Stabil'}
+                                                onChange={() => handleRadioChange('thorax', 'Stabil')}
+                                            />
+                                            <Form.Check
+                                                disabled={disabled}
+                                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                inline
+                                                type="radio"
+                                                label={t('breathing.diagnostic.thorax.unstable')}
+                                                name="thorax"
+                                                checked={value.thorax === 'Instabil'}
+                                                onChange={() => handleRadioChange('thorax', 'Instabil')}
+                                            />
+                                        </div>
+                                    </Form.Group>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="mb-3">
+                                <Card.Body>
+                                    <Form.Label>{t('abcde.category.measures')}</Form.Label>
+                                    <hr />
+                                    <Form.Check
+                                        disabled={disabled}
+                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                        type="checkbox"
+                                        label={t('breathing.measures.oxygen_administered.label')}
+                                        checked={value.sauerstoffgabe || false}
+                                        onChange={() => handleMeasureChange('sauerstoffgabe')}
+                                    />
+                                    <Form.Group className="mb-3">
+                                        {value.sauerstoffgabe && (
+                                            <>
+                                                <Form.Label>{t('breathing.measures.oxygen_administered.amount')}</Form.Label>
                                                 <div className="input-group">
-                                                    <Button variant="outline-secondary" onClick={handleDecrement}>-</Button>
-                                                    <Form.Control
+                                                    <IncreaseDecreaseButton
+                                                        amountToAdd={-1}
+                                                        prevAmount={value.sauerstoffgabeLiters}
                                                         disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                        type="number"
-                                                        value={value.sauerstoffgabe || ''}
-                                                        onChange={(e) => onChange('breathing', 'sauerstoffgabe', e.target.value)}
+                                                        onChange={(e) => onChange('breathing', 'sauerstoffgabeLiters', e)}
                                                     />
-                                                    <Button variant="outline-secondary" onClick={handleIncrement}>+</Button>
+                                                    <Form.Control
+                                                        disabled={true}
+                                                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                                        type="number"
+                                                        value={value.sauerstoffgabeLiters}
+                                                        onChange={(e) => onChange('breathing', 'sauerstoffgabeLiters', e.target.value)}
+                                                        required={value.sauerstoffgabe}
+                                                        min={0}
+                                                    />
+                                                    <IncreaseDecreaseButton
+                                                        amountToAdd={1}
+                                                        prevAmount={value.sauerstoffgabeLiters}
+                                                        disabled={disabled}
+                                                        onChange={(e) => onChange('breathing', 'sauerstoffgabeLiters', e)}
+                                                    />
                                                 </div>
-                                            </Form.Group>
+                                            </>
                                         )}
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Brille"
-                                                checked={value.brille || false}
-                                                onChange={() => handleMeasureChange('brille')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Maske"
-                                                checked={value.maske || false}
-                                                onChange={() => handleMeasureChange('maske')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Beatmungsbeutel"
-                                                checked={value.beatmungsbeutel || false}
-                                                onChange={() => handleMeasureChange('beatmungsbeutel')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Assistierte/kontrollierte Beatmung"
-                                                checked={value.assistierteBeatmung || false}
-                                                onChange={() => handleMeasureChange('assistierteBeatmung')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Hyperventilationsmaske"
-                                                checked={value.hyperventilationsmaske || false}
-                                                onChange={() => handleMeasureChange('hyperventilationsmaske')}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                                type="checkbox"
-                                                label="Oberkörperhochlagerung"
-                                                checked={value.oberkörperhochlagerung || false}
-                                                onChange={() => handleMeasureChange('oberkörperhochlagerung')}
-                                            />
-                                        </Form.Group>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
-                </Card>
-            )}
-        </Form.Group>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.nasal_cannula')}
+                                            checked={value.brille || false}
+                                            onChange={() => handleMeasureChange('brille')}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.oxygen_mask')}
+                                            checked={value.maske || false}
+                                            onChange={() => handleMeasureChange('maske')}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.ambu')}
+                                            checked={value.beatmungsbeutel || false}
+                                            onChange={() => handleMeasureChange('beatmungsbeutel')}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.assisted_breathing')}
+                                            checked={value.assistierteBeatmung || false}
+                                            onChange={() => handleMeasureChange('assistierteBeatmung')}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.hyperventilation_mask')}
+                                            checked={value.hyperventilationsmaske || false}
+                                            onChange={() => handleMeasureChange('hyperventilationsmaske')}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            disabled={disabled}
+                                            style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                            type="checkbox"
+                                            label={t('breathing.measures.upper_body_elevation')}
+                                            checked={value.oberkörperhochlagerung || false}
+                                            onChange={() => handleMeasureChange('oberkörperhochlagerung')}
+                                        />
+                                    </Form.Group>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Container>
+            </Card>
+        </Form.Group >
     );
 };
 

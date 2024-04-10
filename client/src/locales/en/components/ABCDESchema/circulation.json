@@ -1,0 +1,23 @@
+{
+    "circulation.diagnostic.pulse.regularity.label": "Puls Regularity",
+    "circulation.diagnostic.pulse.regularity.regular": "Regular",
+    "circulation.diagnostic.pulse.regularity.irregular": "Irregular",
+    "circulation.diagnostic.pulse.palpable.label": "Puls Palpable",
+    "circulation.diagnostic.pulse.palpable.good": "Good Palpability",
+    "circulation.diagnostic.pulse.palpable.poor": "Poor Palpability",
+    "circulation.diagnostic.abdomen.label": "Abdomen",
+    "circulation.diagnostic.abdomen.soft": "Soft",
+    "circulation.diagnostic.abdomen.hard": "Hard",
+    "circulation.diagnostic.pelvis.label": "Pelvis",
+    "circulation.diagnostic.pelvis.stable": "Stable",
+    "circulation.diagnostic.pelvis.unstable": "Unstable",
+    "circulation.diagnostic.thigh.label": "Thigh",
+    "circulation.diagnostic.thigh.stable": "Stable",
+    "circulation.diagnostic.thigh.unstable": "Unstable",
+    "circulation.diagnostic.ecg_image.label": "ECG Image",
+
+    "circulation.measures.flat_positioning": "Supine Positioning",
+    "circulation.measures.shock_positioning": "Shock Positioning",
+    "circulation.measures.recovery_position": "Recovery Position",
+    "circulation.measures.pressure_bandage": "Pressure breathing/hemostasis"
+}

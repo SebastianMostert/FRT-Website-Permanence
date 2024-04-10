@@ -1,0 +1,8 @@
+{
+    "sampler.last_oral_intake.title": "Last oral intake",
+    "sampler.last_oral_intake.placeholder": "Last oral intake",
+
+    "sampler.last_oral_intake.select.label": "Liquid/Solid",
+    "sampler.last_oral_intake.select.liquid": "Liquid",
+    "sampler.last_oral_intake.select.solid": "Solid"
+}

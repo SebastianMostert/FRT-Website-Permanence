@@ -1,0 +1,21 @@
+{
+    "input.iam.error.valid": "Invalid IAM! The IAM must follow the format: 5 letters followed by 3 digits",
+    "input.iam.error.length": "IAM must be 8 characters long",
+    "input.iam.error.digits": "The last 3 characters of IAM must be digits",
+    "input.iam.error.letters": "The first 5 characters of IAM must be letters",
+
+    "input.matricule.error.length": "The matricule must be 13 characters long",
+    "input.matricule.error.digits": "The characters of the matricule must be digits",
+
+    "input.password.error.length": "Password must be at least 8 characters long!",
+    "input.password.error.digit": "Password must contain at least 1 digit!",
+    "input.password.error.uppercase": "Password must contain at least 1 uppercase character!",
+    "input.password.error.lowercase": "Password must contain at least 1 lowercase character!",
+    "input.password.error.special": "Password must contain at least 1 special character!",
+    "input.password.error.space": "Password cannot contain spaces!",
+
+    "input.class.error.exists": "Class does not exist!",
+
+
+    "input.class.select.label": "Select class"
+}

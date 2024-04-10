@@ -47,11 +47,11 @@ export default function Header() {
         <Nav className="ml-3 mr-3">
           {currentUser ? (
             <span>
-              Logged in as: <Link to="/profile" className='no-underline'>{currentUser.firstName} {currentUser.lastName}</Link>
+              {t('header.logged_in_as')} <Link to="/profile" className='no-underline'>{currentUser.firstName} {currentUser.lastName}</Link>
             </span>
           ) : (
             <Nav.Link as={Link} to="/profile" className="nav-link">
-              {t('header.signin')}
+              {t('header.sign_in')}
             </Nav.Link>
           )}
         </Nav>

@@ -61,7 +61,7 @@ const ShiftAvailability = ({ selectedTable }) => {
         });
 
         if (res.status !== 200) {
-            toast.error('Failed to delete shift.');
+            toast.error(t('toast.availability.delete.error'));
             return;
         }
 
@@ -69,7 +69,7 @@ const ShiftAvailability = ({ selectedTable }) => {
             // Refetch data after deletion
             const data = await getShifts();
             setShift(data);
-            toast.success('Shift deleted successfully.');
+            toast.success(t('toast.availability.delete.success'));
         }
     };
     //#endregion

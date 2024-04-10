@@ -2,9 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { getMember } from '../utils';
-import { toast } from 'react-toastify';
 
-const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
+const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -123,12 +122,12 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
 
                 // Implement logic to create new availabilities, possibly with an API call
                 if (availabilityStart.getTime() === shiftStart.getTime()) {
-                    toast('Start and end time cannot be the same.');
+
                     return;
                 }
                 // Implement logic to create new availabilities, possibly with an API call
                 if (shiftEnd.getTime() === availabilityEnd.getTime()) {
-                    toast('Start and end time cannot be the same.');
+
                     return;
                 }
 
@@ -176,11 +175,6 @@ const MarkBesetztModal = ({ show, handleClose, setAvailability, shifts, IAMList,
             if (data?.success !== true) {
                 return;
             }
-
-            // Refetch data after deletion
-            // TODO: Fix
-            // const availabilities = await getAvailabilities(id);
-            // setAvailability(availabilities);
         } catch (err) {
             console.error(err);
         }

@@ -1,0 +1,8 @@
+{
+    "header.home": "Home",
+    "header.calendar": "Calendar",
+    "header.reports": "Reports",
+    "header.admin": "Admin",
+    "header.sign_in": "Sign In",
+    "header.logged_in_as": "Logged in as:"
+}

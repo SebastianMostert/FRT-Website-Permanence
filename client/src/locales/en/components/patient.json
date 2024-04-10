@@ -1,0 +1,18 @@
+{
+    "patient_information.title": "Patient Information",
+    "patient_information.iam.placeholder": "Enter Patient IAM",
+    "patient_information.matricule.placeholder": "Enter Patient Matricule",
+    "patient_information.first_name.placeholder": "Enter First Name",
+    "patient_information.last_name.placeholder": "Enter Last Name",
+    "patient_information.gender.label": "Gender",
+    "patient_information.gender.placeholder": "Select Gender",
+    "patient_information.gender.male": "Male",
+    "patient_information.gender.female": "Female",
+    "patient_information.gender.other": "Other",
+    "patient_information.age.placeholder": "Enter age",
+
+    "patient_information.age.label": "Age",
+    "patient_information.last_name.label": "Last Name",
+    "patient_information.first_name.label": "First Name",
+    "patient_information.matricule.label": "Matricule"
+}

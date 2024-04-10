@@ -28,17 +28,17 @@ export default function SignUp() {
       setLoading(true);
 
       // Verify password security
-      const _isPasswordValid = await isPasswordValid(formData.password);
+      const _isPasswordValid = await isPasswordValid(formData.password, t);
       if (!_isPasswordValid.success) {
         setLoading(false);
-        return toast.error(`${t("signup.create.failed", { reason: _isPasswordValid.message })}`);
+        return toast.error(`${t("toast.sign_up.create.failed", { reason: _isPasswordValid.message })}`);
       }
 
       // Verify IAM
-      const _isIAMValid = await isIAMValid(formData.IAM);
+      const _isIAMValid = await isIAMValid(formData.IAM, t);
       if (!_isIAMValid.success) {
         setLoading(false);
-        return toast.error(`${t("signup.create.failed", { reason: _isIAMValid.message })}`);
+        return toast.error(`${t("toast.sign_up.create.failed", { reason: _isIAMValid.message })}`);
       }
 
       const res = await fetch('/api/v1/auth/signup', {
@@ -52,14 +52,14 @@ export default function SignUp() {
       const data = await res.json();
       setLoading(false);
       if (data.success === false) {
-        toast.error(`${t('signup.create.error')}`);
+        toast.error(`${t('toast.sign_up.create.error')}`);
         setError(true);
         return;
       }
-      toast.success(`${t('signup.create.success')}`);
+      toast.success(`${t('toast.sign_up.create.success')}`);
       navigate('/sign-in');
     } catch (error) {
-      toast.error(`${t('signup.create.error')}`);
+      toast.error(`${t('toast.sign_up.create.error')}`);
       setLoading(false);
       setError(true);
     }
@@ -67,7 +67,7 @@ export default function SignUp() {
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl text-center font-semibold my-7'>{t('signin.signup')}</h1>
+      <h1 className='text-3xl text-center font-semibold my-7'>{t('sign_in.signup')}</h1>
       <Form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <Form.Group controlId='IAM'>
           <FloatingLabel
@@ -136,7 +136,7 @@ export default function SignUp() {
           <InputGroup className='mb-3'>
             <Form.Control
               type={showPassword ? 'text' : 'password'}
-              placeholder={t('signin.password')}
+              placeholder={t('sign_in.password')}
               className={`bg-slate-100 p-3 rounded-lg ${showPassword ? 'text-black' : ''}`}
               onChange={handleChange}
               id='password'
@@ -160,17 +160,17 @@ export default function SignUp() {
           type='submit'
           disabled={loading}
         >
-          {loading ? `${t('submit.btn.loading')}` : `${t('signin.signup')}`}
+          {loading ? `${t('button.loading')}` : `${t('sign_up')}`}
         </Button>
       </Form>
 
       <div className='d-flex gap-2 mt-5'>
-        <p>{t('signup.haveaccount')}</p>
+        <p>{t('sign_up.have_account')}</p>
         <Link to='/sign-in'>
-          <span className='text-blue-500'>{t('signin.title')}</span>
+          <span className='text-blue-500'>{t('sign_in.title')}</span>
         </Link>
       </div>
-      <p className='text-red-700 mt-5'>{error && `${t("signin.error")}`}</p>
+      <p className='text-red-700 mt-5'>{error && `${t("sign_in.error")}`}</p>
     </div>
   );
 }

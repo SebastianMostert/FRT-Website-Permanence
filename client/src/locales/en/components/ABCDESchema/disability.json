@@ -1,0 +1,40 @@
+{
+    "diagnostic.movement.label": "Movement",
+    "diagnostic.movement.right": "Right",
+    "diagnostic.movement.left": "Left",
+    "diagnostic.movement.normal": "Normal",
+    "diagnostic.movement.limited": "Limited",
+    "diagnostic.movement.none": "None",
+
+    "diagnostic.pupils.label": "Pupils",
+    "diagnostic.pupils.right": "Right",
+    "diagnostic.pupils.left": "Left",
+    "diagnostic.pupils.tight": "Thight",
+    "diagnostic.pupils.normal": "Normal",
+    "diagnostic.pupils.wide": "Wide",
+    "diagnostic.pupils.dyscoria": "Dyscoria",
+    "diagnostic.pupils.light_reaktiv": "Light reaktiv",
+
+    "disability.diagnostic.avpu.label": "AVPU",
+    "disability.diagnostic.avpu.alert": "Alert",
+    "disability.diagnostic.avpu.voice": "Voice",
+    "disability.diagnostic.avpu.pain": "Pain",
+    "disability.diagnostic.avpu.unresponsive": "Unresponsive",
+
+    "disability.diagnostic.dms.label": "DMS",
+    "disability.diagnostic.dms.circulation": "Circulation",
+    "disability.diagnostic.dms.motion": "Motion",
+    "disability.diagnostic.dms.sensation": "Sensation",
+
+    "disability.diagnostic.fast.label": "DMS",
+    "disability.diagnostic.fast.face": "Face",
+    "disability.diagnostic.fast.arms": "Arms",
+    "disability.diagnostic.fast.speech": "Speech",
+    "disability.diagnostic.fast.time.label": "Time",
+    "disability.diagnostic.fast.time.time": "Symptom Onset",
+
+    "disability.diagnostic.temperature.label": "Temperature",
+    "disability.diagnostic.blood_sugar.label": "Blood Sugar",
+
+    "disability.diagnostic.fast.details.label": "FAST Details"
+}

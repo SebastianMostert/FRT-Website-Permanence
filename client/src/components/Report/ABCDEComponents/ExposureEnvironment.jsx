@@ -1,31 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card } from 'react-bootstrap';
+import { Form, Card } from 'react-bootstrap';
 import BodyDiagram from './BodyDiagram';
+import { useTranslation } from 'react-i18next';
 
 const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
-    const [showMeasures, setShowMeasures] = useState(false);
-
+    const { t } = useTranslation();
     const disabled = !isEditable;
-
-    useEffect(() => {
-        if (value.problem) {
-            setShowMeasures(true);
-        }
-    }, [value]);
-
-    const handleCheckboxChange = (event) => {
-        const isChecked = event.target.checked;
-        setShowMeasures(isChecked);
-
-        const updatedValue = { ...value, problem: isChecked };
-        if (!isChecked) {
-            updatedValue.schmerzskala = 0;
-            updatedValue.weitereVerletzungen = '';
-        }
-
-        onChange('exposureEnvironment', 'problem', isChecked);
-    };
 
     const handleRangeChange = (event) => {
         const schmerzskalaValue = parseInt(event.target.value, 10);
@@ -42,101 +22,85 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
 
     return (
         <Form.Group className="mb-3">
-            <Form.Label>Exposure Environment</Form.Label>
-            <Row className="mb-3 align-items-center">
-                <Col xs="auto">
-                    <Form.Check
-                        disabled={disabled}
-                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                        type="checkbox"
-                        label="Problem?"
-                        checked={value.problem || false}
-                        onChange={handleCheckboxChange}
-                    />
-                </Col>
-            </Row>
-            {showMeasures && (
-                <div>
-                    <Card className="mb-3">
-                        <Card.Body>
-                            <Form.Label>Diagnostic</Form.Label>
-                            <hr />
-                            <Form.Group className="mb-3">
-                                <Form.Label>Schmerz: {value.schmerzskala || 0}/10</Form.Label>
-                                <Form.Range
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    type="range"
-                                    label="Schmerzskala"
-                                    min={0}
-                                    max={10}
-                                    step={1}
-                                    value={value.schmerzskala || 0}
-                                    onChange={handleRangeChange}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    type="checkbox"
-                                    label="Body Check"
-                                    checked={value.bodycheck || false}
-                                    onChange={() => handleMeasureChange('bodycheck')}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Weitere Verletzungen/Umfeld/sonstiges</Form.Label>
-                                <Form.Control
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    as="textarea"
-                                    rows={3}
-                                    value={value.weitereVerletzungen || ''}
-                                    onChange={(e) => handleInputChange('weitereVerletzungen', e.target.value)}
-                                />
-                            </Form.Group>
-                            <BodyDiagram letters={value} onChange={onChange} isEditable={isEditable} />
-                        </Card.Body>
-                    </Card>
-                    <Card className="mb-3">
-                        <Card.Body>
-                            <Form.Label>Measures</Form.Label>
-                            <hr />
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    type="checkbox"
-                                    label="Wärmeerhalt"
-                                    checked={value.wärmeerhalt || false}
-                                    onChange={() => handleMeasureChange('wärmeerhalt')}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    type="checkbox"
-                                    label="Wundversorgung"
-                                    checked={value.wundversorgung || false}
-                                    onChange={() => handleMeasureChange('wundversorgung')}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    disabled={disabled}
-                                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                    type="checkbox"
-                                    label="Extremitätenschienung"
-                                    checked={value.extremitätenschienung || false}
-                                    onChange={() => handleMeasureChange('extremitätenschienung')}
-                                />
-                            </Form.Group>
-                        </Card.Body>
-                    </Card>
-                </div>
-            )}
+            <div>
+                <Card className="mb-3">
+                    <Card.Body>
+                        <Form.Label>{t('abcde.category.diagnostic')}</Form.Label>
+                        <hr />
+                        <Form.Group className="mb-3">
+                            <Form.Label>{t('exposure_environment.diagnostic.pain_scale')} {value.schmerzskala || 0}/10</Form.Label>
+                            <Form.Range
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="range"
+                                min={0}
+                                max={10}
+                                step={1}
+                                value={value.schmerzskala || 0}
+                                onChange={handleRangeChange}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="checkbox"
+                                label={t('exposure_environment.diagnostic.body_check')}
+                                checked={value.bodycheck || false}
+                                onChange={() => handleMeasureChange('bodycheck')}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>{t('exposure_environment.diagnostic.further_injuries')}</Form.Label>
+                            <Form.Control
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                as="textarea"
+                                rows={3}
+                                value={value.weitereVerletzungen || ''}
+                                onChange={(e) => handleInputChange('weitereVerletzungen', e.target.value)}
+                            />
+                        </Form.Group>
+                        <BodyDiagram letters={value} onChange={onChange} isEditable={isEditable} />
+                    </Card.Body>
+                </Card>
+                <Card className="mb-3">
+                    <Card.Body>
+                        <Form.Label>{t('abcde.category.measures')}</Form.Label>
+                        <hr />
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="checkbox"
+                                label={t('exposure_environment.measures.heat_retention')}
+                                checked={value.wärmeerhalt || false}
+                                onChange={() => handleMeasureChange('wärmeerhalt')}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="checkbox"
+                                label={t('exposure_environment.measures.wound_care')}
+                                checked={value.wundversorgung || false}
+                                onChange={() => handleMeasureChange('wundversorgung')}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="checkbox"
+                                label={t('exposure_environment.measures.limb_splinting')}
+                                checked={value.extremitätenschienung || false}
+                                onChange={() => handleMeasureChange('extremitätenschienung')}
+                            />
+                        </Form.Group>
+                    </Card.Body>
+                </Card>
+            </div>
         </Form.Group>
     );
 };

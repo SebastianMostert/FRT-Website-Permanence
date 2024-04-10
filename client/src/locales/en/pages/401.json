@@ -1,0 +1,6 @@
+{
+    "401.title": "ACCESS DENIED",
+    "401.description": "Oops, You don't have permission to access this page.",
+    "401.explanation": "This may be due to missing credentials or insufficient permissions. Please contact the site administrator for assistance.",
+    "401.home": "Go to homepage"
+}
