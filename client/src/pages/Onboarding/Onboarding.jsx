@@ -31,7 +31,7 @@ const defaultValue = {
   lastName: '',
   experienceRTW: 0,
   experienceFR: 0,
-  trainings: [],
+  training: [],
   notifications: {
     securityEmails: false,
     shiftEmails: false,

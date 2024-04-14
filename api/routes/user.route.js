@@ -5,8 +5,9 @@ import {
   deleteUser,
   fetchUser,
   notifyUser,
-  fetchUserAuthEnabled,
-  verifyEmail
+  verifyEmail,
+  fetchUserAuthEnabledByEmail,
+  fetchUserAuthEnabledByIAM
 } from '../controllers/user.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
@@ -17,7 +18,8 @@ router.post('/fetch/:IAM', verifyToken, fetchUser);
 router.post('/update/:id', verifyToken, updateUser);
 router.post('/notify', verifyToken, notifyUser);
 router.delete('/delete/:id', verifyToken, deleteUser);
-router.post('/fetch/2fa/:IAM', fetchUserAuthEnabled);
+router.post('/fetch/2fa/IAM/:IAM', fetchUserAuthEnabledByIAM);
+router.post('/fetch/2fa/email/:email', fetchUserAuthEnabledByEmail);
 
 router.post('/verify-email', verifyEmail);
 

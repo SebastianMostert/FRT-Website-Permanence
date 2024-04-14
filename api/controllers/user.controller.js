@@ -119,10 +119,25 @@ export const fetchUser = async (req, res, next) => {
 };
 
 // Fetch authenticator enabled
-export const fetchUserAuthEnabled = async (req, res, next) => {
+export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
     const user = await User.find({ IAM });
+    if (!user || user.length === 0) {
+      return next(errorHandler(404, 'User not found.'));
+    }
+    // Before sending the data to the user remove the password and twoFactorAuthSecret
+    const { twoFactorAuth } = user[0];
+    res.status(200).json(twoFactorAuth);
+  } catch (error) {
+    console.error(error);
+    next(errorHandler(500, 'An error occurred while fetching user.'));
+  }
+};
+export const fetchUserAuthEnabledByEmail = async (req, res, next) => {
+  const email = req.params.email;
+  try {
+    const user = await User.find({ email });
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));
     }

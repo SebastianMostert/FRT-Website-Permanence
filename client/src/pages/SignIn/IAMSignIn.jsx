@@ -93,7 +93,7 @@ export default function IAMSignIn() {
     const iam = formData.IAM.toLocaleLowerCase();
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/v1/user/fetch/2fa/${iam}`, {
+        const res = await fetch(`/api/v1/user/fetch/2fa/IAM/${iam}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

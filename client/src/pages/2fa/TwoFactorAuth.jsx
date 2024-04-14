@@ -20,7 +20,7 @@ const TwoFactorAuth = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await fetch(`/api/v1/user/fetch/2fa/${currentUser.IAM}`, {
+                const res = await fetch(`/api/v1/user/fetch/2fa/IAM/${currentUser.IAM}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

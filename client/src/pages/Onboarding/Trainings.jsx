@@ -14,10 +14,10 @@ const Trainings = ({ data, onChange, onNext }) => {
             <Form.Check
               type="checkbox"
               label="SAP 1"
-              checked={data.trainings.includes('SAP 1')}
+              checked={data.training.includes('SAP 1')}
               onChange={(e) => {
                 const isChecked = e.target.checked;
-                onChange('trainings', isChecked ? [...data.trainings, 'SAP 1'] : data.trainings.filter(t => t !== 'SAP 1'));
+                onChange('training', isChecked ? [...data.training, 'SAP 1'] : data.training.filter(t => t !== 'SAP 1'));
               }}
             />
           </Col>
@@ -27,10 +27,10 @@ const Trainings = ({ data, onChange, onNext }) => {
             <Form.Check
               type="checkbox"
               label="SAP 2"
-              checked={data.trainings.includes('SAP 2')}
+              checked={data.training.includes('SAP 2')}
               onChange={(e) => {
                 const isChecked = e.target.checked;
-                onChange('trainings', isChecked ? [...data.trainings, 'SAP 2'] : data.trainings.filter(t => t !== 'SAP 2'));
+                onChange('training', isChecked ? [...data.training, 'SAP 2'] : data.training.filter(t => t !== 'SAP 2'));
               }}
             />
           </Col>
@@ -40,10 +40,10 @@ const Trainings = ({ data, onChange, onNext }) => {
             <Form.Check
               type="checkbox"
               label={t('onboarding.trainings.first_aid.label')}
-              checked={data.trainings.includes('First Aid Course')}
+              checked={data.training.includes('First Aid Course')}
               onChange={(e) => {
                 const isChecked = e.target.checked;
-                onChange('trainings', isChecked ? [...data.trainings, 'First Aid Course'] : data.trainings.filter(t => t !== 'First Aid Course'));
+                onChange('training', isChecked ? [...data.training, 'First Aid Course'] : data.training.filter(t => t !== 'First Aid Course'));
               }}
             />
           </Col>

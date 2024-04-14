@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     training: {
       type: [{
         type: String,
-        enum: ['SAP 1', 'SAP 2', 'FIS 1', 'FIS 2'],
+        enum: ['SAP 1', 'SAP 2', 'First Aid Course'],
       }],
       required: true,
       default: [],

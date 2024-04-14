@@ -14,7 +14,6 @@ import qrcode from 'qrcode';
 export const signup = async (req, res, next) => {
   req.body.IAM = req.body.IAM.toLowerCase(); // Convert IAM to lowercase
   req.body.password = bcryptjs.hashSync(req.body.password, 10);
-
   try {
     // Check if IAM is a member IAM
     const verified = await isMemberIAM(req.body.IAM);
@@ -109,9 +108,28 @@ async function isMemberIAM(IAM) {
  * @param {object} next The next middleware function
  */
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
+  const { email, otp } = req.body;
   try {
+    // Get the user 
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Check if the user has a password
+    if (user.twoFactorAuth) {
+      const verified = validate2FaCode(user.twoFactorAuthSecret, otp);
+      if (!verified) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid two-factor authentication code',
+        });
+      }
+    }
+
     // Generate a reset token
     const resetToken = crypto.randomBytes(20).toString('hex');
 
@@ -175,8 +193,7 @@ export const forgotPassword = async (req, res) => {
  * @param {object} next The next middleware function
  */
 export const resetPassword = async (req, res) => {
-  console.log(req.body);
-  const { token, newPassword } = req.body;
+  const { token, newPassword, totp } = req.body;
 
   try {
     // Find the reset token in the database
