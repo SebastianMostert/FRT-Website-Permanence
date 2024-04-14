@@ -1,0 +1,32 @@
+{
+    "2fa.title": "Why Two-Factor Authentication (2FA)?",
+    "2fa.description": "Two-factor authentication adds an extra layer of security to your account by requiring not only a password and username but also something that only you have on you, like a piece of information or a physical token. This makes it much harder for potential intruders to gain access and protects your account even if your password is compromised.",
+    "2fa.reasons.title": "Here are some reasons why you should consider using 2FA:",
+    "2fa.reasons.1": "Increased Account Security",
+    "2fa.reasons.2": "Protection Against Unauthorized Access",
+    "2fa.reasons.3": "Prevention of Account Takeover",
+    "2fa.reasons.4": "Enhanced Data Privacy",
+    "2fa.button": "Setup Two-Factor Authentication",
+    "2fa.error": "An error occured",
+
+    "2fa.secured.title": "Your Account is Secure with Two-Factor Authentication (2FA)!",
+    "2fa.secured.description": "Congratulations! Your account is now protected with an extra layer of security. To remove Two-Factor Authentication, click the button below:",
+    "2fa.secured.button": "Remove Two-Factor Authentication",
+
+    "2fa.setup.success": "2FA enabled successfully!",
+    "2fa.setup.invalid_code": "Invalid 2FA code",
+    "2fa.setup.title": "Enable Two-Factor Authentication",
+    "2fa.setup.description": "Scan the QR code with Google Authenticator app and then enter the code below",
+    "2fa.setup.placeholder.totp_code": "Enter TOTP Code",
+    "2fa.setup.button": "Enable 2FA",
+    "2fa.setup.generate_qr": "Generate QR Code",
+    "2fa.setup.generateing_qr": "Generating your QR code...",
+
+
+    "2fa.remove.success": "Two-Factor Authentication removed successfully!",
+    "2fa.remove.title": "Remove Two-Factor Authentication",
+    "2fa.remove.description": "Enter your TOTP code and password to remove 2FA from your account.",
+    "2fa.remove.placeholder.totp_code": "Enter TOTP Code",
+    "2fa.remove.placeholder.password": "Enter Password",
+    "2fa.remove.button": "Remove Two-Factor Authentication"
+}

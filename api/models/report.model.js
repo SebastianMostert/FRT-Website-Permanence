@@ -36,8 +36,8 @@ const reportSchema = new mongoose.Schema({
         },
         firstName: reqStr,
         lastName: reqStr,
-        iam: reqStr,
-        matricule: reqStr,
+        IAM: reqStr,
+        otherInfo: reqStr,
     },
     abcdeSchema: {
         type: Object,

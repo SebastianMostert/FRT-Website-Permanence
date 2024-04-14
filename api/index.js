@@ -10,6 +10,7 @@ import shiftRoutes from './routes/shift.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import cors from 'cors';
+import { WebSocketServer } from 'ws'; // Import the 'ws' package
 dotenv.config();
 
 mongoose
@@ -37,8 +38,27 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-app.listen(3000, () => {
+const server = app.listen(3000, () => {
   console.info('Server listening on port 3000');
+});
+
+// Create a WebSocket server
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) => {
+  console.info('A client connected');
+
+  // Handle messages from the client
+  ws.on('message', (message) => {
+    console.info('Received message:', data);
+    // You can handle the message here
+  });
+
+  // Handle WebSocket closing
+  ws.on('close', () => {
+    console.info('Client disconnected');
+  });
+
 });
 
 app.use('/api/v1/user', userRoutes);
@@ -57,3 +77,5 @@ app.use((err, req, res, next) => {
     statusCode,
   });
 });
+
+export { wss };

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn/SignIn';
 import SignUp from './pages/SignUp';
@@ -18,11 +18,12 @@ import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
 import Reports from './pages/Reports';
 import Report from './pages/Report';
+import ResetPassword from './pages/ResetPassword';
+import TwoFactorAuth from './pages/2fa/TwoFactorAuth';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const location = useLocation();
 
   // Function to validate token
   const validateToken = async () => {
@@ -38,7 +39,12 @@ function TokenValidator() {
       if (!data.valid) {
         const handleSignOut = async () => {
           try {
-            await fetch('/api/v1/auth/signout');
+            await fetch('/api/v1/auth/signout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
             dispatch(signOut());
 
             // Go to home page
@@ -55,7 +61,7 @@ function TokenValidator() {
 
   useEffect(() => {
     validateToken();
-  }, [location.pathname, currentUser]);
+  }, [currentUser]);
 
   return null;
 }
@@ -70,7 +76,6 @@ function App() {
         <Route element={<HeaderRoute />}>
           <Route path='/' element={<Home />} />
           <Route path='/sign-in' element={<SignIn />} />
-          <Route path='/sign-up' element={<SignUp />} />
           <Route element={<PrivateRoute />}>
             <Route path='/reports' element={<Reports />} />
             <Route exact path="/report/:missionNumber" element={<Report />} />
@@ -80,7 +85,10 @@ function App() {
         </Route>
         <Route element={<PrivateRoute />}>
           <Route path='/admin' element={<AdminDashboard />} />
+          <Route path='/2fa' element={<TwoFactorAuth />} />
         </Route>
+        <Route path='/sign-up' element={<SignUp />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path='*' element={<NotFoundPage />} />
       </Routes>
       <ToastContainer

@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
 import bcryptjs from 'bcryptjs';
 import nodemailer from 'nodemailer';
+import sendEmail from '../utils/sendEmail.js';
 
 // Test
 export const test = (req, res) => {
@@ -32,7 +33,6 @@ export const updateUser = async (req, res, next) => {
       body.experience.FR = body.experienceFR || body.experience.FR;
     }
 
-    const firstAidCourse = (body?.firstAidCourse !== undefined) ? body.firstAidCourse : user.firstAidCourse;
     const firstName = (body?.firstName !== undefined) ? body.firstName : user.firstName;
     const lastName = (body?.lastName !== undefined) ? body.lastName : user.lastName;
     const studentClass = (body?.studentClass !== undefined) ? body.studentClass : user.studentClass;
@@ -44,12 +44,14 @@ export const updateUser = async (req, res, next) => {
     const llisPosition = (body?.llisPosition !== undefined) ? body.llisPosition : user.llisPosition;
     const verified = (body?.verified !== undefined) ? body.verified : user.verified;
 
+    const emailVerified = (body?.emailVerified !== undefined) ? body.emailVerified : user.emailVerified;
+    const notifications = (body?.notifications !== undefined) ? body.notifications : user.notifications;
+    const onBoarded = (body?.onBoarded !== undefined) ? body.onBoarded : user.onBoarded;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
-          firstAidCourse,
           firstName,
           lastName,
           studentClass,
@@ -58,7 +60,6 @@ export const updateUser = async (req, res, next) => {
           email,
           training,
           operationalPosition: checkOperationalPosition(
-            firstAidCourse,
             training,
             experience.RTW,
             experience.FR
@@ -67,6 +68,9 @@ export const updateUser = async (req, res, next) => {
           IAM,
           llisPosition,
           verified,
+          emailVerified,
+          notifications,
+          onBoarded,
         },
       },
       { new: true }
@@ -105,8 +109,26 @@ export const fetchUser = async (req, res, next) => {
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));
     }
-    const { password, ...rest } = user[0];
+    // Before sending the data to the user remove the password and twoFactorAuthSecret
+    const { password, twoFactorAuthSecret, ...rest } = user[0];
     res.status(200).json(rest);
+  } catch (error) {
+    console.error(error);
+    next(errorHandler(500, 'An error occurred while fetching user.'));
+  }
+};
+
+// Fetch authenticator enabled
+export const fetchUserAuthEnabled = async (req, res, next) => {
+  const IAM = req.params.IAM;
+  try {
+    const user = await User.find({ IAM });
+    if (!user || user.length === 0) {
+      return next(errorHandler(404, 'User not found.'));
+    }
+    // Before sending the data to the user remove the password and twoFactorAuthSecret
+    const { twoFactorAuth } = user[0];
+    res.status(200).json(twoFactorAuth);
   } catch (error) {
     console.error(error);
     next(errorHandler(500, 'An error occurred while fetching user.'));
@@ -116,26 +138,79 @@ export const fetchUser = async (req, res, next) => {
 export const notifyUser = async (req, res, next) => {
   const emailBody = req.body.emailBody;
 
-  const emailUser = process.env.EMAIL_USER;
-  const emailPassword = process.env.EMAIL_PASSWORD;
-
-  let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: emailUser,
-      pass: emailPassword
-    }
-  });
-
-  // Send email using transporter
-  let info = await transporter.sendMail(emailBody);
-
+  const info = sendEmail(emailBody);
 
   return res.status(200).json({ info });
 };
 
-const checkOperationalPosition = (firstAidCourse, training, rtwExperience, frExperience) => {
-  const hasFirstAidCourse = firstAidCourse;
+export const verifyEmail = async (req, res, next) => {
+  const { code, time, email } = req.body;
+
+  const html = `
+  <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+        .header {
+          background-color: #007bff;
+          color: #fff;
+          padding: 20px;
+          text-align: center;
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
+        }
+        .content {
+          padding: 20px;
+        }
+        .button {
+          background-color: #007bff;
+          color: #fff;
+          padding: 10px 20px;
+          text-decoration: none;
+          border-radius: 5px;
+        }
+        .form-card {
+          margin-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Email Verification</h1>
+        </div>
+        <div class="content">
+          <p>Hello,</p>
+          <p>Please verify your email address by entering the following code in the verification form:</p>
+          <h2 style="text-align: center;">${code}</h2>
+          <p>The code will expire in ${time / 60} minutes.</p>
+          <p>Thank you!</p>
+        </div>
+      </div>
+    </body>
+  </html>
+`;
+
+  const info = sendEmail({
+    to: email,
+    subject: 'Email verification',
+    html,
+  });
+
+  return res.status(200).json({ info });
+};
+
+const checkOperationalPosition = (training, rtwExperience, frExperience) => {
+  const hasFirstAidCourse = training.includes('First Aid Course');
   const hasSAP1 = training.includes('SAP 1');
   const hasSAP2 = training.includes('SAP 2');
   const hasRTWExperience = rtwExperience >= 100;

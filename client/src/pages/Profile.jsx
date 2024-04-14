@@ -12,10 +12,11 @@ import {
   signOut,
 } from '../redux/user/userSlice';
 import { toast } from 'react-toastify';
-import { getSelectMenuClass, isClassValid, isPasswordValid } from '../utils';
+import { isClassValid, isPasswordValid } from '../utils';
 import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -23,7 +24,6 @@ export default function Profile() {
 
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
-  const [classOptions, setClassOptions] = useState([]);
   const [trainingFirstAidCourse, setTrainingFirstAidCourse] = useState(false);
   const [trainingSAP1, setTrainingSAP1] = useState(false);
   const [trainingSAP2, setTrainingSAP2] = useState(false);
@@ -31,19 +31,9 @@ export default function Profile() {
 
   useEffect(() => {
     try {
-      const fetchData = async () => {
-        try {
-          const response = await getSelectMenuClass(t); // Use your actual fetching function
-          setClassOptions(response);
-
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      setTrainingFirstAidCourse(currentUser.firstAidCourse);
+      setTrainingFirstAidCourse(currentUser.training?.includes('First Aid Course'));
       setTrainingSAP1(currentUser.training?.includes('SAP 1'));
       setTrainingSAP2(currentUser.training?.includes('SAP 2'));
-      fetchData();
     } catch (error) {
       console.error(error);
     }
@@ -70,8 +60,9 @@ export default function Profile() {
 
       if (trainingSAP1) trainings.push('SAP 1');
       if (trainingSAP2) trainings.push('SAP 2');
+      if (checked) trainings.push('First Aid Course');
 
-      setFormData({ ...formData, training: trainings, firstAidCourse: checked });
+      setFormData({ ...formData, training: trainings });
     } else if (id === 'trainingSAP1') {
       setTrainingSAP1(checked)
 
@@ -178,13 +169,19 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/v1/auth/signout');
+      await fetch('/api/v1/auth/signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       dispatch(signOut())
       toast.info(`${t('toast.profile.signed_out')}`);
     } catch (error) {
       toast.info(`${t('toast.profile.signed_out.error')}`);
     }
   };
+
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -265,21 +262,6 @@ export default function Profile() {
           </Row>
         </div>
 
-        <Form.Group controlId='studentClass'>
-          <FloatingLabel
-            label={t('profile.class.label')}
-            className="mb-3"
-          >
-            <Form.Select id='studentClass' onChange={handleChange} value={formData.studentClass || currentUser.studentClass}>
-              {classOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Form.Select>
-          </FloatingLabel>
-        </Form.Group>
-
         <Form.Group controlId='training'>
           <FormLabel className="mb-3 text-lg">
             {t('profile.training.label')}
@@ -309,29 +291,23 @@ export default function Profile() {
             onChange={handleTrainingChange}
           />
         </Form.Group>
-        <Form.Group controlId='email'>
-          <FloatingLabel
-            label={t('profile.email')}
-            className="mb-3"
-          >
-            <Form.Control
-              type='email'
-              defaultValue={formData.email || currentUser.email}
-              placeholder={t('profile.email')}
-              onChange={handleChange}
-              id='email'
-            />
-          </FloatingLabel>
-        </Form.Group>
         <Button
           variant='primary'
           type='submit'
           disabled={loading}
           className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
         >
-          {loading ? `${t('button.loading')}` : `${t('button.update')}` }
+          {loading ? `${t('button.loading')}` : `${t('button.update')}`}
         </Button>
       </Form>
+
+
+      <Link to="/2fa" className="d-block text-center">
+        <Button variant="outline-primary" className="w-100 mt-3">
+          {t('profile.manage_2fa')}
+        </Button>
+      </Link>
+
       <div className='flex justify-between mt-5'>
         <span
           onClick={handleDeleteAccount}

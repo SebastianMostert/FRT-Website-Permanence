@@ -54,7 +54,7 @@ export async function getSelectMenuClass(t) {
         for (let i = 0; i < classes.length; i++) {
             const _class = classes[i];
             const value = _class.name;
-            const label = `${_class.longName} - (${_class.name})`;
+            const label = `${_class.name} - (${_class.longName})`;
 
             finalClasses.push({ value, label });
         }

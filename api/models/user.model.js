@@ -23,12 +23,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-    }, // Done
-    profilePicture: {
-      type: String,
-      default:
-        'https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg',
-    }, // Done
+    },
     training: {
       type: [{
         type: String,
@@ -36,12 +31,6 @@ const userSchema = new mongoose.Schema(
       }],
       required: true,
       default: [],
-    }, // Done
-    llisPosition: {
-      type: String,
-      enum: ['Student', 'Teacher', 'SEPAS'],
-      required: true,
-      default: 'Student',
     },
     experience: {
       RTW: {
@@ -54,10 +43,6 @@ const userSchema = new mongoose.Schema(
         required: true,
         default: 0,
       }
-    }, // Done
-    firstAidCourse: {
-      type: Boolean,
-      default: true,
     },
     operationalPosition: {
       type: String,
@@ -74,12 +59,55 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
     }, // Done
     verified: {
       type: Boolean,
+      default: true,
+      required: true,
+    },
+    emailVerified: {
+      type: Boolean,
       default: false,
       required: true,
-    }
+    },
+    onBoarded: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    twoFactorAuth: {
+      type: Boolean,
+      default: false,
+    },
+    twoFactorAuthSecret: {
+      type: String,
+      default: '',
+    },
+    notifications: {
+      securityEmails: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
+      shiftEmails: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
+      otherEmails: {
+        type: Boolean,
+        default: true,
+        required: false,
+      },
+    },
+    roles: {
+      type: [{
+        type: String,
+        enum: ['admin', 'user', 'public'],
+      }],
+      default: ['user'],
+    },
   },
   { timestamps: true }
 );

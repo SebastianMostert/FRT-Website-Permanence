@@ -77,19 +77,13 @@ export const getClasses = async (req, res, next) => {
         await untisHelper.login();
         const classes = await untisHelper.untis.getClasses();
 
+        classes.push({
+            name: 'Teacher',
+            longName: 'Teacher',
+        })
         res.json({
             message: 'All available classes',
-            classes: [
-                ...classes,
-                {
-                    id: 9999,
-                    name: 'teacher',
-                    longName: 'Teacher',
-                    active: true,
-                    did: 9999,
-                    teacher1: 9999
-                }
-            ],
+            classes,
         });
     } catch (error) {
         console.error(error);
