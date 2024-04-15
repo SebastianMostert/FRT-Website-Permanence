@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { isPasswordValid } from '../utils';
+import { isPasswordValid } from '../../utils';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');

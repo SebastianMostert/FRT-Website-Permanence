@@ -1,4 +1,4 @@
-import Onboarding from './Onboarding/Onboarding';
+import { Onboarding } from './index';
 
 export default function SignUp() {
   return <Onboarding />

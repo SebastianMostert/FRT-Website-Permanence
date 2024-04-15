@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import ReportForm from "../components/Report/ReportForm";
-import NotFound from "./ErrorPages/Pages/404";
+import { NotFoundPage } from "./index";
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from "react";
 
@@ -28,8 +28,8 @@ const Report = () => {
   }, [missionNumber]);
 
   // Ensure correct format 
-  if (missionNumber.length !== 10) return <NotFound />
-  if (!missionNumber.match(/^[0-9]+$/)) return <NotFound />
+  if (missionNumber.length !== 10) return <NotFoundPage />
+  if (!missionNumber.match(/^[0-9]+$/)) return <NotFoundPage />
 
   return (
     <div className='max-w-4xl mx-auto'>

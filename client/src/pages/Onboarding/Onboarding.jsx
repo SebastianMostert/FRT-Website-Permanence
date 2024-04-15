@@ -3,13 +3,7 @@ import { CSSTransition, TransitionGroup, SwitchTransition } from 'react-transiti
 import { isIAMValid, isPasswordValid } from '../../utils';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
-import Introduction from './Introduction';
-import VerifyEmail from './VerifyEmail';
-import BasicInfo from './BasicInfo';
-import Experience from './Experience';
-import Trainings from './Trainings';
-import Notifications from './Notifications';
-import ThankYou from './ThankYou';
+import { BasicInfo, Experience, Notifications, Trainings, VerifyEmail, Introduction, ThankYou } from './index';
 
 import {
   signInStart,

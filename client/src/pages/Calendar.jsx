@@ -10,13 +10,13 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../Styles/CustomCalendar.css'; // Import your custom CSS stylesheet
 
 import CalendarComponent from '../components/Calendar/Calendar';
-import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import AvailabilityModal from '../components/Calendar/AvailabilityModal';
-import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
+import CreateAvailabilityModal from '../components/Modals/CreateAvailabilityModal';
 import ShiftModal from '../components/Calendar/ShiftModal';
 import ExamModal from '../components/Modals/ExamModal';
-import CreateAvailabilityModal from '../components/Modals/CreateAvailabilityModal';
+
+import { NoMobilePage, NotAuthorized } from './index'
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';

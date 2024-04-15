@@ -1,4 +1,4 @@
-import IAMSignIn from './IAMSignIn';
+import { IAMSignIn } from './index';
 
 export default function SignIn() {
 

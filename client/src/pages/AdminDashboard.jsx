@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { NotAuthorized } from './ErrorPages/Pages/401';
 import AdminSidebar from '../components/Admin/AdminSidebar';
 import ShiftAvailability from '../components/ShiftAvailability';
-import NoMobilePage from './ErrorPages/Pages/NoMobilePage';
 import { isMobile } from '../utils';
-import Dashboard from '../Admin/pages/Dashboard';
+
+import { NotAuthorized, NoMobilePage } from './index'
 
 const AdminDashboard = () => {
     const { currentUser } = useSelector((state) => state.user);

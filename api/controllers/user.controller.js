@@ -14,9 +14,14 @@ export const test = (req, res) => {
 // Update User
 export const updateUser = async (req, res, next) => {
   const body = req.body;
-  if (req.user.id !== req.params.id) {
-    return next(errorHandler(401, 'You can update only your account!'));
-  }
+  const user = req.user;
+
+  // TODO: FIX
+  // Check if the user is an admin 
+  // if (user.id !== req.params.id) {
+  //   return next(errorHandler(401, 'You can update only your account!'));
+  // }
+  
   try {
     // Fetch the user
     const user = await User.findById(req.params.id);
@@ -48,6 +53,8 @@ export const updateUser = async (req, res, next) => {
     const notifications = (body?.notifications !== undefined) ? body.notifications : user.notifications;
     const onBoarded = (body?.onBoarded !== undefined) ? body.onBoarded : user.onBoarded;
 
+    const roles = (body?.roles !== undefined) ? body.roles : user.roles;
+
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -71,6 +78,7 @@ export const updateUser = async (req, res, next) => {
           emailVerified,
           notifications,
           onBoarded,
+          roles
         },
       },
       { new: true }
@@ -112,6 +120,24 @@ export const fetchUser = async (req, res, next) => {
     // Before sending the data to the user remove the password and twoFactorAuthSecret
     const { password, twoFactorAuthSecret, ...rest } = user[0];
     res.status(200).json(rest);
+  } catch (error) {
+    console.error(error);
+    next(errorHandler(500, 'An error occurred while fetching user.'));
+  }
+};
+
+// Fetch All User
+export const fetchAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    let usersArray = [];
+    // Before sending the data to the user remove the password and twoFactorAuthSecret from each user
+    usersArray = users.map(user => {
+      const { password, twoFactorAuthSecret, ...rest } = user._doc;
+      return rest;
+    })
+
+    res.status(200).json(usersArray);
   } catch (error) {
     console.error(error);
     next(errorHandler(500, 'An error occurred while fetching user.'));

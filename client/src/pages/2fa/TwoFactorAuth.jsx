@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import TwoFactorAuthSetup from './TwoFactorAuthSetup'
-import TwoFactorAuthRemove from './TwoFactorAuthRemove'
+import { TwoFactorAuthRemove, TwoFactorAuthSetup } from './index'
 import { Card, ListGroup, Button, Container, Row, Col } from 'react-bootstrap'
 
 import { useTranslation } from 'react-i18next'

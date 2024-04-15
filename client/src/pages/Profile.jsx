@@ -13,10 +13,10 @@ import {
 } from '../redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { isClassValid, isPasswordValid } from '../utils';
-import { NotAuthorized } from './ErrorPages/Pages/401';
 import { useTranslation } from 'react-i18next';
 import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { NotAuthorized } from './index';
 
 export default function Profile() {
   const { t } = useTranslation();

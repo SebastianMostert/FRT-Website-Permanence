@@ -21,24 +21,40 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
     const [headerToolbar, setHeaderToolbar] = useState({
         left: 'prev,next today',
         center: 'title',
-        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
+        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
     });
 
     useEffect(() => {
         const handleResize = () => {
             // Set initialView based on screen size
             if (window.innerWidth <= hideToolbarSize) {
-                setHeaderToolbar({
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'createAvailabilityButton',
-                });
+
+                if (customButtons) {
+                    setHeaderToolbar({
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'createAvailabilityButton',
+                    });
+                } else {
+                    setHeaderToolbar({
+                        left: 'prev,next today',
+                        center: 'title',
+                    });
+                }
             } else {
-                setHeaderToolbar({
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
-                });
+                if (customButtons) {
+                    setHeaderToolbar({
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
+                    });
+                } else {
+                    setHeaderToolbar({
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
+                    });
+                }
             }
         };
 
@@ -62,26 +78,39 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
                 right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
             });
         } else {
-            setHeaderToolbar({
-                left: 'prev,next today',
-                center: 'title',
-                right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
-            });
+            if (customButtons) {
+                setHeaderToolbar({
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
+                });
+            } else {
+                setHeaderToolbar({
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
+                });
+            }
         }
     }, [loading]);
 
     return (
         <FullCalendar
             plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction, bootstrap5Plugin]}
-            initialView={localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth'}
+            initialView={window.localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth'}
             windowResize={(e) => {
-                const newViewType = window.innerWidth <= hideToolbarSize ? 'timeGridWeek' : 'dayGridMonth';
+                const localStorage = window.localStorage;
+                const localStorageType = localStorage.getItem(VIEW_TYPE_KEY);
+                console.log(localStorageType);
+                const newViewType = window.innerWidth <= hideToolbarSize ? 'timeGridWeek' : localStorageType || 'dayGridMonth';
+                console.log(newViewType);
                 localStorage.setItem(VIEW_TYPE_KEY, newViewType);
 
                 const calendar = e.view.calendar;
 
                 calendar.changeView(newViewType);
             }}
+
             events={events}
             businessHours={{
                 daysOfWeek: [1, 2, 3, 4, 5],

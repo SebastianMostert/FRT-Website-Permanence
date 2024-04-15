@@ -1,25 +1,34 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import SignIn from './pages/SignIn/SignIn';
-import SignUp from './pages/SignUp';
-import Profile from './pages/Profile';
-import PrivateRoute from './components/PrivateRoute';
-import Calendar from './pages/Calendar';
+import PrivateRoute from './components/Routes/PrivateRoute';
 import { ToastContainer } from 'react-toastify';
-import AdminDashboard from './pages/AdminDashboard';
-import NotFoundPage from './pages/ErrorPages/Pages/404';
 import './App.css';
-import HeaderRoute from './components/HeaderRoute';
+import HeaderRoute from './components/Routes/HeaderRoute';
+import SidebarRoute from './components/Routes/SidebarRoute';
 import { isTinyMobile } from './utils';
-import NoMobilePage from './pages/ErrorPages/Pages/NoMobilePage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
-import Reports from './pages/Reports';
-import Report from './pages/Report';
-import ResetPassword from './pages/ResetPassword';
-import TwoFactorAuth from './pages/2fa/TwoFactorAuth';
+
+import {
+  Reports,
+  Report,
+  ResetPassword,
+  TwoFactorAuth,
+  NotFoundPage,
+  NoMobilePage,
+  Home,
+  SignIn,
+  SignUp,
+  Profile,
+  Calendar,
+} from './pages/index'
+
+import Dashboard from './Admin/pages/Dashboard';
+import Users from './Admin/pages/Users';
+import Availabilities from './Admin/pages/Availabilities';
+import Shifts from './Admin/pages/Shifts';
+import Settings from './Admin/pages/Settings';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -73,6 +82,13 @@ function App() {
     <BrowserRouter>
       <TokenValidator />
       <Routes>
+        <Route element={<SidebarRoute />}>
+          <Route path='/admin' element={<Dashboard />} />
+          <Route path='/admin/users' element={<Users />} />
+          <Route path='/admin/availabilities' element={<Availabilities />} />
+          <Route path='/admin/shifts' element={<Shifts />} />
+          <Route path='/admin/settings' element={<Settings />} />
+        </Route>
         <Route element={<HeaderRoute />}>
           <Route path='/' element={<Home />} />
           <Route path='/sign-in' element={<SignIn />} />
@@ -84,7 +100,6 @@ function App() {
           </Route>
         </Route>
         <Route element={<PrivateRoute />}>
-          <Route path='/admin' element={<AdminDashboard />} />
           <Route path='/2fa' element={<TwoFactorAuth />} />
         </Route>
         <Route path='/sign-up' element={<SignUp />} />

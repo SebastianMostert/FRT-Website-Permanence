@@ -10,7 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Form, Button, InputGroup } from 'react-bootstrap';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
-import ForgotPassword from '../ForgotPassword';
+
+import { ForgotPassword } from '../index'
 
 const defaultValues = {
   IAM: '',
