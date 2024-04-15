@@ -53,7 +53,7 @@ const Availabilities = () => {
 
 export default Availabilities;
 
-async function getAvailabilities(IAM) {
+async function getAvailabilities() {
     try {
         const res = await fetch(`/api/v1/availability/all`, {
             method: 'POST',

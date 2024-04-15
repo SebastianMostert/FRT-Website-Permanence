@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import HeaderRoute from './components/Routes/HeaderRoute';
 import SidebarRoute from './components/Routes/SidebarRoute';
+import AdminRoute from './components/Routes/AdminRoute';
 import { isTinyMobile } from './utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
@@ -82,12 +83,14 @@ function App() {
     <BrowserRouter>
       <TokenValidator />
       <Routes>
-        <Route element={<SidebarRoute />}>
-          <Route path='/admin' element={<Dashboard />} />
-          <Route path='/admin/users' element={<Users />} />
-          <Route path='/admin/availabilities' element={<Availabilities />} />
-          <Route path='/admin/shifts' element={<Shifts />} />
-          <Route path='/admin/settings' element={<Settings />} />
+        <Route element={<AdminRoute />}>
+          <Route element={<SidebarRoute />}>
+            <Route path='/admin' element={<Dashboard />} />
+            <Route path='/admin/users' element={<Users />} />
+            <Route path='/admin/availabilities' element={<Availabilities />} />
+            <Route path='/admin/shifts' element={<Shifts />} />
+            <Route path='/admin/settings' element={<Settings />} />
+          </Route>
         </Route>
         <Route element={<HeaderRoute />}>
           <Route path='/' element={<Home />} />

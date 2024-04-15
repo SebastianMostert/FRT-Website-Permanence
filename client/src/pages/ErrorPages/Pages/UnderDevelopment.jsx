@@ -1,4 +1,4 @@
-import '../CSS/underDevelopment.css';
+import '../CSS/UnderDevelopment.css';
 
 const UnderDevelopment = () => {
     return (
