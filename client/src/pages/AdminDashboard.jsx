@@ -1,22 +1,17 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import AdminSidebar from '../components/Admin/AdminSidebar';
 import ShiftAvailability from '../components/ShiftAvailability';
+
+import { NoMobilePage } from './index'
 import { isMobile } from '../utils';
 
-import { NotAuthorized, NoMobilePage } from './index'
-
 const AdminDashboard = () => {
-    const { currentUser } = useSelector((state) => state.user);
-    const roles = currentUser?.roles;
-
     const [selectedNavItem, setSelectedNavItem] = useState('#home');
 
     const handleNavItemClick = (navItem) => {
         setSelectedNavItem(navItem);
     };
 
-    if (!roles?.includes('admin')) return <NotAuthorized />;
     if (isMobile()) return <NoMobilePage />;
 
     return (

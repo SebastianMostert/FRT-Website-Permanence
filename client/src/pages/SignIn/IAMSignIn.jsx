@@ -104,6 +104,7 @@ export default function IAMSignIn() {
         const data = await res.json()
 
         if (!res.ok) {
+          if(res.status == 404) return
           toast.error(`An error occured`)
           return
         }
@@ -111,11 +112,10 @@ export default function IAMSignIn() {
         setTwoFactorAuthEnabled(data);
       } catch (error) {
         toast.error(`An error occured: ${error.message}`)
-        console.log(error)
+        console.error(error)
       }
     }
 
-    console.log(iam.length);
     if (iam.length == 8) fetchUser();
     else setTwoFactorAuthEnabled(null);
   }, [navigate, formData.IAM]);

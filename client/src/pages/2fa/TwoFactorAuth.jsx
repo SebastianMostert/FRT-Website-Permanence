@@ -35,7 +35,7 @@ const TwoFactorAuth = () => {
                 setTwoFactorAuthEnabled(data);
             } catch (error) {
                 toast.error(t('2fa.error'))
-                console.log(error)
+                console.error(error)
             }
         }
 

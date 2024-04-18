@@ -97,3 +97,13 @@
 .fade-exit-active {
     transition: opacity 500ms;
 }
+
+.dark-bg {
+    background-color: #222;
+    color: #fff;
+}
+
+.light-bg {
+    background-color: #fff;
+    color: #222;
+}

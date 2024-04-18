@@ -25,12 +25,14 @@ const Sidebar = () => {
                     left: 0;
                     background-color: #f8f9fa;
                     padding: 20px;
+                    overflow-y: auto; /* Enable scrolling */
                 }
 
                 .sidebar-footer {
-                    position: absolute;
+                    position: fixed;
                     bottom: 20px;
                     left: 20px;
+                    width: 250px;
                 }
 
                 .content {
@@ -86,11 +88,11 @@ const Sidebar = () => {
                         </Nav.Link>
                     </Nav.Item>
                 </Nav>
-                <div className="sidebar-footer">
-                    <Button variant="primary" as={NavLink} to="/">
-                        Return to Website
-                    </Button>
-                </div>
+            </div>
+            <div className="sidebar-footer">
+                <Button variant="primary" as={NavLink} to="/">
+                    Return to Website
+                </Button>
             </div>
         </>
     );

@@ -34,7 +34,7 @@ const ForgotPassword = () => {
       return data;
     } catch (error) {
       toast.error(`An error occurred: ${error.message}`);
-      console.log(error);
+      console.error(error);
     }
   };
 

@@ -8,7 +8,6 @@ export default function PrivateRoute() {
     const { currentUser } = useSelector(state => state.user)
     const [roles, setRoles] = useState([]);
 
-
     try {
         useEffect(() => {
             async function fetchData() {
@@ -19,9 +18,8 @@ export default function PrivateRoute() {
             fetchData();
         }, [currentUser?.IAM]);
 
-        const isAdmin = roles?.includes('admin');
-
-        return isAdmin ? <Outlet /> : <NotAuthorized />
+        const isLoge = roles?.includes('loge');
+        return isLoge ? <Outlet /> : <NotAuthorized />
     } catch (error) {
         return <NotAuthorized />
     }

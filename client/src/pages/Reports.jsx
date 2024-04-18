@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form, Button, Col, Row, Container, InputGroup, FormControl, FloatingLabel } from "react-bootstrap";
 import IncidentReportCard from "../components/Incidents/IncidentReportCard";
-import { getAllReports, getMember, reportCSV, reportPDF, updateReport } from "../utils";
+import { getAllReports, getMember, getRoles, reportCSV, reportPDF, updateReport } from "../utils";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -16,11 +16,19 @@ const Reports = () => {
   const [searchNumber, setSearchNumber] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(false); // State for refresh
+  const [roles, setRoles] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
   const { t } = useTranslation();
 
-  const roles = currentUser?.roles;
+  useEffect(() => {
+    const fetchRoles = async () => {
+      const roles = await getRoles(currentUser?.IAM);
+      setRoles(roles);
+    };
+    fetchRoles();
+  }, [currentUser?.IAM]);
+
   const isAdmin = roles?.includes("admin");
 
   useEffect(() => {

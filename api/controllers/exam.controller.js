@@ -81,6 +81,14 @@ export const getClasses = async (req, res, next) => {
             name: 'Teacher',
             longName: 'Teacher',
         })
+        classes.push({
+            name: 'Public',
+            longName: 'Public',
+        })
+        classes.push({
+            name: 'Loge',
+            longName: 'Loge',
+        })
         res.json({
             message: 'All available classes',
             classes,

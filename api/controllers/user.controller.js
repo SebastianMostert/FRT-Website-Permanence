@@ -21,7 +21,7 @@ export const updateUser = async (req, res, next) => {
   // if (user.id !== req.params.id) {
   //   return next(errorHandler(401, 'You can update only your account!'));
   // }
-  
+
   try {
     // Fetch the user
     const user = await User.findById(req.params.id);
@@ -97,9 +97,11 @@ export const updateUser = async (req, res, next) => {
 
 // Delete User
 export const deleteUser = async (req, res, next) => {
-  if (req.user.id !== req.params.id) {
-    return next(errorHandler(401, 'You can delete only your account!'));
-  }
+  // TODO: FIX
+  // Check if the user is an admin 
+  // if (user.id !== req.params.id) {
+  //   return next(errorHandler(401, 'You can update only your account!'));
+  // }
   try {
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json('User has been deleted...');
@@ -143,7 +145,6 @@ export const fetchAllUsers = async (req, res, next) => {
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
-
 // Fetch authenticator enabled
 export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
   const IAM = req.params.IAM;
@@ -175,7 +176,6 @@ export const fetchUserAuthEnabledByEmail = async (req, res, next) => {
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
-
 export const notifyUser = async (req, res, next) => {
   const emailBody = req.body.emailBody;
 
@@ -183,7 +183,6 @@ export const notifyUser = async (req, res, next) => {
 
   return res.status(200).json({ info });
 };
-
 export const verifyEmail = async (req, res, next) => {
   const { code, time, email } = req.body;
 
@@ -249,7 +248,6 @@ export const verifyEmail = async (req, res, next) => {
 
   return res.status(200).json({ info });
 };
-
 const checkOperationalPosition = (training, rtwExperience, frExperience) => {
   const hasFirstAidCourse = training.includes('First Aid Course');
   const hasSAP1 = training.includes('SAP 1');
@@ -263,4 +261,36 @@ const checkOperationalPosition = (training, rtwExperience, frExperience) => {
   else if (hasSAP1) return 'Equipier Bin.';
   else if (hasFirstAidCourse) return 'Stagiaire Bin.';
   else return 'None';
+};
+
+export const fetchRoles = async (req, res, next) => {
+  const IAM = req.params.IAM;
+  try {
+    const user = await User.find({ IAM });
+    if (!user || user.length === 0) {
+      return next(errorHandler(404, 'User not found.'));
+    }
+    // Before sending the data to the user remove the password and twoFactorAuthSecret
+    const { roles } = user[0];
+    res.status(200).json(roles);
+  } catch (error) {
+    console.error(error);
+    next(errorHandler(500, 'An error occurred while fetching user.'));
+  }
+};
+
+export const exists = async (req, res, next) => {
+  const IAM = req.params.IAM;
+  try {
+    const user = await User.find({ IAM });
+
+    if (user?.length > 0) {
+      res.status(200).json({ exists: true }); // Send response indicating user exists
+    } else {
+      res.status(200).json({ exists: false }); // Send response indicating user doesn't exist
+    }
+  } catch (error) {
+    console.error(error);
+    next(errorHandler(500, 'An error occurred while fetching user.'));
+  }
 };

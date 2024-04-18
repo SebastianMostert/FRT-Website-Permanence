@@ -1,29 +1,26 @@
+// Import necessary modules
 import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
-import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 import MemberIAM from '../models/memberIAM.model.js';
 import ResetPassword from '../models/resetPasswordRequest.model.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
-
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
+import { errorHandler } from '../utils/error.js';
 
 // Sign Up
 export const signup = async (req, res, next) => {
-  req.body.IAM = req.body.IAM.toLowerCase(); // Convert IAM to lowercase
-  req.body.password = bcryptjs.hashSync(req.body.password, 10);
   try {
+    req.body.IAM = req.body.IAM.toLowerCase(); // Convert IAM to lowercase
+    req.body.password = bcryptjs.hashSync(req.body.password, 10);
+
     // Check if IAM is a member IAM
     const verified = await isMemberIAM(req.body.IAM);
-
-    if (!verified) {
-      throw errorHandler(400, 'Invalid IAM. User is not a member.');
-    }
-
-    const newUser = new User(req.body);
+    const newUser = new User({ ...req.body, verified });
     await newUser.save();
+
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     console.error(error);
@@ -33,22 +30,26 @@ export const signup = async (req, res, next) => {
 
 // Sign In
 export const signin = async (req, res, next) => {
-  let { IAM, password, code } = req.body;
-  IAM = IAM.toLowerCase(); // Convert IAM to lowercase
-
   try {
+    let { IAM, password, code } = req.body;
+    IAM = IAM.toLowerCase(); // Convert IAM to lowercase
+
     const { success: validPassword, statusCode, statusText, user } = await validatePassword(IAM, password, code);
+
     if (!validPassword) {
       throw errorHandler(statusCode, statusText);
+    }
+
+    // Check if the user is verified
+    if (!user.verified && ['admin', 'member', 'loge'].some(role => user.roles.includes(role))) {
+      throw errorHandler(401, 'User is not verified');
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     const { password: hashedPassword, twoFactorAuthSecret, ...rest } = user._doc;
     const expiryDate = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-    res
-      .cookie('access_token', token, { httpOnly: true, expires: expiryDate })
-      .status(200)
-      .json(rest);
+
+    res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
   } catch (error) {
     console.error(error);
     next(error);
@@ -61,7 +62,7 @@ export const signout = (req, res) => {
 };
 
 // Validate
-export const validate = (req, res) => {
+export const validate = (req, res, next) => {
   // Get the token
   const token = req.cookies.access_token;
 
@@ -232,8 +233,6 @@ export const resetPassword = async (req, res) => {
     const helpBody = encodeURIComponent(`Hello,\n\nI am reaching out because it seems that my password has been changed without my authorization.\nCould you please assist me in resolving this issue?\nMy IAM is: ${user.IAM}\n\nThank you,\n${user.lastName} ${user.firstName}`);
 
     const contactHelpLink = `mailto:${helpEmail}?subject=${helpSubject}&body=${helpBody}`;
-
-    console.log(contactHelpLink);
     const html = `
       <html>
         <head>

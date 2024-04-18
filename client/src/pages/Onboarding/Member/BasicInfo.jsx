@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import { Form, Button, Row, FloatingLabel, Col, Alert, InputGroup } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { getSelectMenuClass, isIAMValid, isPasswordValid } from '../../utils';
+import { getSelectMenuClass, isIAMValid, isPasswordValid } from '../../../utils';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import Select from 'react-select';
+import FullNameInput from '../../../components/Inputs/FullName';
 
 const BasicInfo = ({ data, onChange, onNext }) => {
   const { t } = useTranslation();
@@ -43,20 +44,35 @@ const BasicInfo = ({ data, onChange, onNext }) => {
     }
 
     // Check if all required fields are filled and email is valid
-    if (
-      data.firstName &&
-      data.lastName &&
-      data.email &&
-      emailRegex.test(data.email) &&
-      data.IAM?.length === 8 &&
-      selectedClass
-    ) {
-      setShowError(false); // Reset error state
-      onNext(); // Proceed to next step
-    } else {
-      setShowError(true); // Show error message
+    if (!data.firstName) {
+      toast.error('First name is required');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: t('profile.firstName') }));
     }
+    if (!data.lastName) {
+      toast.error('Last name is required');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: t('profile.lastName') }));
+    }
+    if (!data.email || !emailRegex.test(data.email)) {
+      toast.error('Email is required and must be a valid email address');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: t('profile.email') }));
+    }
+    if (!data.IAM || data.IAM.length !== 8) {
+      toast.error('IAM is required and must be 8 characters long');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: 'IAM' }));
+    }
+    if (!data.password) {
+      toast.error('Password is required');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: t('sign_in.password') }));
+    }
+    if (!selectedClass) {
+      toast.error('Class is required');
+      return toast.error(t('onboarding.basic_info.validation_error', { field: t('profile.class.label') }));
+    }
+
+    setShowError(false); // Reset error state
+    onNext(); // Proceed to next step
   };
+
 
   const handleShowPassword = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
@@ -65,6 +81,11 @@ const BasicInfo = ({ data, onChange, onNext }) => {
   const handleClassChange = (selectedOption) => {
     setSelectedClass(selectedOption);
     onChange('studentClass', selectedOption ? selectedOption.value : null);
+  };
+
+  const handleNameChange = (e) => {
+    const { value, id } = e.target;
+    onChange(id, value);
   };
 
   const customStyles = {
@@ -79,40 +100,7 @@ const BasicInfo = ({ data, onChange, onNext }) => {
       <div className='p-10 w-full'>
         <h1 className="mb-4 text-center">{t('onboarding.basic_info.title')}</h1>
         <Form>
-          <Row className="mb-3">
-            <Col>
-              <Form.Group controlId='firstName'>
-                <FloatingLabel
-                  label={t('profile.first_name')}
-                  className="mb-3 text-gray-400"
-                >
-                  <Form.Control
-                    type='text'
-                    placeholder={t('profile.first_name')}
-                    value={data.firstName}
-                    onChange={(e) => onChange('firstName', e.target.value)}
-                    id='firstName'
-                  />
-                </FloatingLabel>
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group controlId='lastName'>
-                <FloatingLabel
-                  label={t('profile.last_name')}
-                  className="mb-3 text-gray-400"
-                >
-                  <Form.Control
-                    type='text'
-                    placeholder={t('profile.last_name')}
-                    value={data.lastName}
-                    onChange={(e) => onChange('lastName', e.target.value)}
-                    id='lastName'
-                  />
-                </FloatingLabel>
-              </Form.Group>
-            </Col>
-          </Row>
+          <FullNameInput formData={data} handleChange={handleNameChange} className='mb-3 text-gray-400' />
           <Row className="mb-3">
             <Col>
               <Form.Group controlId='email'>
@@ -125,7 +113,6 @@ const BasicInfo = ({ data, onChange, onNext }) => {
                     placeholder={t('profile.email')}
                     value={data.email}
                     onChange={(e) => onChange('email', e.target.value)}
-                    id='email'
                     pattern='[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
                     required
                   />
@@ -143,7 +130,6 @@ const BasicInfo = ({ data, onChange, onNext }) => {
                     placeholder="IAM"
                     value={data.IAM}
                     onChange={(e) => onChange('IAM', e.target.value)}
-                    id='iam'
                     minLength={8}
                     maxLength={8}
                   />
@@ -159,7 +145,6 @@ const BasicInfo = ({ data, onChange, onNext }) => {
                   placeholder={t('sign_in.password')}
                   className={`bg-slate-100 p-3 rounded-lg ${showPassword ? 'text-black' : ''}`}
                   onChange={(e) => onChange('password', e.target.value)}
-                  id='password'
                   value={data.password}
                   required
                 />
@@ -183,7 +168,6 @@ const BasicInfo = ({ data, onChange, onNext }) => {
               <Form.Label>{t('profile.class.label')}</Form.Label>
               <Select
                 className='text-black'
-                id='studentClass'
                 options={classOptions}
                 value={selectedClass}
                 onChange={handleClassChange}

@@ -8,12 +8,13 @@ import { SignIn } from './SignIn'
 
 import Calendar from './Calendar'
 import Home from './Home'
-import Profile from './Profile'
 import Report from './Report'
 import Reports from './Reports'
 import SignUp from './SignUp'
 
 import AdminDashboard from './AdminDashboard'
+
+import { Profile } from './Profiles'
 
 export {
     TwoFactorAuth,

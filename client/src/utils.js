@@ -352,3 +352,44 @@ export function formatDate(date) {
 
     return `${year}-${month}-${day}`;
 }
+
+export async function getRoles(IAM) {
+
+    // If the IAM is not provided, return an empty array
+    if (!IAM) {
+        return [];
+    }
+    // Fetch the roles for the given IAM
+    const res = await fetch(`/api/v1/user/roles/${IAM}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+
+    const roles = await res.json();
+    if (!roles) {
+        return [];
+    }
+
+    // Return the roles
+    return roles;
+}
+
+export async function userExists(IAM) {
+    try {
+        const res = await fetch(`/api/v1/user/exists/${IAM}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        const data = await res.json();
+        if(!res.ok) return false
+
+        return data?.exists;
+    } catch (error) {
+        return false;
+    }
+}

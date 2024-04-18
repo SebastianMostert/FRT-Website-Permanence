@@ -2,10 +2,14 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Navbar, Nav } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import { getRoles } from '../utils';
 
 export default function Header() {
   const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const logoStyle = {
     maxHeight: '50px',
@@ -13,8 +17,48 @@ export default function Header() {
     marginLeft: '10px',
   };
 
-  const roles = currentUser?.roles;
-  // If user is not an admin, redirect to 401 page
+  useEffect(() => {
+    async function fetchData() {
+      const roles = await getRoles(currentUser?.IAM);
+      setRoles(roles);
+
+      setLoading(false);
+    }
+
+    fetchData();
+  }, [currentUser?.IAM]);
+
+  const isAdmin = roles?.includes('admin');
+  const isMember = roles?.includes('member');
+  const isLoge = roles?.includes('loge');
+  const isPublic = roles?.includes('public');
+
+  const memberLinks = [
+    <Nav.Link key="calendar" as={Link} to="/calendar" className="nav-link">
+      {t('header.calendar')}
+    </Nav.Link>,
+    <Nav.Link key="reports" as={Link} to="/reports" className="nav-link">
+      {t('header.reports')}
+    </Nav.Link>
+  ];
+
+  const adminOnlyLinks = [
+    <Nav.Link key="admin" as={Link} to="/admin" className="nav-link">
+      {t('header.admin')}
+    </Nav.Link>
+  ];
+
+  const logeLinks = [
+    <Nav.Link key="loge" as={Link} to="#" className="nav-link">
+      {t('header.loge')}
+    </Nav.Link>
+  ];
+
+  const publicLinks = [
+    <Nav.Link key="public" as={Link} to="#" className="nav-link">
+      {t('header.public')}
+    </Nav.Link>
+  ];
 
   return (
     <Navbar expand="lg" className="shadow-sm bg-slate-200">
@@ -27,20 +71,13 @@ export default function Header() {
           <Nav.Link as={Link} to="/" className="nav-link">
             {t('header.home')}
           </Nav.Link>
-          {currentUser && (
+          {!loading && (
             <>
-              <Nav.Link as={Link} to="/calendar" className="nav-link">
-                {t('header.calendar')}
-              </Nav.Link>
-              <Nav.Link as={Link} to="/reports" className="nav-link">
-                {t('header.reports')}
-              </Nav.Link>
-
-              {roles?.includes('admin') && (
-                <Nav.Link as={Link} to="/admin" className="nav-link">
-                  {t('header.admin')}
-                </Nav.Link>
-              )}
+              {isAdmin && adminOnlyLinks}
+              {/* If Admin show all links */}
+              {(isAdmin || isMember) && memberLinks}
+              {(isAdmin || isLoge) && logeLinks}
+              {(isAdmin || isPublic) && publicLinks}
             </>
           )}
         </Nav>

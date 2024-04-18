@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 const timeInSeconds = 300;
 
-const VerifyEmail = ({ data, onChange, onNext }) => {
+const VerifyEmail = ({ darkMode, data, onChange, onNext }) => {
   const [verificationId, setVerificationId] = useState('');
   const [remainingTime, setRemainingTime] = useState(timeInSeconds); // 5 minutes in seconds
   const [timerInterval, setTimerInterval] = useState(null);
@@ -96,13 +96,13 @@ const VerifyEmail = ({ data, onChange, onNext }) => {
     <Container className="mt-5">
       <Row className="justify-content-center">
         <Col md={8}>
-          <Card className="form-card">
+          <Card className={`form-card ${darkMode ? 'bg-dark text-light' : ''}`}>
             <Card.Body>
-              <h1 className="text-center mb-4">{t('onboarding.verify_email.title')}</h1>
-              <p className="text-center">{t('onboarding.verify_email.subtitle')} {data.email}</p>
+              <h1 className={`text-center mb-4 ${darkMode ? 'text-light' : ''}`}>{t('onboarding.verify_email.title')}</h1>
+              <p className={`text-center ${darkMode ? 'text-light' : ''}`}>{t('onboarding.verify_email.subtitle')} {data.email}</p>
               <Form>
                 <Form.Group controlId="verificationId">
-                  <Form.Label>{t('onboarding.verify_email.label.otp_code')}</Form.Label>
+                  <Form.Label className={darkMode ? 'text-light' : ''}>{t('onboarding.verify_email.label.otp_code')}</Form.Label>
                   <Form.Control
                     type="text"
                     value={data.verificationId}
@@ -116,7 +116,7 @@ const VerifyEmail = ({ data, onChange, onNext }) => {
                   </Button>
                 </div>
               </Form>
-              <p className="text-center mt-3">
+              <p className={`text-center mt-3 ${darkMode ? 'text-light' : ''}`}>
                 {t('onboarding.verify_email.remaining_time')} {Math.floor(remainingTime / 60)}:{remainingTime % 60 < 10 ? '0' : ''}{remainingTime % 60}
               </p>
             </Card.Body>
@@ -131,6 +131,7 @@ VerifyEmail.propTypes = {
   data: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
+  darkMode: PropTypes.bool.isRequired,
 };
 
 export default VerifyEmail;

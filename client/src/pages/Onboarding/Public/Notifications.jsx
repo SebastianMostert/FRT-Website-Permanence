@@ -20,29 +20,9 @@ const Notifications = ({ data, onChange, onNext }) => {
           <Col>
             <Form.Check
               type="checkbox"
-              label={t('onboarding.notifications.shift_emails.label')}
-              checked={data.notifications.shiftEmails}
-              onChange={(e) => handleCheckboxChange('shiftEmails', e.target.checked)}
-            />
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} className="mb-3">
-          <Col>
-            <Form.Check
-              type="checkbox"
-              label={t('onboarding.notifications.security_emails.label')}
-              checked={data.notifications.securityEmails}
-              onChange={(e) => handleCheckboxChange('securityEmails', e.target.checked)}
-            />
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} className="mb-3">
-          <Col>
-            <Form.Check
-              type="checkbox"
-              label={t('onboarding.notifications.other_emails.label')}
-              checked={data.notifications.otherEmails}
-              onChange={(e) => handleCheckboxChange('otherEmails', e.target.checked)}
+              label={t('onboarding.notifications.newsletter_emails.label')}
+              checked={data.notifications.newsletterEmails}
+              onChange={(e) => handleCheckboxChange('newsletterEmails', e.target.checked)}
             />
           </Col>
         </Form.Group>

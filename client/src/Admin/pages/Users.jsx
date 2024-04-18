@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, FormControl } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select';
 import { getSelectMenuClass } from '../../utils';
 import { useTranslation } from 'react-i18next';
@@ -8,15 +10,23 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedUser, setEditedUser] = useState(null);
-  const [allRoles, setAllRoles] = useState(['admin', 'user', 'public']);
-  const [classOptions, setClassOptions] = useState([]); // Define classOptions state
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false); // State for delete confirmation
+  // eslint-disable-next-line no-unused-vars
+  const [allRoles, setAllRoles] = useState(['admin', 'member', 'public', 'loge']);
+  const [classOptions, setClassOptions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
   const { t } = useTranslation();
 
-  // Placeholder for classOptions
+  // State for sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: 'ascending',
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getSelectMenuClass(t); // Use your actual fetching function
+        const response = await getSelectMenuClass(t);
         setClassOptions(response);
       } catch (error) {
         console.error(error);
@@ -25,7 +35,6 @@ const Users = () => {
     fetchData();
   }, [t]);
 
-  // Fetch users data from API
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/v1/user/fetch-all', {
@@ -56,16 +65,28 @@ const Users = () => {
       if (!response.ok) {
         throw new Error('Failed to update user');
       }
-      const data = await response.json();
-      console.log(data);
-      // Refresh users after update
+      await response.json();
       fetchUsers();
     } catch (error) {
       console.error(error);
     }
   };
 
-  // useEffect to fetch users on component mount
+  const deleteUser = async (userId) => {
+    try {
+      const response = await fetch(`/api/v1/user/delete/${userId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      fetchUsers();
+      setDeleteConfirmation(false); // Close the confirmation modal after deletion
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -80,8 +101,25 @@ const Users = () => {
     setEditedUser(null);
   };
 
+  const handleDeleteConfirmation = (userId) => {
+    if (editedUser) {
+      alert('Are you sure you want to delete this user?');
+
+      // Perform the delete operation
+      deleteUser(userId);
+
+      // Close the modal
+      setDeleteConfirmation(false);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (editedUser) {
+      deleteUser(editedUser);
+    }
+  };
+
   const handleSaveEdit = () => {
-    // Update user data here
     if (editedUser) {
       updateUser(editedUser._id, editedUser);
       setShowEditModal(false);
@@ -89,12 +127,20 @@ const Users = () => {
     }
   };
 
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedUser({
-      ...editedUser,
-      [name]: value,
-    });
+    const { name, value, checked } = e.target;
+    if (name === 'verified') {
+      setEditedUser({
+        ...editedUser,
+        verified: checked,
+      });
+    } else {
+      setEditedUser({
+        ...editedUser,
+        [name]: value,
+      });
+    }
   };
 
   const handleRoleChange = (selectedOptions) => {
@@ -112,38 +158,168 @@ const Users = () => {
     });
   };
 
+  const handleVerification = (userId) => {
+    const userToUpdate = users.find((user) => user._id === userId);
+    if (!userToUpdate) {
+      console.error("User not found");
+      return;
+    }
+
+    const updatedUserData = {
+      ...userToUpdate,
+      verified: !userToUpdate.verified, // Toggle verification status
+    };
+    updateUser(userId, updatedUserData);
+  };
+
   const customStyles = {
     control: (provided) => ({
       ...provided,
-      height: '50px', // Adjust the height as needed
+      height: '50px',
     }),
   };
 
-  const handleRowDoubleClick = (user) => {
-    handleEditUser(user);
+  // Function to handle sorting
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
   };
 
+  // Function to dynamically sort users based on current sortConfig
+  const sortedUsers = users.sort((a, b) => {
+    if (sortConfig.key && a[sortConfig.key] && b[sortConfig.key]) {
+      if (sortConfig.direction === 'ascending') {
+        return a[sortConfig.key].toString().localeCompare(b[sortConfig.key].toString());
+      }
+      if (sortConfig.direction === 'descending') {
+        return b[sortConfig.key].toString().localeCompare(a[sortConfig.key].toString());
+      }
+    }
+    return 0;
+  });
+
+  // Filter users based on search term
+  const filteredUsers = sortedUsers.filter((user) => {
+    const fullNameFirstName = `${user.firstName} ${user.lastName}`;
+    const fullNameLastName = `${user.lastName} ${user.firstName}`;
+    const fullNameEmail = `${user.email}`;
+
+
+    return fullNameFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fullNameLastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fullNameEmail.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   return (
-    <div>
-      <h2>Users</h2>
-      <Table striped bordered hover>
+    <div className='users-container select-none'>
+      <h2>{t('Users')}</h2>
+      <FormControl
+        type="text"
+        placeholder={t('Search by name or email')}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className='search-input'
+      />
+
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>IAM</th>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Student Class</th>
-            <th>Actions</th>
+            <th onClick={() => requestSort('firstName')}>
+              {t('First Name')}{' '}
+              {sortConfig.key === 'firstName' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('lastName')}>
+              {t('Last Name')}{' '}
+              {sortConfig.key === 'lastName' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('IAM')}>
+              {t('IAM')}{' '}
+              {sortConfig.key === 'IAM' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('email')}>
+              {t('Email')}{' '}
+              {sortConfig.key === 'email' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('roles')}>
+              {t('Roles')}{' '}
+              {sortConfig.key === 'roles' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('studentClass')}>
+              {t('Student Class')}{' '}
+              {sortConfig.key === 'studentClass' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th onClick={() => requestSort('verified')}>
+              {t('Verified')}{' '}
+              {sortConfig.key === 'verified' && (
+                <>
+                  {sortConfig.direction === 'ascending' ? (
+                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
+                  ) : (
+                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
+                  )}
+                </>
+              )}
+            </th>
+            <th>{t('Actions')}</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <tr
               key={user._id}
-              onDoubleClick={() => handleRowDoubleClick(user)}
-              style={{ cursor: 'pointer' }}
+              onDoubleClick={() => handleEditUser(user)}
+              className='user-row'
             >
               <td>{user.firstName}</td>
               <td>{user.lastName}</td>
@@ -151,9 +327,17 @@ const Users = () => {
               <td>{user.email}</td>
               <td>{user.roles.join(', ')}</td>
               <td>{user.studentClass}</td>
+              <td>{user.verified ? t('Yes') : t('No')}</td>
               <td>
                 <Button variant="primary" onClick={() => handleEditUser(user)}>
-                  Edit
+                  {t('Edit')}
+                </Button>
+                <Button
+                  variant={user.verified ? "danger" : "success"}
+                  onClick={() => handleVerification(user._id)}
+                  style={{ marginLeft: '10px' }}
+                >
+                  {user.verified ? t('Unverify') : t('Verify')}
                 </Button>
               </td>
             </tr>
@@ -164,13 +348,13 @@ const Users = () => {
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={handleCloseEditModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit User</Modal.Title>
+          <Modal.Title>{t('Edit User')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {editedUser && (
             <Form>
               <Form.Group controlId="formFirstName">
-                <Form.Label>First Name</Form.Label>
+                <Form.Label>{t('First Name')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="firstName"
@@ -179,7 +363,7 @@ const Users = () => {
                 />
               </Form.Group>
               <Form.Group controlId="formLastName">
-                <Form.Label>Last Name</Form.Label>
+                <Form.Label>{t('Last Name')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="lastName"
@@ -188,7 +372,7 @@ const Users = () => {
                 />
               </Form.Group>
               <Form.Group controlId="formIAM">
-                <Form.Label>IAM</Form.Label>
+                <Form.Label>{t('IAM')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="IAM"
@@ -197,7 +381,7 @@ const Users = () => {
                 />
               </Form.Group>
               <Form.Group controlId="formEmail">
-                <Form.Label>Email</Form.Label>
+                <Form.Label>{t('Email')}</Form.Label>
                 <Form.Control
                   type="email"
                   name="email"
@@ -206,7 +390,7 @@ const Users = () => {
                 />
               </Form.Group>
               <Form.Group controlId="formRoles">
-                <Form.Label>Roles</Form.Label>
+                <Form.Label>{t('Roles')}</Form.Label>
                 <Select
                   options={allRoles.map((role) => ({ value: role, label: role }))}
                   value={editedUser.roles.map((role) => ({ value: role, label: role }))}
@@ -215,7 +399,7 @@ const Users = () => {
                 />
               </Form.Group>
               <Form.Group controlId="formStudentClass">
-                <Form.Label>Student Class</Form.Label>
+                <Form.Label>{t('Student Class')}</Form.Label>
                 <Select
                   options={classOptions}
                   value={classOptions.find((option) => option.value === editedUser.studentClass)}
@@ -225,20 +409,51 @@ const Users = () => {
                   required
                 />
               </Form.Group>
+              <Form.Group controlId="formVerified">
+                <Form.Check
+                  type="checkbox"
+                  label={t('Verified')}
+                  name="verified"
+                  checked={editedUser.verified}
+                  onChange={handleChange}
+                />
+              </Form.Group>
             </Form>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseEditModal}>
-            Close
+            {t('Close')}
+          </Button>
+          <Button variant="danger" onClick={() => handleDeleteConfirmation(editedUser._id)}>
+            {t('Delete')}
           </Button>
           <Button variant="primary" onClick={handleSaveEdit}>
-            Save Changes
+            {t('Save Changes')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={deleteConfirmation} onHide={() => setDeleteConfirmation(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('Confirm Deletion')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{t('Are you sure you want to delete this user?')}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setDeleteConfirmation(false)}>
+            {t('Cancel')}
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            {t('Delete')}
           </Button>
         </Modal.Footer>
       </Modal>
     </div>
   );
+
 };
 
 export default Users;

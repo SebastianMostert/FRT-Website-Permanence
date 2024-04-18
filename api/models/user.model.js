@@ -66,11 +66,6 @@ const userSchema = new mongoose.Schema(
       default: true,
       required: true,
     },
-    emailVerified: {
-      type: Boolean,
-      default: false,
-      required: true,
-    },
     onBoarded: {
       type: Boolean,
       default: true,
@@ -100,13 +95,18 @@ const userSchema = new mongoose.Schema(
         default: true,
         required: false,
       },
+      newsletterEmails: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
     },
     roles: {
       type: [{
         type: String,
-        enum: ['admin', 'user', 'public'],
+        enum: ['member', 'public', 'loge', 'admin'],
       }],
-      default: ['user'],
+      default: ['public'],
     },
   },
   { timestamps: true }

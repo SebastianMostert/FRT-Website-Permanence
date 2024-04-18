@@ -101,9 +101,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
             windowResize={(e) => {
                 const localStorage = window.localStorage;
                 const localStorageType = localStorage.getItem(VIEW_TYPE_KEY);
-                console.log(localStorageType);
                 const newViewType = window.innerWidth <= hideToolbarSize ? 'timeGridWeek' : localStorageType || 'dayGridMonth';
-                console.log(newViewType);
                 localStorage.setItem(VIEW_TYPE_KEY, newViewType);
 
                 const calendar = e.view.calendar;

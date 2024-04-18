@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import PrivateRoute from './components/Routes/PrivateRoute';
+import MemberRoute from './components/Routes/MemberRoute';
 import { ToastContainer } from 'react-toastify';
 import './App.css';
 import HeaderRoute from './components/Routes/HeaderRoute';
 import SidebarRoute from './components/Routes/SidebarRoute';
 import AdminRoute from './components/Routes/AdminRoute';
-import { isTinyMobile } from './utils';
+import LoggedInRoute from './components/Routes/LoggedInRoute';
+import { isTinyMobile, userExists } from './utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { signOut } from './redux/user/userSlice';
@@ -37,40 +38,44 @@ function TokenValidator() {
 
   // Function to validate token
   const validateToken = async () => {
-    if (currentUser) {
-      const res = await fetch('/api/v1/auth/validate', {
+    const res = await fetch('/api/v1/auth/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await res.json();
+
+    if (!data.valid) handleSignOut();
+  };
+
+  const exists = async (IAM) => {
+    const doesExists = await userExists(IAM);
+    if (!doesExists) handleSignOut();
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/v1/auth/signout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      const data = await res.json();
+      dispatch(signOut());
 
-      if (!data.valid) {
-        const handleSignOut = async () => {
-          try {
-            await fetch('/api/v1/auth/signout', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-            dispatch(signOut());
-
-            // Go to home page
-            window.location.href = '/';
-          } catch (error) {
-            console.error(error);
-          }
-        };
-
-        handleSignOut();
-      }
+      // Go to home page
+      window.location.href = '/';
+    } catch (error) {
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    validateToken();
+    if (currentUser) {
+      validateToken();
+      exists(currentUser.IAM);
+    }
   }, [currentUser]);
 
   return null;
@@ -83,6 +88,8 @@ function App() {
     <BrowserRouter>
       <TokenValidator />
       <Routes>
+
+        {/* All the Admin Routes */}
         <Route element={<AdminRoute />}>
           <Route element={<SidebarRoute />}>
             <Route path='/admin' element={<Dashboard />} />
@@ -92,19 +99,27 @@ function App() {
             <Route path='/admin/settings' element={<Settings />} />
           </Route>
         </Route>
+
+        {/* All these Routes have a Header */}
         <Route element={<HeaderRoute />}>
           <Route path='/' element={<Home />} />
           <Route path='/sign-in' element={<SignIn />} />
-          <Route element={<PrivateRoute />}>
+          <Route element={<MemberRoute />}>
             <Route path='/reports' element={<Reports />} />
             <Route exact path="/report/:missionNumber" element={<Report />} />
             <Route path='/calendar' element={<Calendar />} />
+          </Route>
+          <Route element={<LoggedInRoute />}>
             <Route path='/profile' element={<Profile />} />
           </Route>
         </Route>
-        <Route element={<PrivateRoute />}>
+
+        {/* The 2 factor auth route */}
+        <Route element={<MemberRoute />}>
           <Route path='/2fa' element={<TwoFactorAuth />} />
         </Route>
+
+        {/* Various Routes */}
         <Route path='/sign-up' element={<SignUp />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path='*' element={<NotFoundPage />} />
