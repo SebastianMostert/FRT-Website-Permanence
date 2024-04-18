@@ -371,10 +371,6 @@ async function getExams(user) {
             const oneHourBeforeStart = new Date(startDate);
             oneHourBeforeStart.setHours(oneHourBeforeStart.getHours() - 1);
 
-            // Create a date that ends on the next full hour of the endDate
-            const nextFullHourEndDate = new Date(endDate);
-            nextFullHourEndDate.setMinutes(Math.ceil(endDate.getMinutes() / 60) * 60);
-
             calendarEvents.push({
                 title: exam.name,
                 start: startDate,
@@ -385,7 +381,7 @@ async function getExams(user) {
 
             calendarEvents.push({
                 start: oneHourBeforeStart,
-                end: nextFullHourEndDate,
+                end: endDate,
                 display: 'background',
                 backgroundColor: '#FF0000',
                 extendedProps: { ...exam, type: 'exam' },
