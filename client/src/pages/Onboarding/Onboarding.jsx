@@ -200,8 +200,8 @@ const App = () => {
   return (
     <div className={darkMode ? 'dark-bg' : 'light-bg'} style={{ minHeight: '100vh' }}>
       <ProgressBar variant='success' now={calculateProgress()} className="mb-3" />
-
-      <button onClick={toggleDarkMode}>Toggle Dark Mode</button>
+      {/* TODO */}
+      {/* <button onClick={toggleDarkMode}>Toggle Dark Mode</button> */}
 
       <TransitionGroup>
         <SwitchTransition>
