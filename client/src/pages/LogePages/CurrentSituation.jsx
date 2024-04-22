@@ -31,7 +31,7 @@ const CurrentSituation = () => {
         fetchData();
 
         // Establish WebSocket connection when the component mounts
-        const ws = new WebSocket(`ws://${window.location.hostname}:3000`);// Adjust the URL based on your WebSocket server configuration
+        const ws = new WebSocket(`wss://${window.location.hostname}:3000`);// Adjust the URL based on your WebSocket server configuration
 
         // Listen for 'updateTeams' event from the server
         ws.onmessage = (event) => {
