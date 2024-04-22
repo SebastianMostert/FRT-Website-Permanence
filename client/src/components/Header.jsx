@@ -49,14 +49,14 @@ export default function Header() {
   ];
 
   const logeLinks = [
-    <Nav.Link key="loge" as={Link} to="#" className="nav-link">
-      {t('header.loge')}
+    <Nav.Link key="loge" as={Link} to="/current-situation" className="nav-link">
+      {t('header.current_situation')}
     </Nav.Link>
   ];
 
   const publicLinks = [
-    <Nav.Link key="public" as={Link} to="#" className="nav-link">
-      {t('header.public')}
+    <Nav.Link key="loge" as={Link} to="/incidents" className="nav-link">
+      {t('header.incidents')}
     </Nav.Link>
   ];
 

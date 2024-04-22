@@ -7,6 +7,8 @@ import examRoutes from './routes/exam.route.js';
 import availabilityRoutes from './routes/availability.route.js';
 import reportRoutes from './routes/report.route.js';
 import shiftRoutes from './routes/shift.route.js';
+import teamRoutes from './routes/team.route.js';
+import incidentRoutes from './routes/incident.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import cors from 'cors';
@@ -61,12 +63,17 @@ wss.on('connection', (ws) => {
 
 });
 
-app.use('/api/v1/user', userRoutes);
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/exam', examRoutes)
-app.use('/api/v1/availability', availabilityRoutes)
-app.use('/api/v1/report', reportRoutes)
-app.use('/api/v1/shift', shiftRoutes)
+const apiVersion = 1;
+
+app.use(`/api/v${apiVersion}/user`, userRoutes);
+app.use(`/api/v${apiVersion}/auth`, authRoutes);
+app.use(`/api/v${apiVersion}/exam`, examRoutes)
+app.use(`/api/v${apiVersion}/availability`, availabilityRoutes)
+app.use(`/api/v${apiVersion}/report`, reportRoutes)
+app.use(`/api/v${apiVersion}/shift`, shiftRoutes)
+app.use(`/api/v${apiVersion}/team`, teamRoutes)
+app.use(`/api/v${apiVersion}/incident`, incidentRoutes)
+
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

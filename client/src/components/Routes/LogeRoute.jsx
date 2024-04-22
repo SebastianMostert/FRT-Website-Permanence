@@ -18,7 +18,7 @@ export default function PrivateRoute() {
             fetchData();
         }, [currentUser?.IAM]);
 
-        const isLoge = roles?.includes('loge');
+        const isLoge = roles?.includes('loge') || roles?.includes('admin');
         return isLoge ? <Outlet /> : <NotAuthorized />
     } catch (error) {
         return <NotAuthorized />
