@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Badge, Accordion } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
@@ -61,8 +61,9 @@ const IncidentCard = ({ incident }) => {
         <Card className="shadow-sm mb-4">
             <Card.Body>
                 <Card.Title className="mb-3">{name}</Card.Title>
-                <div className="mb-3">
-                    <strong>Team Status:</strong> <StatusBadge status={team.status} alerted={team.alerted} />
+                <div className="mb-3 d-flex align-items-center">
+                    <strong className="me-3">Team Status:</strong>
+                    <StatusBadge status={team.status} alerted={team.alerted} />
                     <Badge bg={team.alerted ? 'success' : 'danger'}>{team.alerted ? 'Alerted' : 'Not Alerted'}</Badge>
                 </div>
                 <div className="mb-3">
@@ -76,7 +77,7 @@ const IncidentCard = ({ incident }) => {
                 </div>
                 <div>
                     <strong>Team Members:</strong>
-                    <Accordion>
+                    <Accordion flush>
                         {team.members.map((member, index) => (
                             <UserAccordion key={index} user={member} index={index} />
                         ))}
@@ -112,14 +113,9 @@ const UserAccordion = ({ user, index }) => {
     );
 };
 
-UserAccordion.propTypes = {
-    user: PropTypes.shape({
-        firstName: PropTypes.string.isRequired,
-        lastName: PropTypes.string.isRequired,
-        position: PropTypes.string.isRequired,
-        IAM: PropTypes.string.isRequired,
-    }).isRequired,
-    index: PropTypes.number.isRequired
+StatusBadge.propTypes = {
+    status: PropTypes.string.isRequired,
+    alerted: PropTypes.bool.isRequired
 };
 
 IncidentCard.propTypes = {
@@ -130,6 +126,16 @@ IncidentCard.propTypes = {
         location: PropTypes.string.isRequired,
         ambulanceCalled: PropTypes.bool.isRequired,
     }).isRequired
+};
+
+UserAccordion.propTypes = {
+    user: PropTypes.shape({
+        firstName: PropTypes.string.isRequired,
+        lastName: PropTypes.string.isRequired,
+        position: PropTypes.string.isRequired,
+        IAM: PropTypes.string.isRequired,
+    }).isRequired,
+    index: PropTypes.number.isRequired
 };
 
 export default IncidentCard;

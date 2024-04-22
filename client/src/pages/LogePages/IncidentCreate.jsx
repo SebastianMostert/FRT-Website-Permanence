@@ -3,26 +3,10 @@ import { Alert, Button, Container, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 
-// TODO: Fetch data from API
-const startTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' });
-const endTime = new Date(new Date().setHours(new Date().getHours() + 2)).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' });
-const members = [
-    { "id": 1, "firstName": "Pol", "lastName": "Nilles", "position": "Chef Agres", "IAM": "NilPo732" },
-    { "id": 2, "firstName": "Sebastian", "lastName": "Mostert", "position": "Equipier Bin.", "IAM": "MosSe842" },
-];
-const teams = [
-    { id: 1, name: 'FRT-LLIS 1', members, alerted: false, status: 1, startTime, endTime },
-    { id: 2, name: 'FRT-LLIS 2', members, alerted: false, status: 2, startTime, endTime },
-    { id: 3, name: 'FRT-LLIS 3', members, alerted: true, status: 1, startTime, endTime },
-    { id: 4, name: 'FRT-LLIS 4', members, alerted: true, status: 2, startTime, endTime },
-    { id: 5, name: 'FRT-LLIS 5', members, alerted: false, status: 3, startTime, endTime },
-    { id: 6, name: 'FRT-LLIS 6', members, alerted: false, status: 4, startTime, endTime },
-    { id: 7, name: 'FRT-LLIS 7', members, alerted: false, status: 6, startTime, endTime },
-];
-
 const IncidentCreate = () => {
     const [name, setName] = useState('');
     const [team, setTeam] = useState('');
+    const [teams, setTeams] = useState([]);
     const [incidentInfo, setIncidentInfo] = useState('');
     const [location, setLocation] = useState('');
     const [ambulanceCalled, setAmbulanceCalled] = useState(false);
@@ -30,6 +14,31 @@ const IncidentCreate = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        console.log({
+            name: name,
+            teamId: team,
+            incidentInfo,
+            location,
+            ambulanceCalled,
+        })
+        async function postData() {
+            await fetch('/api/v1/incident/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    teamId: team,
+                    incidentInfo,
+                    location,
+                    ambulanceCalled,
+                }),
+            })
+        }
+
+        postData();
+
         setName('');
         setIncidentInfo('');
         setLocation('');
@@ -37,7 +46,32 @@ const IncidentCreate = () => {
         setError(false);
     };
 
-    const filteredTeams = teams.filter(team => (team.status === 1 || team.status === 2) && !team.alerted);
+    useEffect(() => {
+        async function fetchData() {
+            const res = await fetch('/api/v1/team/fetch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+            console.log(data);
+            const filteredTeams = data.filter(team => (team.status === "1" || team.status === "2") && !team.alerted);
+            if (filteredTeams.length > 0) {
+                setError(false);
+                setTeams(filteredTeams);
+                setTeam(filteredTeams[0]._id); // Assuming '_id' is the correct property name for team ID
+            } else {
+                setError(true);
+            }
+        }
+
+        fetchData();
+    }, []);
+
+
+    const filteredTeams = teams.filter(team => (team.status === "1" || team.status === "2") && !team.alerted);
 
     useEffect(() => {
         if (filteredTeams.length > 0) {
@@ -56,6 +90,11 @@ const IncidentCreate = () => {
                 <Alert variant="danger">Unfortunately all teams are occupied. Please try again later.</Alert>
             ) : (
                 <Form onSubmit={handleSubmit}>
+                    {/* Name */}
+                    <Form.Group controlId="formName" className="mb-3">
+                        <Form.Label className="fw-bold">Name:</Form.Label>
+                        <Form.Control type="text" placeholder="Enter name" value={name} onChange={(e) => setName(e.target.value)} required />
+                    </Form.Group>
 
                     {/* Team Selection */}
                     <Form.Group controlId="formTeam" className="mb-3">
