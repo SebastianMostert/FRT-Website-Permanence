@@ -44,8 +44,6 @@ export const updateTeamMembers = async (req, res, next) => {
     let status = 6;
     let members = body.members;
 
-    console.log(members)
-
     try {
         // Fetch the user
         const team = await Team.findById(id);

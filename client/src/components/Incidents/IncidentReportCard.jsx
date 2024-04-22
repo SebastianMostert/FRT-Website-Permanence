@@ -80,22 +80,14 @@ const IncidentReportCard = ({
                     <div className="card-subtitle mb-2 text-muted">{t('incidents.responders')}</div>
                     <Accordion>
                         {users.map((user, index) => (
-                            <Accordion.Item key={index} eventKey={index.toString()}>
-                                <Accordion.Header>
-                                    {`${user.firstName} ${user.lastName}`}
-                                    <span className="ms-2 text-muted">{user.position}</span>
-                                </Accordion.Header>
-                                <Accordion.Body>
-                                    <div>
-                                        <strong>Email:</strong> {user.email}
-                                    </div>
-                                    <div>
-                                        <strong>{t('incidents.student_class')}</strong> {user.studentClass}
-                                    </div>
-                                    {/* Add more user details here as needed */}
-                                </Accordion.Body>
-                            </Accordion.Item>
-                        ))}
+                            <UserAccordion
+                                key={index}
+                                user={user}
+                                index={index}
+                                t={t}
+                            />
+                        ))
+                        }
                     </Accordion>
                 </div>
 
@@ -153,3 +145,23 @@ const IncidentReportCard = ({
 };
 
 export default IncidentReportCard;
+
+const UserAccordion = ({ user, index, t }) => {
+    return (
+        <Accordion.Item key={index} eventKey={index.toString()}>
+            <Accordion.Header>
+                {`${user.firstName} ${user.lastName}`}
+                <span className="ms-2 text-muted">{user.position}</span>
+            </Accordion.Header>
+            <Accordion.Body>
+                <div>
+                    <strong>Email:</strong> {user.email}
+                </div>
+                <div>
+                    <strong>{t('incidents.student_class')}</strong> {user.studentClass}
+                </div>
+                {/* Add more user details here as needed */}
+            </Accordion.Body>
+        </Accordion.Item>
+    );
+}

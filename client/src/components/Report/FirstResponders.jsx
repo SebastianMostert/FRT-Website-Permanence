@@ -76,7 +76,6 @@ function isValid(responder, t) {
 
     // If the user is not a stagiaire validate the IAM
     if (!isStagiaire) {
-
         const { valid, message } = isValidIAM(responder.iam, t);
         if (!valid) {
             setFeedback(message);
@@ -96,7 +95,7 @@ function isValid(responder, t) {
     return { showFeedback, minLength, feedback };
 }
 
-export function isValidIAM(IAM, t) {
+export function isValidIAM(IAM='', t) {
     // Check the length of the IAM it must be 8
     if (IAM.length != 8) {
         return { valid: false, message: t('input.iam.error.length') };

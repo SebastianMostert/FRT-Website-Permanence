@@ -1,55 +1,29 @@
 import { Button, Col, Row } from 'react-bootstrap';
 import IncidentCard from './IncidentCard';
-
-// TODO: Fetch data from API
-const incidents = [
-    {
-        missionNumber: 1,
-        name: 'Incident 1',
-        teamId: 1,
-        incidentInfo: 'Incident Info 1',
-        location: 'Location 1',
-        ambulanceCalled: false,
-        startTime: new Date().toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-    },
-    {
-        missionNumber: 1,
-        name: 'Incident 1',
-        teamId: 1,
-        incidentInfo: 'Incident Info 1',
-        location: 'Location 1',
-        ambulanceCalled: false,
-        startTime: new Date().toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-    },
-    {
-        missionNumber: 1,
-        name: 'Incident 1',
-        teamId: 1,
-        incidentInfo: 'Incident Info 1',
-        location: 'Location 1',
-        ambulanceCalled: false,
-        startTime: new Date().toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-    },
-    {
-        missionNumber: 1,
-        name: 'Incident 1',
-        teamId: 1,
-        incidentInfo: 'Incident Info 1',
-        location: 'Location 1',
-        ambulanceCalled: false,
-        startTime: new Date().toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' }),
-    },
-]
+import { useEffect, useState } from 'react';
 
 const Incidents = () => {
+    const [incidents, setIncidents] = useState([]);
     const marginPx = 5; // Adjust margin as needed
 
+    useEffect(() => {
+        async function fetchData() {
+            const res = await fetch('/api/v1/incident/fetch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            const data = await res.json();
+            setIncidents(data);
+        }
+
+        fetchData();
+    }, []);
+
     return (
-        <div>
+        <div className='select-none'>
             <Button
                 variant="danger"
                 onClick={() => window.location.href = '/incidents/create'}

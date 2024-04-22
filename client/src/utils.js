@@ -354,7 +354,6 @@ export function formatDate(date) {
 }
 
 export async function getRoles(IAM) {
-
     // If the IAM is not provided, return an empty array
     if (!IAM) {
         return [];
@@ -386,7 +385,7 @@ export async function userExists(IAM) {
         })
 
         const data = await res.json();
-        if(!res.ok) return false
+        if (!res.ok) return false
 
         return data?.exists;
     } catch (error) {

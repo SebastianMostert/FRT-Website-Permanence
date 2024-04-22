@@ -34,7 +34,6 @@ export const createIncident = async (req, res, next) => {
         }
 
         // Only allow it if the status is 1 or 2
-        console.log(team.status)
         if (team.status.toString() != "1" && team.status.toString() != "2") {
             next(errorHandler(403, 'Team is not available to call an incident.'));
             return;
@@ -43,13 +42,20 @@ export const createIncident = async (req, res, next) => {
         // Get the current date
         const currentDate = new Date();
         const year = currentDate.getFullYear().toString();
-        let month = (currentDate.getMonth() + 1).toString(); // Adding 1 because months are zero-based
+        let month = (currentDate.getMonth() + 1).toString();
+        if (month.length === 1) {
+            month = '0' + month;
+        }
+
         let day = currentDate.getDate().toString();
-        let missionNumberPrefix = year + month + day;
+        if (day.length === 1) {
+            day = '0' + day;
+        }
+        let missionNumberPrefix = parseInt(year + month + day);
 
         // Get the number of incidents on that day
         // TODO: Fix
-        const incidents = await Report.find({ missionNumber: { $regex: '^' + missionNumberPrefix } });
+        const incidents = await Report.find({ missionNumber: { $gte: missionNumberPrefix } });
         const numberOfIncidents = incidents.length;
 
         // Create the mission number
@@ -72,14 +78,15 @@ export const createIncident = async (req, res, next) => {
 
         const firstResponders = [];
         for (let i = 0; i < team.members.length; i++) {
-            const member = team.members[i];
-            firstResponders.push(member.IAM)
+            const { IAM, position } = team.members[i];
+            firstResponders.push({ position, iam: IAM });
         }
 
         // Create a report
         const report = new Report({
             missionNumber,
-            firstResponders
+            firstResponders,
+            archived: false,
         });
         await report.save();
 
@@ -93,3 +100,30 @@ export const createIncident = async (req, res, next) => {
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
+
+// Fetch Incident
+export const fetchIncident = async (req, res, next) => {
+    const id = req.params.id;
+
+    try {
+        const incident = await Incident.findById(id);
+        if (!incident) {
+            next(errorHandler(404, 'Incident not found.'));
+        }
+        res.status(200).json(incident);
+    } catch (error) {
+        console.error(error);
+        next(errorHandler(500, 'An error occurred while updating team.'));
+    }
+};
+
+// Fetch all Incidents
+export const fetchAllIncidents = async (req, res, next) => {
+    try {
+        const incidents = await Incident.find();
+        res.status(200).json(incidents);
+    } catch (error) {
+        console.error(error);
+        next(errorHandler(500, 'An error occurred while fetching incidents.'));
+    }
+}

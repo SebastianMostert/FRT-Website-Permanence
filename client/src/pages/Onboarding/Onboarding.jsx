@@ -89,8 +89,6 @@ const App = () => {
   }, [data.roles]); // Run this effect only when data.roles changes
 
   const submitData = async () => {
-    console.log(data);
-
     // Verify password security
     const _isPasswordValid = await isPasswordValid(data.password, t);
     if (!_isPasswordValid.success) {

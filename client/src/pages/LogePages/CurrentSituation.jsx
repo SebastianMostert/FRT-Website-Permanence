@@ -46,8 +46,7 @@ const CurrentSituation = () => {
             const allTeams = [];
             allTeams.push(updatedTeam);
             allTeams.push(...teams);
-
-            console.log('All Teams:', allTeams);
+            
             setTeams(allTeams);
         }
 

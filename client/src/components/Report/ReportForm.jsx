@@ -132,7 +132,8 @@ const defaultValues = {
             text: '',
             erhoben: false,
         },
-    }
+    },
+    archived: false,
 }
 
 const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
@@ -274,6 +275,12 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 } else {
                     if (data?.archived) setIsEditable(false);
                     setIsNewReport(false);
+                }
+
+                if (data?.firstResponders.length > 0) {
+                    while (data?.firstResponders.length < 3) {
+                        data.firstResponders.push({ position: 'Stagiaire Bin.', iam: '' });
+                    }
                 }
 
                 setFirstResponders(data?.firstResponders || defaultValues.firstRespondersValues);

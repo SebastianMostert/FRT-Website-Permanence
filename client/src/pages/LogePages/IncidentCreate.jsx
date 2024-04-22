@@ -30,7 +30,6 @@ const IncidentCreate = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log('Form submitted:', { name, team, incidentInfo, location, ambulanceCalled });
         setName('');
         setIncidentInfo('');
         setLocation('');
@@ -43,7 +42,6 @@ const IncidentCreate = () => {
     useEffect(() => {
         if (filteredTeams.length > 0) {
             setError(false);
-            console.log('Filtered teams:', filteredTeams);
             setTeam(filteredTeams[0].id);
         } else {
             setError(true);
