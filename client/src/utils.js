@@ -392,3 +392,12 @@ export async function userExists(IAM) {
         return false;
     }
 }
+
+export const colors = {
+    events: {
+        exams: '#e74c3c',         // Red for exams
+        shifts: '#3498db',        // Blue for shifts
+        availability: '#27ae60',  // Green for availability
+        overlap: '#f1c40f',       // Yellow for overlap (if needed)
+    },
+};

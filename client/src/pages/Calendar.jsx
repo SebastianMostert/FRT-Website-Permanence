@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { createAvailability, formatDate, getMember, validateDate, verifyClass } from '../utils';
+import { colors, createAvailability, formatDate, getMember, validateDate, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -22,7 +22,6 @@ const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
 const AVAILABILITY_TYPE = 'availability';
 const SHIFT_TYPE = 'shift';
-
 
 export default function Calendar() {
     const { t } = useTranslation();
@@ -66,7 +65,8 @@ export default function Calendar() {
             }
 
             const calendarAvailabilities = await getAvailabilities(IAM);
-            const calendarShifts = await getShifts();
+            const shifts = await getShifts();
+            const calendarShifts = getShiftEvents(shifts);
 
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
@@ -126,7 +126,8 @@ export default function Calendar() {
 
             if (refreshTriggerShift) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.shifts')}`, { autoClose: false });
-                const calendarShifts = await getShifts();
+                const shifts = await getShifts();
+                const calendarShifts = getShiftEvents(shifts);
                 setCalendarShift(calendarShifts);
             }
 
@@ -376,14 +377,14 @@ async function getExams(user) {
                 start: startDate,
                 end: endDate,
                 extendedProps: { ...exam, type: 'exam' },
-                backgroundColor: '#FF0000',
+                backgroundColor: colors.events.exams,
             });
 
             calendarEvents.push({
                 start: oneHourBeforeStart,
                 end: endDate,
                 display: 'background',
-                backgroundColor: '#FF0000',
+                backgroundColor: colors.events.exams,
                 extendedProps: { ...exam, type: 'exam' },
             });
         }
@@ -426,7 +427,7 @@ async function getAvailabilities(IAM) {
                 start: availability.startTime,
                 end: availability.endTime,
                 id: availability._id,
-                backgroundColor: isVerifiedAvailability ? '#00FF00' : '#0000FF',
+                backgroundColor: colors.events.availability,
                 extendedProps: { ...availability, type: 'availability', user },
             });
         }
@@ -437,48 +438,43 @@ async function getAvailabilities(IAM) {
     }
 }
 
-async function getShifts() {
-    try {
-        const shiftEvents = [];
-        const res = await fetch(`/api/v1/shift/fetch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+function getShiftEvents(shifts) {
+    const shiftEvents = [];
 
-        const data = (await res.json()).data
+    for (let i = 0; i < shifts.length; i++) {
+        const shift = shifts[i];
 
-        for (let i = 0; i < data.length; i++) {
-            const shift = data[i];
-            const startTime = shift.shifts[0].startDate;
-            const endTime = shift.shifts[0].endDate;
-            const id = shift._id
+        console.log(shift);
+        // 
 
-            // Now get all the users of this shift
-            const allUsers = [];
-            for (let j = 0; j < shift.shifts.length; j++) {
-                const element = shift.shifts[j];
-                const IAM = element.IAM
-                const memberRes = await getMember(IAM);
-                const member = await memberRes.data;
-                member.position = element.position
-                allUsers.push(member);
-            }
-
-            shiftEvents.push({
-                title: 'Shift',
-                start: startTime,
-                end: endTime,
-                id,
-                backgroundColor: '#00FF00',
-                extendedProps: { shiftObject: shift, users: allUsers, type: SHIFT_TYPE },
-            });
-        }
-        return shiftEvents;
-    } catch (error) {
-        console.error(error)
+        const event = {
+            title: shift.title,
+            start: shift.startDate,
+            end: shift.endDate,
+            id: shift._id,
+            backgroundColor: colors.events.shifts,
+            extendedProps: { ...shift, type: 'shift' },
+        };
+        shiftEvents.push(event);
     }
+
+    return shiftEvents;
+}
+
+async function getShifts() {
+    const res = await fetch(`/api/v1/shift/fetch`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const dataJson = await res.json();
+    if (dataJson.success === false) return [];
+
+    const data = dataJson.data;
+
+    return data;
 }
 
 async function deleteAvailability(id, IAM, t) {

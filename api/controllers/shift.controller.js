@@ -2,34 +2,40 @@ import Shift from '../models/shift.model.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 export const createShift = async (req, res, next) => {
-  const { shifts } = req.body;
+  const { startDate, endDate, title, users } = req.body;
 
   try {
-    // Validate if shifts is an array and has 2-3 objects
-    if (!Array.isArray(shifts) || shifts.length < 2 || shifts.length > 3) {
-      return res.status(400).json({ success: false, message: 'Shifts should be an array with 2-3 objects.' });
-    }
+    if (!startDate) return res.status(400).json({ success: false, message: 'Missing start date' });
+    if (!endDate) return res.status(400).json({ success: false, message: 'Missing end date' });
+    if (!title) return res.status(400).json({ success: false, message: 'Missing title' });
+    if (!users) return res.status(400).json({ success: false, message: 'Missing users' });
 
-    // Validate each shift object
-    for (const shift of shifts) {
-      if (
-        !shift.IAM ||
-        !shift.firstName ||
-        !shift.lastName ||
-        !shift.position ||
-        !shift.availabilityId ||
-        !shift.operationalPosition
-      ) {
-        return res.status(400).json({ success: false, message: 'Each shift object should have IAM, firstName, lastName, position, availabilityId, and operationalPosition.' });
-      }
+    // Check if the users array has 2 to 3 objects
+    if (users.length < 2 || users.length > 3) return res.status(400).json({ success: false, message: 'Each shift must have 2 to 3 users' });
+
+    for (let i = 0; i < users.length; i++) {
+      const {
+        IAM,
+        firstName,
+        lastName,
+        position
+      } = users[i];
+
+      if (!IAM || !firstName || !lastName || !position) return res.status(400).json({ success: false, message: 'Each user must have an IAM, first name, last name, and a position' });
     }
 
     // Create the shifts
-    const createdShifts = await Shift.create({ shifts: shifts });
+    const createdShifts = await Shift.create({
+      startDate,
+      endDate,
+      title,
+      users,
+    });
 
     res.status(201).json({ success: true, data: createdShifts });
     sendReportsUpdated('shifts_updated')
   } catch (error) {
+    console.error(error)
     res.status(500).json({ success: false, message: 'Failed to create shifts.', error: error.message });
   }
 };

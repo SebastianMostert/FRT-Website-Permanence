@@ -2,24 +2,29 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { getMember } from '../utils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserMinus } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
 
-const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsList, date, startTime, endTime }) => {
+// TODO: Add the team selection 
+
+const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [shiftTitle, setShiftTitle] = useState('');
 
     useEffect(() => {
+        if (!event) return;
+        if (!event.extendedProps) return;
+        const overlapEvents = event.extendedProps.events;
+
+        const IAMList = overlapEvents.map((event) => event.IAM);
+        const availabilityIdsList = overlapEvents.map((event) => event._id);
+
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+
         const fetchUsers = async () => {
-            // Split date into day, month, and year
-            const [day, month, year] = date.split('/');
-
-            // Split startTime and endTime into hours and minutes
-            const [startHour, startMinute] = startTime.split(':');
-            const [endHour, endMinute] = endTime.split(':');
-
-            // Create startDate and endDate
-            const startDate = new Date(year, month - 1, day, startHour, startMinute);
-            const endDate = new Date(year, month - 1, day, endHour, endMinute);
-
             const users = await Promise.all(
                 IAMList.map(async (iam, index) => {
                     const res = await getMember(iam);
@@ -47,7 +52,7 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
         };
 
         fetchUsers();
-    }, [IAMList, availabilityIdsList, date, endTime, startTime]);
+    }, [event]);
 
     const handleSelectPosition = (event, userIAM) => {
         const { value } = event.target;
@@ -64,19 +69,10 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
     const handleCreateShift = async () => {
         const selectedUsersWithPosition = selectedUsers.filter((user) => user.position !== '');
 
-        if (selectedUsersWithPosition.length === 0) {
-            alert('Please select positions for at least one user.');
-            return;
-        }
-
-        const chefsCount = selectedUsersWithPosition.filter(user => user.position === 'Chef Agres').length;
-        const equipiersCount = selectedUsersWithPosition.filter(user => user.position === 'Equipier Bin.').length;
-        const stagiairesCount = selectedUsersWithPosition.filter(user => user.position === 'Stagiaire Bin.').length;
-
-        const valid = validateShift(chefsCount, equipiersCount, stagiairesCount);
+        const valid = validateShift(selectedUsersWithPosition);
 
         if (!valid.isValid) {
-            alert(valid.message);
+            toast.error(valid.message);
             return;
         }
 
@@ -102,7 +98,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
 
                 // Validate start and end time are not the same
                 if (shiftStart.getTime() === shiftEnd.getTime()) {
-                    console.error('Start and end time cannot be the same.');
                     continue; // Skip this user and move to the next
                 }
 
@@ -121,13 +116,13 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
 
                 // Implement logic to create new availabilities, possibly with an API call
                 if (availabilityStart.getTime() === shiftStart.getTime()) {
-
-                    return;
+                    toast.info('Create new availabilities, possibly with an API call');
+                    continue;
                 }
                 // Implement logic to create new availabilities, possibly with an API call
                 if (shiftEnd.getTime() === availabilityEnd.getTime()) {
-
-                    return;
+                    toast.info('Create new availabilities, possibly with an API call');
+                    continue;
                 }
 
                 createAvailability(newAvailability1);
@@ -135,14 +130,36 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
             }
         }
 
-        createShiftDB(selectedUsersWithPosition);
-        handleClose();
+        try {
+            console.log(selectedUsersWithPosition);
+            await createShiftDB(selectedUsersWithPosition, shiftTitle);
+            handleClose();
+            toast.success('Shift created successfully');
+        } catch (error) {
+            console.error('Error creating shift:', error);
+            toast.error('Failed to create shift. Please try again later.');
+        }
     };
 
-    const validateShift = (chefsCount, equipiersCount, stagiairesCount) => {
-        if (chefsCount + equipiersCount + stagiairesCount < 2 || chefsCount + equipiersCount + stagiairesCount > 3) return { isValid: false, message: 'Each shift must have at least 2 and at most 3 positions.' };
-        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1) return { isValid: true, message: '' };
-        if (chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0) return { isValid: true, message: '' };
+    const handleTitleChange = (event) => {
+        setShiftTitle(event.target.value);
+    };
+
+    const validateShift = (selectedUsersWithPosition) => {
+        const totalPositions = selectedUsersWithPosition.length;
+
+        if (totalPositions === 0) return { isValid: false, message: 'Please select positions for at least one user.' };
+
+        const chefsCount = selectedUsersWithPosition.filter(user => user.position === 'Chef Agres').length;
+        const equipiersCount = selectedUsersWithPosition.filter(user => user.position === 'Equipier Bin.').length;
+        const stagiairesCount = selectedUsersWithPosition.filter(user => user.position === 'Stagiaire Bin.').length;
+
+        const threePositions = chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 1;
+        const twoPositions = chefsCount === 1 && equipiersCount === 1 && stagiairesCount === 0;
+
+        if (totalPositions < 2 || totalPositions > 3) return { isValid: false, message: 'Each shift must have at least 2 and at most 3 positions.' };
+        if (totalPositions === 3) if (!threePositions) return { isValid: false, message: 'You must have 1 Chef Agres, 1 Equipier Bin. and 1 Stagiaire Bin.' };
+        if (totalPositions === 2) if (!twoPositions) return { isValid: false, message: 'You must have 1 Chef Agres and 1 Equipier Bin.' };
 
         // Ensure that there is no other shift
         for (let i = 0; i < shifts.length; i++) {
@@ -155,10 +172,12 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
             if (shiftStart > shiftStart && shiftStart < shiftEnd && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
         }
 
-        return { isValid: false, message: 'This shift is not valid.' };
+        return { isValid: true, message: '' };
     };
 
     const deleteAvailability = async (id, IAM) => {
+        // TODO: Add the team selection 
+        return
         try {
             const res = await fetch(`/api/v1/availability/delete/`, {
                 method: 'DELETE',
@@ -184,40 +203,46 @@ const MarkBesetztModal = ({ show, handleClose, shifts, IAMList, availabilityIdsL
                 <Modal.Title>Create Shift</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>Please select the position for each user:</p>
                 {loading ? (
                     <p>Loading...</p>
                 ) : (
                     <Form>
+                        <Form.Group controlId="shiftTitle">
+                            <Form.Label>Shift Title</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter shift title"
+                                value={shiftTitle}
+                                onChange={handleTitleChange}
+                            />
+                        </Form.Group>
+                        <p>Please select the position for each user:</p>
                         {selectedUsers.map((user) => (
                             <div key={user.IAM} className="mb-3">
-                                <div className="d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center mb-2">
                                     <Button
                                         variant="outline-danger"
                                         size="sm"
                                         onClick={() => handleRemoveUser(user.IAM)}
+                                        className="mr-2"
                                     >
-                                        X
+                                        <FontAwesomeIcon icon={faUserMinus} />
                                     </Button>
-                                    <span className="ml-2">{`${user.firstName} ${user.lastName}`}</span>
+                                    <span>{`${user.firstName} ${user.lastName}`}</span>
                                 </div>
-                                {user.selected && (
-                                    <Form.Group controlId={`positionSelect-${user.IAM}`}>
-                                        <Form.Label>Select Position</Form.Label>
-                                        <Form.Control
-                                            as="select"
-                                            value={user.position}
-                                            onChange={(e) => handleSelectPosition(e, user.IAM)}
-                                        >
-                                            <option value="">Choose...</option>
-                                            {getAllowedPositions(user.operationalPosition).map((position) => (
-                                                <option key={position} value={position}>
-                                                    {position}
-                                                </option>
-                                            ))}
-                                        </Form.Control>
-                                    </Form.Group>
-                                )}
+                                <Form.Group controlId={`positionSelect-${user.IAM}`}>
+                                    <Form.Label>Select Position</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={user.position}
+                                        onChange={(e) => handleSelectPosition(e, user.IAM)}
+                                    >
+                                        <option value="">Choose...</option>
+                                        {getAllowedPositions(user.operationalPosition).map((position) => (
+                                            <option key={position} value={position}>{position}</option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
                             </div>
                         ))}
                     </Form>
@@ -251,42 +276,75 @@ const getAllowedPositions = (operationalPosition) => {
 export default MarkBesetztModal;
 
 
-const createShiftDB = async (data) => {
-    for (let i = 0; i < data.length; i++) {
-        const element = data[i];
-        notifyUser(element, data);
+const createShiftDB = async (shift, title) => {
+    const startDate = new Date(shift[0].startDate);
+    const endDate = new Date(shift[0].endDate);
+    const users = [];
+
+    for (let i = 0; i < shift.length; i++) {
+        const element = shift[i];
+        const {
+            IAM,
+            firstName,
+            lastName,
+            position,
+        } = element;
+
+        const user = {
+            IAM,
+            firstName,
+            lastName,
+            position,
+        }
+
+        users.push(user);
+
+        notifyUser({
+            allUsers: shift,
+            user: user,
+            startDate,
+            endDate,
+        });
     }
+
     try {
         const res = await fetch('/api/v1/shift/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ shifts: data }),
+            body: JSON.stringify({
+                startDate,
+                endDate,
+                title,
+                users
+            }),
         });
         const json = await res.json();
+
+        console.log(json);
         return json;
     } catch (err) {
         console.error(err);
     }
 }
 
-const notifyUser = async (shift, allShifts) => {
-    const { IAM, firstName, lastName, position, startDate, endDate } = shift;
+const notifyUser = async ({ user, startDate, endDate, allUsers }) => {
+    const { IAM, firstName, lastName, position } = user;
+
     const partnerInfo = {
-        IAMs: [],
         firstNames: [],
         lastNames: [],
         positions: [],
     };
 
-    for (let i = 0; i < allShifts.length; i++) {
-        if (allShifts[i].IAM === IAM) continue;
+    for (let i = 0; i < allUsers.length; i++) {
+        const _user = allUsers[i];
+        if (_user.IAM === IAM) continue;
 
-        partnerInfo.IAMs.push(allShifts[i].IAM);
-        partnerInfo.firstNames.push(allShifts[i].firstName);
-        partnerInfo.lastNames.push(allShifts[i].lastName);
-        partnerInfo.positions.push(allShifts[i].position);
+        partnerInfo.firstNames.push(_user.firstName);
+        partnerInfo.lastNames.push(_user.lastName);
+        partnerInfo.positions.push(_user.position);
     }
 
     const res = await getMember(IAM);
@@ -298,6 +356,103 @@ const notifyUser = async (shift, allShifts) => {
     const startTimeStr = formatTime(new Date(startDate));
     const endTimeStr = formatTime(new Date(endDate));
 
+    const partnersList = partnerInfo.firstNames.map((name, index) => `<li>${name} ${partnerInfo.lastNames[index]} - ${partnerInfo.positions[index]}</li>`).join('');
+
+    const html = `
+    <html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Notification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        ul {
+            margin-top: 5px;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        .shift-partners {
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .shift-partners h2 {
+            color: #0056b3;
+            margin-top: 0;
+        }
+
+        .shift-partners ul {
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+
+        .shift-partners li {
+            color: #666;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Shift Notification</h1>
+        <p>Hello ${firstName} ${lastName},</p>
+        <p>You have been added to a shift on ${formattedStartDate} from ${startTimeStr} to ${endTimeStr}.</p>
+        <p>You're assigned as a "${position}".</p>
+        <div class="shift-partners">
+            <h2>Shift Partners:</h2>
+            <ul>${partnersList}</ul>
+        </div>
+        <p class="footer">Thank you!</p>
+    </div>
+</body>
+
+</html>`;
+
+
+    if (email !== 'sebastianmostert663@gmail.com') return
 
     const res2 = await fetch('/api/v1/user/notify', {
         method: 'POST',
@@ -308,7 +463,7 @@ const notifyUser = async (shift, allShifts) => {
             emailBody: {
                 to: email,
                 subject: 'Permanence Notification',
-                text: `Hello ${firstName} ${lastName},\n\nYou have been assigned to a shift on the ${formattedStartDate} from ${startTimeStr} to ${endTimeStr}.\n\nYou're assigned as a "${position}".\n\nYour partner(s) are:\n${partnerInfo.firstNames.map((name, index) => `${name} ${partnerInfo.lastNames[index]} as a "${partnerInfo.positions[index]}"`).join('\n')}`,
+                html
             }
         }),
     });

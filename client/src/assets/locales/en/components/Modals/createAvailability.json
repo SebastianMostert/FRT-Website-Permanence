@@ -1,5 +1,5 @@
 {
-    "create_availability_modal.title": "",
-    "create_availability_modal.date": "",
-    "create_availability_modal.time_range": ""
+    "create_availability_modal.title": "Create Availability",
+    "create_availability_modal.date": "Date",
+    "create_availability_modal.time_range": "Time range"
 }
