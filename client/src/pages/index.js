@@ -12,7 +12,6 @@ import Report from './Report'
 import Reports from './Reports'
 import SignUp from './SignUp'
 
-import AdminDashboard from './AdminDashboard'
 
 import { Profile } from './Profiles'
 
@@ -35,5 +34,4 @@ export {
     Report,
     Reports,
     SignUp,
-    AdminDashboard
 }

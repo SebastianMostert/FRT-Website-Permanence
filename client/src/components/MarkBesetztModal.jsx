@@ -5,13 +5,14 @@ import { getMember } from '../utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserMinus } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-
-// TODO: Add the team selection 
+import Select from 'react-select';
 
 const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [shiftTitle, setShiftTitle] = useState('');
+    const [teams, setTeams] = useState([]);
+    const [selectedTeamID, setSelectedTeamID] = useState(null);
 
     useEffect(() => {
         if (!event) return;
@@ -51,7 +52,28 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
             setLoading(false);
         };
 
+        const fetchTeams = async () => {
+            try {
+                // Make a post request to the API
+                const res = await fetch('/api/v1/team/fetch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                // Get the data from the response
+                const data = await res.json();
+
+                // Set the data in the state
+                setTeams(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
         fetchUsers();
+        fetchTeams();
     }, [event]);
 
     const handleSelectPosition = (event, userIAM) => {
@@ -67,6 +89,15 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
     };
 
     const handleCreateShift = async () => {
+        // Check everything is provided
+        if (!shiftTitle) return toast.error('Please provide a title for the shift');
+        if (selectedTeamID === null) return toast.error('Please select a team');
+
+        // Check that the team actually exists
+        const team = teams.find((team) => team._id === selectedTeamID);
+        if (!team) return toast.error('Selected team does not exist');
+
+        // Validate shift
         const selectedUsersWithPosition = selectedUsers.filter((user) => user.position !== '');
 
         const valid = validateShift(selectedUsersWithPosition);
@@ -132,7 +163,7 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
 
         try {
             console.log(selectedUsersWithPosition);
-            await createShiftDB(selectedUsersWithPosition, shiftTitle);
+            await createShiftDB(selectedUsersWithPosition, shiftTitle, selectedTeamID);
             handleClose();
             toast.success('Shift created successfully');
         } catch (error) {
@@ -143,6 +174,12 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
 
     const handleTitleChange = (event) => {
         setShiftTitle(event.target.value);
+    };
+
+    const handleTeamChange = (e) => {
+        const value = e.value;
+
+        setSelectedTeamID(value);
     };
 
     const validateShift = (selectedUsersWithPosition) => {
@@ -176,8 +213,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
     };
 
     const deleteAvailability = async (id, IAM) => {
-        // TODO: Add the team selection 
-        return
         try {
             const res = await fetch(`/api/v1/availability/delete/`, {
                 method: 'DELETE',
@@ -216,6 +251,21 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
                                 onChange={handleTitleChange}
                             />
                         </Form.Group>
+                        <Form.Group controlId="users" className="mb-3">
+                            <Form.Label>Team Selection</Form.Label>
+                            <Select
+                                value={selectedTeamID && {
+                                    value: selectedTeamID,
+                                    label: teams.find((team) => team._id === selectedTeamID)?.name,
+                                }}
+                                onChange={(e) => handleTeamChange(e)}
+                                options={teams.map((team) => ({
+                                    value: team._id,
+                                    label: team.name,
+                                }))}
+                                required
+                            />
+                        </Form.Group>
                         <p>Please select the position for each user:</p>
                         {selectedUsers.map((user) => (
                             <div key={user.IAM} className="mb-3">
@@ -236,6 +286,7 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
                                         as="select"
                                         value={user.position}
                                         onChange={(e) => handleSelectPosition(e, user.IAM)}
+                                        required
                                     >
                                         <option value="">Choose...</option>
                                         {getAllowedPositions(user.operationalPosition).map((position) => (
@@ -276,7 +327,7 @@ const getAllowedPositions = (operationalPosition) => {
 export default MarkBesetztModal;
 
 
-const createShiftDB = async (shift, title) => {
+const createShiftDB = async (shift, title, teamID) => {
     const startDate = new Date(shift[0].startDate);
     const endDate = new Date(shift[0].endDate);
     const users = [];
@@ -317,7 +368,8 @@ const createShiftDB = async (shift, title) => {
                 startDate,
                 endDate,
                 title,
-                users
+                users,
+                teamID
             }),
         });
         const json = await res.json();
@@ -452,6 +504,7 @@ const notifyUser = async ({ user, startDate, endDate, allUsers }) => {
 </html>`;
 
 
+    // Todo fix
     if (email !== 'sebastianmostert663@gmail.com') return
 
     const res2 = await fetch('/api/v1/user/notify', {

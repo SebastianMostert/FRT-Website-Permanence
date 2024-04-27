@@ -75,3 +75,27 @@ export const deleteAvailability = async (req, res, next) => {
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
+
+// Update
+export const updateAvailability = async (req, res, next) => {
+    try {
+        // Param
+        const { id } = req.params;
+
+        const { startTime, endTime } = req.body;
+
+        const updated = await Availability.findByIdAndUpdate(id, {
+            startTime,
+            endTime
+        });
+
+        if (updated) {
+            return res.status(200).json({ message: 'Availability updated successfully', success: true });
+            sendReportsUpdated('availabilities_updated');
+        }
+        res.status(404).json({ message: 'Availability not found', success: false });
+    } catch (error) {
+        console.error(error);
+        next(errorHandler(500, 'Internal Server Error'));
+    }
+}

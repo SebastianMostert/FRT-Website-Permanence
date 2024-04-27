@@ -297,6 +297,7 @@ export default function Calendar() {
                         handleClose={() => setShowAvailabilityModal(false)}
                         event={selectedAvailability}
                         handleDelete={handleAvailabilityDelete}
+                        refreshData={refreshDataAvailability}
                     />
                     <ShiftModal
                         show={showShiftModal}

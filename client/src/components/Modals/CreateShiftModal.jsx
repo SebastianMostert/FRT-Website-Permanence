@@ -16,6 +16,8 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
     const [users, setUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [usersPosition, setUsersPosition] = useState({});
+    const [teams, setTeams] = useState([]);
+    const [selectedTeamID, setSelectedTeamID] = useState(null);
 
     const handleDateChange = (e) => {
         setDate(e.target.value);
@@ -44,6 +46,12 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
         });
     };
 
+    const handleTeamChange = (e) => {
+        const value = e.value;
+
+        setSelectedTeamID(value);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -70,6 +78,7 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
             endDate: new Date(date + ' ' + endTime),
             title,
             users,
+            teamID: selectedTeamID,
         }
 
         createShift(shiftObj);
@@ -92,6 +101,27 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
 
             setUsers(_users);
         };
+        const fetchTeams = async () => {
+            try {
+                // Make a post request to the API
+                const res = await fetch('/api/v1/team/fetch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                // Get the data from the response
+                const data = await res.json();
+
+                // Set the data in the state
+                setTeams(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchTeams();
         getUsers();
     }, []);
 
@@ -122,13 +152,19 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
                             required
                         />
                     </Form.Group>
-                    {/* TODO: Add the team selection */}
                     <Form.Group controlId="users" className="mb-3">
-                        <Form.Label>{t(`${componentTranslationName}.team`)}</Form.Label>
+                        <Form.Label>Team Selection</Form.Label>
                         <Select
-                            value={selectedUsers}
-                            onChange={handleUsersChange}
-                            options={users}
+                            value={selectedTeamID && {
+                                value: selectedTeamID,
+                                label: teams.find((team) => team._id === selectedTeamID)?.name,
+                            }}
+                            onChange={(e) => handleTeamChange(e)}
+                            options={teams.map((team) => ({
+                                value: team._id,
+                                label: team.name,
+                            }))}
+                            required
                         />
                     </Form.Group>
                     <Form.Group controlId="users" className="mb-3">

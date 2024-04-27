@@ -30,6 +30,10 @@ const shiftSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
+        teamID: {
+            type: String,
+            required: true,
+        },
     }]
 });
 

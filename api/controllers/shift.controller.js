@@ -1,14 +1,16 @@
 import Shift from '../models/shift.model.js';
+import Team from '../models/team.model.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 export const createShift = async (req, res, next) => {
-  const { startDate, endDate, title, users } = req.body;
+  const { startDate, endDate, title, users, teamID } = req.body;
 
   try {
     if (!startDate) return res.status(400).json({ success: false, message: 'Missing start date' });
     if (!endDate) return res.status(400).json({ success: false, message: 'Missing end date' });
     if (!title) return res.status(400).json({ success: false, message: 'Missing title' });
     if (!users) return res.status(400).json({ success: false, message: 'Missing users' });
+    if (!teamID) return res.status(400).json({ success: false, message: 'Missing team ID' });
 
     // Check if the users array has 2 to 3 objects
     if (users.length < 2 || users.length > 3) return res.status(400).json({ success: false, message: 'Each shift must have 2 to 3 users' });
@@ -24,12 +26,19 @@ export const createShift = async (req, res, next) => {
       if (!IAM || !firstName || !lastName || !position) return res.status(400).json({ success: false, message: 'Each user must have an IAM, first name, last name, and a position' });
     }
 
+    // Fetch the team
+    const team = await Team.findById(teamID);
+    if (!team) {
+      return res.status(404).json({ success: false, message: 'Team not found.' });
+    }
+
     // Create the shifts
     const createdShifts = await Shift.create({
       startDate,
       endDate,
       title,
       users,
+      teamID,
     });
 
     res.status(201).json({ success: true, data: createdShifts });
