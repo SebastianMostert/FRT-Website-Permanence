@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Nav, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faCog, faUsers, faCalendar, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faCog, faUsers, faCalendar, faAngleDown, faAngleUp, faCubes } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
     // State to manage visibility of sub-links
@@ -14,7 +14,7 @@ const Sidebar = () => {
     };
 
     return (
-        <>
+        <div className="select-none">
             <style>
                 {`
                 .sidebar {
@@ -83,6 +83,11 @@ const Sidebar = () => {
                         </Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
+                        <Nav.Link as={NavLink} to="/admin/stock">
+                            <FontAwesomeIcon icon={faCubes} /> Stock
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
                         <Nav.Link as={NavLink} to="/admin/settings">
                             <FontAwesomeIcon icon={faCog} /> Settings
                         </Nav.Link>
@@ -94,7 +99,7 @@ const Sidebar = () => {
                     Return to Website
                 </Button>
             </div>
-        </>
+        </div>
     );
 };
 

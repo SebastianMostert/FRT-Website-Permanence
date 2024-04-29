@@ -268,6 +268,31 @@ export default function Calendar() {
 
     };
 
+    const handleEventResize = (e) => {
+        const event = e.event;
+        const { start, end } = event;
+
+        const newStartDate = new Date(start);
+        const newEndDate = new Date(end);
+
+        // Ensure that the start date is after or equal to 08:00
+        if (newStartDate.getHours() < 8) {
+            newStartDate.setHours(8, 0, 0, 0);
+        }
+        // Ensure that the end date is before or equal to 18:00
+        if (newEndDate.getHours() > 18) {
+            newEndDate.setHours(18, 0, 0, 0);
+        }
+
+        // Ensure that the sart and end dates are in the same day
+        if (newStartDate.toDateString() !== newEndDate.toDateString()) {
+            newEndDate.setDate(newStartDate.getDate());
+            newEndDate.setHours(18, 0, 0, 0);
+        }
+
+        updateAvailability(newStartDate, newEndDate, event.id, refreshDataAvailability);
+    };
+
     const calendarAndModal = (
         <>
             {
@@ -291,6 +316,7 @@ export default function Calendar() {
                         }}
                         loading={isLoading}
                         handleDateClick={handleDateClick}
+                        handleEventResize={handleEventResize}
                     />
                     <AvailabilityModal
                         show={showAvailabilityModal}
@@ -298,6 +324,7 @@ export default function Calendar() {
                         event={selectedAvailability}
                         handleDelete={handleAvailabilityDelete}
                         refreshData={refreshDataAvailability}
+                        updateAvailability={updateAvailability}
                     />
                     <ShiftModal
                         show={showShiftModal}
@@ -430,6 +457,7 @@ async function getAvailabilities(IAM) {
                 id: availability._id,
                 backgroundColor: colors.events.availability,
                 extendedProps: { ...availability, type: 'availability', user },
+                durationEditable: true,
             });
         }
 
@@ -444,9 +472,6 @@ function getShiftEvents(shifts) {
 
     for (let i = 0; i < shifts.length; i++) {
         const shift = shifts[i];
-
-        console.log(shift);
-        // 
 
         const event = {
             title: shift.title,
@@ -491,6 +516,27 @@ async function deleteAvailability(id, IAM, t) {
         const data = await res.json()
 
         if (data?.success != true) return { success: false, message: `${t('toast.calendar.availability.delete.success')}` }
+        return { success: true }
+    } catch (err) {
+        return { success: false, message: err.message }
+    }
+}
+
+async function updateAvailability(start, end, id, refreshData) {
+    try {
+        await fetch(`/api/v1/availability/update/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                startTime: start,
+                endTime: end,
+            }),
+        })
+
+        refreshData();
+
         return { success: true }
     } catch (err) {
         return { success: false, message: err.message }

@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 const VIEW_TYPE_KEY = 'viewType';
 const hideToolbarSize = 1000;
 
-const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, selectable, customButtons, loading, handleDateClick }) => {
+const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, selectable, customButtons, loading, handleDateClick, handleEventResize }) => {
     const { t } = useTranslation();
     const [headerToolbar, setHeaderToolbar] = useState({
         left: 'prev,next today',
@@ -68,7 +68,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [customButtons]);
 
     useEffect(() => {
         if (loading) {
@@ -92,7 +92,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
                 });
             }
         }
-    }, [loading]);
+    }, [customButtons, loading]);
 
     return (
         <FullCalendar
@@ -136,6 +136,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
             eventClick={handleEventClick}
             select={handleSelect}
             viewDidMount={handleViewDidMount}
+            eventResize={handleEventResize}
 
             // Styling
             headerToolbar={headerToolbar}

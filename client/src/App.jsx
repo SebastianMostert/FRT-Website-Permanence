@@ -34,6 +34,7 @@ import Settings from './Admin/pages/Settings';
 import CurrentSituation from './pages/LogePages/CurrentSituation';
 import Incidents from './pages/LogePages/Incidents';
 import IncidentCreate from './pages/LogePages/IncidentCreate';
+import Stock from './Admin/pages/Stock';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -100,6 +101,7 @@ function App() {
             <Route path='/admin/availabilities' element={<Availabilities />} />
             <Route path='/admin/shifts' element={<Shifts />} />
             <Route path='/admin/settings' element={<Settings />} />
+            <Route path='/admin/stock' element={<Stock />} />
           </Route>
         </Route>
 

@@ -1,4 +1,31 @@
 // TODO: Report
+// TODO: Add a Stock page which:
+//  Allows a user to create items to the Page which have:
+//      An Image 
+//      A name
+//      An expiration date
+//      A minimum amount
+//  Allows a user to add/remove an/multiple item(s) (these items have to have been created, this just changes the amount)
+//  Display all the items already existing
+//      Marks the items that are about to expire yellow
+//      Marks the items that are expired red
+//      Marks the items which are below the minimum amount but not 0 yellow
+//      Marks the items which are at 0 as red
+//
 // TODO: The Admin User page needs extra stuff (like a btn to create a new user)
 // TODO: Add Dark/Light mode
-// TODO: Allow availabilities times to be changed by dragging in the calendar
+
+// This below is just the placeholder of the item
+const verbandPlaceholder = {
+    image: 'ssssssssssssssssssssssssss',
+    name: 'Verband',
+    minAmount: 5,
+    id: This is the id in the barcode,
+}
+
+// This is what the user can add if they add new items
+const verbandItemA = {
+    placeholderID: This links it to the placeholder, its just the barcode,
+    amount: 5,
+    expirationDate: '2024-03-22'
+}
