@@ -42,6 +42,11 @@ const reportSchema = new mongoose.Schema({
         required: true,
         default: {}
     },
+    missionInfo: {
+        type: Object,
+        required: true,
+        default: {}
+    },
     archived: {
         type: Boolean,
         default: false,

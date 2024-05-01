@@ -9,6 +9,7 @@ import MissionNumber from '../Inputs/MissionNumber';
 import { updateReport } from '../../utils';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import MissionInformation from './MissionInformation';
 
 const defaultValues = {
     firstRespondersValues: [
@@ -133,6 +134,13 @@ const defaultValues = {
             erhoben: false,
         },
     },
+    missionInfo: {
+        quickReport: '',
+        location: '',
+        valuablesGivenTo: '',
+        SepasContacted: false,
+        ambulanceOnSite: false,
+    },
     archived: false,
 }
 
@@ -142,6 +150,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     const [patientInfo, setPatientInfo] = useState(defaultValues.patientInfoValues);
     const [abcdeSchema, setAbcdeData] = useState(defaultValues.ABCDEValues);
     const [samplerSchema, setSamplerData] = useState(defaultValues.samplerValues);
+    const [missionInfo, setMissionInfo] = useState(defaultValues.missionInfo);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [isNewReport, setIsNewReport] = useState(false);
 
@@ -179,6 +188,11 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
         });
     };
 
+    const handleMissionInfoChange = (event) => {
+        const { name, value } = event.target;
+        setMissionInfo({ ...missionInfo, [name]: value });
+    };
+
     const handleMissionNumberChange = (newMissionNumber) => {
         setMissionNumber(newMissionNumber.split(''));
     };
@@ -208,6 +222,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 patientInfo,
                 abcdeSchema,
                 samplerSchema,
+                missionInfo,
             };
 
             if (isNewReport) {
@@ -287,6 +302,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 setPatientInfo(data?.patientInfo || defaultValues.patientInfoValues);
                 setAbcdeData(data?.abcdeSchema || defaultValues.ABCDEValues);
                 setSamplerData(data?.samplerSchema || defaultValues.samplerValues);
+                setMissionInfo(data?.missionInfo || defaultValues.missionInfo);
                 setDataLoaded(true);
             });
         }
@@ -387,6 +403,17 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
             ),
             header: t('report.sampler.title'),
         },
+        missionInformation: {
+            // TODO: Fix this
+            body: (
+                <MissionInformation
+                    isEditable={isEditable}
+                    missionInfo={missionInfo}
+                    handleMissionInfoChange={handleMissionInfoChange}
+                />
+            ),
+            header: t('report.mission_information.title'),
+        },
     };
 
     const CustomAccordion = ({ body, header }) => {
@@ -403,7 +430,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     }
 
     return (
-        <Container>
+        <Container className='select-none'>
             <h2 className="mt-4 mb-3">{t('report.title')}</h2>
             <Form onSubmit={handleSubmit} noValidate validated={validated}>
                 <Form.Group className="mb-3">
