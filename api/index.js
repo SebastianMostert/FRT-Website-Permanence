@@ -9,6 +9,7 @@ import reportRoutes from './routes/report.route.js';
 import shiftRoutes from './routes/shift.route.js';
 import teamRoutes from './routes/team.route.js';
 import incidentRoutes from './routes/incident.route.js';
+import stockRoutes from './routes/stock.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import cors from 'cors';
@@ -73,6 +74,7 @@ app.use(`/api/v${apiVersion}/report`, reportRoutes)
 app.use(`/api/v${apiVersion}/shift`, shiftRoutes)
 app.use(`/api/v${apiVersion}/team`, teamRoutes)
 app.use(`/api/v${apiVersion}/incident`, incidentRoutes)
+app.use(`/api/v${apiVersion}/stock`, stockRoutes)
 
 
 app.use((err, req, res, next) => {

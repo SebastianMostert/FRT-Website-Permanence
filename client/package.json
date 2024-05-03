@@ -48,6 +48,7 @@
     "mern-auth": "file:..",
     "moment": "^2.30.1",
     "nfc-react-web": "^0.0.2",
+    "quagga": "^0.12.1",
     "react": "^18.2.0",
     "react-big-calendar": "^1.11.2",
     "react-bootstrap": "^2.10.2",
