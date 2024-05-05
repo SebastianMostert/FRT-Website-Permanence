@@ -112,8 +112,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
             return;
         }
 
-
-
         try {
             await createShiftDB(selectedUsersWithPosition, shiftTitle, selectedTeamID);
             handleClose();
@@ -246,6 +244,7 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
             toast.success(`${t('toast.calendar.availability.create.success')}`);
         } catch (err) {
             toast.error(`${t('toast.calendar.availability.create.error')}`);
+            throw err
         }
     };
 
@@ -253,35 +252,27 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
         const startDate = new Date(shift[0].startDate);
         const endDate = new Date(shift[0].endDate);
         const users = [];
+        try {
+            for (let i = 0; i < shift.length; i++) {
+                const element = shift[i];
+                const {
+                    IAM,
+                    firstName,
+                    lastName,
+                    position,
+                } = element;
 
-        for (let i = 0; i < shift.length; i++) {
-            const element = shift[i];
-            const {
-                IAM,
-                firstName,
-                lastName,
-                position,
-            } = element;
+                const user = {
+                    IAM,
+                    firstName,
+                    lastName,
+                    position,
+                }
 
-            const user = {
-                IAM,
-                firstName,
-                lastName,
-                position,
+                users.push(user);
             }
 
-            users.push(user);
-
-            notifyUser({
-                allUsers: shift,
-                user: user,
-                startDate,
-                endDate,
-            });
-        }
-
-        try {
-            const shift = await apiClient.shift.create({
+            const createdShift = await apiClient.shift.create({
                 startDate,
                 endDate,
                 title,
@@ -289,7 +280,18 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
                 teamID
             })
 
-            return shift;
+            for (let i = 0; i < users.length; i++) {
+                const element = users[i];
+
+                notifyUser({
+                    allUsers: shift,
+                    user: element,
+                    startDate,
+                    endDate,
+                });
+            }
+
+            return createdShift;
         } catch (err) {
             console.error(err);
         }
@@ -388,9 +390,6 @@ const getAllowedPositions = (operationalPosition) => {
 };
 
 export default MarkBesetztModal;
-
-
-
 
 const notifyUser = async ({ user, startDate, endDate, allUsers }) => {
     const { IAM, firstName, lastName, position } = user;

@@ -23,12 +23,20 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
         center: 'title',
         right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
     });
+    const [showWeekend, setShowWeekend] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
-            // Set initialView based on screen size
-            if (window.innerWidth <= hideToolbarSize) {
+            const windowWidth = window.innerWidth;
 
+            // if(windowWidth > 1500) {
+            //     setShowWeekend(true);
+            // } else {
+            //     setShowWeekend(false);
+            // }
+
+            // Set initialView based on screen size
+            if (windowWidth <= hideToolbarSize) {
                 if (customButtons) {
                     setHeaderToolbar({
                         left: 'prev,next today',
@@ -117,7 +125,7 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
             }}
             firstDay={1}
             nowIndicator={true}
-            weekends={false}
+            weekends={showWeekend}
 
             // Selection
             selectConstraint={{
