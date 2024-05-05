@@ -5,6 +5,7 @@ import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select';
 import { getSelectMenuClass } from '../../utils';
 import { useTranslation } from 'react-i18next';
+import { useApiClient } from '../../ApiContext';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -15,7 +16,10 @@ const Users = () => {
   const [allRoles, setAllRoles] = useState(['admin', 'member', 'public', 'loge']);
   const [classOptions, setClassOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const [classesAPI, setClassesAPI] = useState(null);
+
   const { t } = useTranslation();
+  const apiClient = useApiClient();
 
   // State for sorting
   const [sortConfig, setSortConfig] = useState({
@@ -24,16 +28,26 @@ const Users = () => {
   });
 
   useEffect(() => {
+    async function fetchData() {
+      const classes = await apiClient.exam.getClasses();
+      console.log(classes)
+      setClassesAPI(classes);
+    }
+
+    fetchData();
+  }, [apiClient.exam]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getSelectMenuClass(t);
+        const response = await getSelectMenuClass(t, classesAPI);
         setClassOptions(response);
       } catch (error) {
         console.error(error);
       }
     };
     fetchData();
-  }, [t]);
+  }, [classesAPI, t]);
 
   const fetchUsers = async () => {
     try {

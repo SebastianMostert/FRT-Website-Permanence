@@ -11,7 +11,7 @@ export const createAvailability = async (req, res, next) => {
         const newAvailability = new Availability({ IAM: validIAM, startTime, endTime });
         await newAvailability.save();
 
-        res.status(201).json({ message: 'Availability created successfully', success: true, availability: newAvailability });
+        res.status(201).json(newAvailability);
         sendReportsUpdated('availabilities_updated');
     } catch (error) {
         console.error(error);
@@ -66,7 +66,7 @@ export const deleteAvailability = async (req, res, next) => {
         });
 
         if (deleted.deletedCount > 0) {
-            return res.status(200).json({ message: 'Availability deleted successfully', success: true });
+            return res.status(200).json(deleted);
             sendReportsUpdated('availabilities_updated');
         }
         res.status(404).json({ message: 'Availability not found', success: false });
@@ -90,7 +90,7 @@ export const updateAvailability = async (req, res, next) => {
         });
 
         if (updated) {
-            return res.status(200).json({ message: 'Availability updated successfully', success: true });
+            return res.status(200).json(updated);
             sendReportsUpdated('availabilities_updated');
         }
         res.status(404).json({ message: 'Availability not found', success: false });

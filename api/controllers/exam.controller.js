@@ -52,10 +52,7 @@ export const getExamsByUser = async (req, res, next) => {
                 }
             }
 
-            res.json({
-                message: 'Returning all exams with the user\'s class!',
-                exams: filteredExams,
-            });
+            res.status(200).json(filteredExams);
         } else {
             throw errorHandler(404, 'No class found for this user!');
         }
@@ -89,10 +86,7 @@ export const getClasses = async (req, res, next) => {
             name: 'Loge',
             longName: 'Loge',
         })
-        res.json({
-            message: 'All available classes',
-            classes,
-        });
+        res.status(200).json(classes);
     } catch (error) {
         console.error(error);
         next(error);

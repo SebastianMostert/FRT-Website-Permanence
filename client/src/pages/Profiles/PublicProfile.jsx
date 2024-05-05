@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Form } from 'react-bootstrap';
 import { NotAuthorized } from '../index';
 import FullNameInput from '../../components/Inputs/FullName';
+import { useApiClient } from '../../ApiContext';
 
 const defaultValue = {
     firstName: '',
@@ -29,7 +30,21 @@ export default function Profile() {
 
     const dispatch = useDispatch();
     const [formData, setFormData] = useState(defaultValue);
+    const [classesAPI, setClassesAPI] = useState(null);
+
     const { currentUser, loading } = useSelector((state) => state.user)
+
+    const apiClient = useApiClient();
+
+    useEffect(() => {
+        async function fetchData() {
+            const classes = await apiClient.exam.getClasses();
+            console.log(classes)
+            setClassesAPI(classes);
+        }
+
+        fetchData();
+    }, [apiClient.exam]);
 
     // Set the initial values
     useEffect(() => {
@@ -93,7 +108,7 @@ export default function Profile() {
 
             // Verify class
             if (updatedUserData.studentClass) {
-                const _isClassValid = await isClassValid(updatedUserData.studentClass, t);
+                const _isClassValid = await isClassValid(updatedUserData.studentClass, t, classesAPI);
                 if (!_isClassValid.success) {
                     const msg = `${t('toast.profile.update.failed', { reason: _isClassValid.message })}`
                     dispatch(updateUserFailure(msg));

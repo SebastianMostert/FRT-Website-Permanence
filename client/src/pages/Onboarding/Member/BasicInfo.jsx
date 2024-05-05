@@ -7,6 +7,7 @@ import { getSelectMenuClass, isIAMValid, isPasswordValid } from '../../../utils'
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import Select from 'react-select';
 import FullNameInput from '../../../components/Inputs/FullName';
+import { useApiClient } from '../../../ApiContext';
 
 const BasicInfo = ({ data, onChange, onNext }) => {
   const { t } = useTranslation();
@@ -14,18 +15,32 @@ const BasicInfo = ({ data, onChange, onNext }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [classOptions, setClassOptions] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [classesAPI, setClassesAPI] = useState(null);
+
+  const apiClient = useApiClient();
+
+  useEffect(() => {
+    async function fetchData() {
+      const classes = await apiClient.exam.getClasses();
+      console.log(classes)
+      setClassesAPI(classes);
+    }
+
+    fetchData();
+  }, [apiClient.exam]);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getSelectMenuClass(t); // Use your actual fetching function
+        const response = await getSelectMenuClass(t, classesAPI); // Use your actual fetching function
         setClassOptions(response);
       } catch (error) {
         console.error(error);
       }
     };
     fetchData();
-  }, [t]);
+  }, [classesAPI, t]);
 
   const handleNext = async () => {
     // Email validation regular expression

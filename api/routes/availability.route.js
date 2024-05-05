@@ -5,11 +5,11 @@ import { verifyToken } from '../utils/verifyUser.js';
 const router = express.Router();
 
 router.post('/create', verifyToken, createAvailability);
-router.post('/get/:IAM', verifyToken, getAvailabilities);
-router.post('/all', verifyToken, getAllAvailabilities);
-router.post('/get-by-id/:id', verifyToken, getAvailabilityByID);
+router.post('/get', verifyToken, getAllAvailabilities);
+router.post('/get/IAM/:IAM', verifyToken, getAvailabilities);
+router.post('/get/ID/:id', verifyToken, getAvailabilityByID);
 router.post('/update/:id', verifyToken, updateAvailability);
 
-router.delete('/delete', verifyToken, deleteAvailability);
+router.delete('/delete/:id', verifyToken, deleteAvailability);
 
 export default router;

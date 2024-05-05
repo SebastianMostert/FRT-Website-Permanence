@@ -6,13 +6,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserMinus } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
+import { useApiClient } from '../ApiContext';
+import { useTranslation } from 'react-i18next';
 
 const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
+    const { t } = useTranslation();
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [shiftTitle, setShiftTitle] = useState('');
     const [teams, setTeams] = useState([]);
     const [selectedTeamID, setSelectedTeamID] = useState(null);
+
+    const apiClient = useApiClient();
 
     useEffect(() => {
         if (!event) return;
@@ -107,64 +112,64 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
             return;
         }
 
-        for (let i = 0; i < selectedUsersWithPosition.length; i++) {
-            const selectedUserWithPosition = selectedUsersWithPosition[i];
-            // only delete availability if the start time and end time exactly match the created shifts start and end time
-            const shiftStart = new Date(selectedUserWithPosition.startDate);
-            const shiftEnd = new Date(selectedUserWithPosition.endDate);
 
-            const availabilityID = selectedUserWithPosition.availabilityId;
-            const IAM = selectedUserWithPosition.IAM;
-
-            // Fetch availability
-            const availability = await getAvailabilities(availabilityID);
-            const availabilityStart = new Date(availability.startTime);
-            const availabilityEnd = new Date(availability.endTime);
-
-            if (shiftStart.getTime() === availabilityStart.getTime() && shiftEnd.getTime() === availabilityEnd.getTime()) {
-                deleteAvailability(availabilityID, IAM);
-            } else {
-                // Delete availability
-                deleteAvailability(availabilityID, IAM);
-
-                // Validate start and end time are not the same
-                if (shiftStart.getTime() === shiftEnd.getTime()) {
-                    continue; // Skip this user and move to the next
-                }
-
-                // Create new availabilities
-                const newAvailability1 = {
-                    IAM,
-                    startTime: availabilityStart,
-                    endTime: shiftStart,
-                };
-
-                const newAvailability2 = {
-                    IAM,
-                    startTime: shiftEnd,
-                    endTime: availabilityEnd,
-                };
-
-                // Implement logic to create new availabilities, possibly with an API call
-                if (availabilityStart.getTime() === shiftStart.getTime()) {
-                    toast.info('Create new availabilities, possibly with an API call');
-                    continue;
-                }
-                // Implement logic to create new availabilities, possibly with an API call
-                if (shiftEnd.getTime() === availabilityEnd.getTime()) {
-                    toast.info('Create new availabilities, possibly with an API call');
-                    continue;
-                }
-
-                createAvailability(newAvailability1);
-                createAvailability(newAvailability2);
-            }
-        }
 
         try {
-            console.log(selectedUsersWithPosition);
             await createShiftDB(selectedUsersWithPosition, shiftTitle, selectedTeamID);
             handleClose();
+            for (let i = 0; i < selectedUsersWithPosition.length; i++) {
+                const selectedUserWithPosition = selectedUsersWithPosition[i];
+                // only delete availability if the start time and end time exactly match the created shifts start and end time
+                const shiftStart = new Date(selectedUserWithPosition.startDate);
+                const shiftEnd = new Date(selectedUserWithPosition.endDate);
+
+                const availabilityID = selectedUserWithPosition.availabilityId;
+                const IAM = selectedUserWithPosition.IAM;
+
+                // Fetch availability
+                const availability = await apiClient.availability.getByID(availabilityID);
+                const availabilityStart = new Date(availability.startTime);
+                const availabilityEnd = new Date(availability.endTime);
+
+                if (shiftStart.getTime() === availabilityStart.getTime() && shiftEnd.getTime() === availabilityEnd.getTime()) {
+                    deleteAvailability(availabilityID, IAM);
+                } else {
+                    // Delete availability
+                    deleteAvailability(availabilityID, IAM);
+
+                    // Validate start and end time are not the same
+                    if (shiftStart.getTime() === shiftEnd.getTime()) {
+                        continue; // Skip this user and move to the next
+                    }
+
+                    // Create new availabilities
+                    const newAvailability1 = {
+                        IAM,
+                        startTime: availabilityStart,
+                        endTime: shiftStart,
+                    };
+
+                    const newAvailability2 = {
+                        IAM,
+                        startTime: shiftEnd,
+                        endTime: availabilityEnd,
+                    };
+
+                    // Implement logic to create new availabilities, possibly with an API call
+                    if (availabilityStart.getTime() === shiftStart.getTime()) {
+                        toast.info('Create new availabilities, possibly with an API call');
+                        continue;
+                    }
+                    // Implement logic to create new availabilities, possibly with an API call
+                    if (shiftEnd.getTime() === availabilityEnd.getTime()) {
+                        toast.info('Create new availabilities, possibly with an API call');
+                        continue;
+                    }
+
+                    createAvailability(newAvailability1);
+                    createAvailability(newAvailability2);
+                }
+            }
             toast.success('Shift created successfully');
         } catch (error) {
             console.error('Error creating shift:', error);
@@ -199,38 +204,96 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
         if (totalPositions === 2) if (!twoPositions) return { isValid: false, message: 'You must have 1 Chef Agres and 1 Equipier Bin.' };
 
         // Ensure that there is no other shift
-        for (let i = 0; i < shifts.length; i++) {
-            const shift = shifts[i];
-            const shiftStart = new Date(shift.startDate);
-            const shiftEnd = new Date(shift.endDate);
-            if (shiftStart >= shiftEnd) continue;
-            if (shiftStart <= shiftStart && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
-            if (shiftStart <= shiftStart && shiftEnd > shiftStart && shiftEnd <= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
-            if (shiftStart > shiftStart && shiftStart < shiftEnd && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
-        }
+        // for (let i = 0; i < shifts.length; i++) {
+        //     const shift = shifts[i];
+        //     console.log(shift)
+        //     const shiftStart = new Date(shift.startDate);
+        //     const shiftEnd = new Date(shift.endDate);
+        //     if (shiftStart >= shiftEnd) continue;
+        //     if (shiftStart <= shiftStart && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
+        //     if (shiftStart <= shiftStart && shiftEnd > shiftStart && shiftEnd <= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
+        //     if (shiftStart > shiftStart && shiftStart < shiftEnd && shiftEnd >= shiftEnd) return { isValid: false, message: 'You cannot have multiple shifts at the same time.' };
+        // }
 
         return { isValid: true, message: '' };
     };
 
     const deleteAvailability = async (id, IAM) => {
         try {
-            const res = await fetch(`/api/v1/availability/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ IAM: IAM, id: id }),
-            });
-
-            const data = await res.json();
-
-            if (data?.success !== true) {
-                return;
+            try {
+                await apiClient.availability.delete({
+                    id,
+                    IAM
+                })
+            } catch (error) {
+                toast.error(`${t('toast.calendar.availability.delete.error')}`);
             }
+        } catch (err) {
+            toast.error(`${t('toast.calendar.availability.delete.error')}`);
+        }
+    };
+
+    const createAvailability = async (data) => {
+        const { IAM, startTime, endTime } = data;
+
+        try {
+            await apiClient.availability.create({
+                IAM,
+                startTime,
+                endTime
+            })
+
+            toast.success(`${t('toast.calendar.availability.create.success')}`);
+        } catch (err) {
+            toast.error(`${t('toast.calendar.availability.create.error')}`);
+        }
+    };
+
+    const createShiftDB = async (shift, title, teamID) => {
+        const startDate = new Date(shift[0].startDate);
+        const endDate = new Date(shift[0].endDate);
+        const users = [];
+
+        for (let i = 0; i < shift.length; i++) {
+            const element = shift[i];
+            const {
+                IAM,
+                firstName,
+                lastName,
+                position,
+            } = element;
+
+            const user = {
+                IAM,
+                firstName,
+                lastName,
+                position,
+            }
+
+            users.push(user);
+
+            notifyUser({
+                allUsers: shift,
+                user: user,
+                startDate,
+                endDate,
+            });
+        }
+
+        try {
+            const shift = await apiClient.shift.create({
+                startDate,
+                endDate,
+                title,
+                users,
+                teamID
+            })
+
+            return shift;
         } catch (err) {
             console.error(err);
         }
-    };
+    }
 
     return (
         <Modal show={show} onHide={handleClose} centered>
@@ -327,59 +390,7 @@ const getAllowedPositions = (operationalPosition) => {
 export default MarkBesetztModal;
 
 
-const createShiftDB = async (shift, title, teamID) => {
-    const startDate = new Date(shift[0].startDate);
-    const endDate = new Date(shift[0].endDate);
-    const users = [];
 
-    for (let i = 0; i < shift.length; i++) {
-        const element = shift[i];
-        const {
-            IAM,
-            firstName,
-            lastName,
-            position,
-        } = element;
-
-        const user = {
-            IAM,
-            firstName,
-            lastName,
-            position,
-        }
-
-        users.push(user);
-
-        notifyUser({
-            allUsers: shift,
-            user: user,
-            startDate,
-            endDate,
-        });
-    }
-
-    try {
-        const res = await fetch('/api/v1/shift/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                startDate,
-                endDate,
-                title,
-                users,
-                teamID
-            }),
-        });
-        const json = await res.json();
-
-        console.log(json);
-        return json;
-    } catch (err) {
-        console.error(err);
-    }
-}
 
 const notifyUser = async ({ user, startDate, endDate, allUsers }) => {
     const { IAM, firstName, lastName, position } = user;
@@ -503,10 +514,6 @@ const notifyUser = async ({ user, startDate, endDate, allUsers }) => {
 
 </html>`;
 
-
-    // Todo fix
-    if (email !== 'sebastianmostert663@gmail.com') return
-
     const res2 = await fetch('/api/v1/user/notify', {
         method: 'POST',
         headers: {
@@ -536,38 +543,3 @@ const formatTime = (date) => {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 };
-
-const getAvailabilities = async (id) => {
-    try {
-        const res = await fetch(`/api/v1/availability/get-by-id/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await res.json();
-
-        return data;
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-const createAvailability = async (data) => {
-    const { IAM, startTime, endTime } = data;
-
-    try {
-        const res = await fetch('/api/v1/availability/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM, startTime, endTime }),
-        });
-        const json = await res.json();
-        return json;
-    } catch (err) {
-        console.error(err);
-    }
-}

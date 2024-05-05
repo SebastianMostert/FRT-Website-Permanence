@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Button, Container, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
+import { useApiClient } from '../../ApiContext';
 
 const IncidentCreate = () => {
     const [name, setName] = useState('');
@@ -12,29 +13,18 @@ const IncidentCreate = () => {
     const [ambulanceCalled, setAmbulanceCalled] = useState(false);
     const [error, setError] = useState(false);
 
+    const apiClient = useApiClient();
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log({
-            name: name,
-            teamId: team,
-            incidentInfo,
-            location,
-            ambulanceCalled,
-        })
         async function postData() {
-            await fetch('/api/v1/incident/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    teamId: team,
-                    incidentInfo,
-                    location,
-                    ambulanceCalled,
-                }),
-            })
+            await apiClient.incident.create({
+                ambulanceCalled,
+                incidentInfo,
+                location,
+                name,
+                teamId: team,
+            });
         }
 
         postData();

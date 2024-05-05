@@ -21,9 +21,10 @@ export const signup = async (req, res, next) => {
     const newUser = new User({ ...req.body, verified });
     await newUser.save();
 
-    res.status(201).json({ message: 'User created successfully' });
+    // Remove message
+    res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
-    console.error(error);
+    res.status(500).json({ error });
     next(error);
   }
 };
@@ -196,6 +197,7 @@ export const forgotPassword = async (req, res) => {
 export const resetPassword = async (req, res) => {
   const { token, newPassword, totp } = req.body;
 
+  // TODO: Implement TOTP validation
   try {
     // Find the reset token in the database
     const resetRecord = await ResetPassword.findOne({ token });

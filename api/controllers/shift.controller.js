@@ -4,7 +4,7 @@ import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 export const createShift = async (req, res, next) => {
   const { startDate, endDate, title, users, teamID } = req.body;
-
+  console.log(req.body)
   try {
     if (!startDate) return res.status(400).json({ success: false, message: 'Missing start date' });
     if (!endDate) return res.status(400).json({ success: false, message: 'Missing end date' });
@@ -51,7 +51,6 @@ export const createShift = async (req, res, next) => {
 
 export const deleteShift = async (req, res, next) => {
   const { id } = req.params;
-
   try {
     // Check if the shift exists
     const shift = await Shift.findById(id);
@@ -73,7 +72,7 @@ export const fetchAllShifts = async (req, res, next) => {
   try {
     const shifts = await Shift.find();
 
-    res.status(200).json({ success: true, data: shifts });
+    res.status(200).json(shifts);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch shifts.', error: error.message });
   }

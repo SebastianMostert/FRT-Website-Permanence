@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { Modal, Button, Form, InputGroup } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { createAvailability, firstDayAfterDeadline, formatDate, validateDate } from '../../utils';
+import { formatDate, validateDate } from '../../utils';
+import moment from 'moment';
+import { useApiClient } from '../../ApiContext';
 
 const componentTranslationName = 'create_availability_modal';
 
@@ -13,6 +15,8 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
     const [date, setDate] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
+
+    const apiClient = useApiClient();
 
     useEffect(() => {
         setDate(selectedDate);
@@ -30,7 +34,7 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
         setEndTime(e.target.value);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         handleClose();
 
@@ -41,8 +45,18 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
             const start = new Date(`${date}T${startTime}`).getTime();
             const end = new Date(`${date}T${endTime}`).getTime();
 
-            createAvailability(start, end, currentUser, t)
-            refreshData()
+            try {
+                await apiClient.availability.create({
+                    IAM: currentUser.IAM,
+                    startTime,
+                    endTime
+                })
+
+                refreshData()
+                toast.success(`${t('toast.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
+            } catch (error) {
+                toast.error(`${t('toast.availability.create.error')}`);
+            }
         } else {
             // Display an error message or handle invalid date/time range
             const { extendedProps } = event;
@@ -54,7 +68,8 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
         }
     };
 
-    const minDate = firstDayAfterDeadline();
+    // Current date
+    const minDate = new Date();
 
     return (
         <Modal show={show} onHide={handleClose} centered>

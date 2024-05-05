@@ -7,6 +7,8 @@ import MarkBesetztModal from '../../components/MarkBesetztModal';
 import CreateShiftModal from '../../components/Modals/CreateShiftModal';
 import { colors } from '../../utils';
 import DeleteShiftModal from '../../components/Modals/DeleteShiftModal';
+import { useApiClient } from '../../ApiContext';
+import moment from 'moment';
 
 // Functional component definition for Availabilities
 const Shifts = () => {
@@ -24,12 +26,14 @@ const Shifts = () => {
   const [showDeleteShiftModal, setShowDeleteShiftModal] = useState(false);
   const [selectedShift, setSelectedShift] = useState(null);
 
+  const apiClient = useApiClient();
+
   // useEffect hook for fetching data
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const data = await getAvailabilities();
-      const shifts = await getShifts();
+      const data = await apiClient.availability.get();
+      const shifts = await apiClient.shift.get();
 
       const overlapEvents = getOverlapAvailabilities(data);
       const shiftEvents = getShiftEvents(shifts);
@@ -41,7 +45,7 @@ const Shifts = () => {
     }
 
     fetchData(); // Calling the fetchData function
-  }, [IAM, currentUser, t]); // Dependency array for the useEffect hook
+  }, [IAM, apiClient.availability, apiClient.shift, currentUser, t]); // Dependency array for the useEffect hook
 
   // Event click handler function
   const handleEventClick = async (e) => {
@@ -63,6 +67,10 @@ const Shifts = () => {
 
 
   };
+
+  async function deleteShift(id) {
+    await apiClient.shift.delete(id);
+  }
 
   // Rendering the Calendar component
   return (
@@ -107,41 +115,6 @@ const Shifts = () => {
 // Exporting the Availabilities component as the default export
 export default Shifts;
 
-// Async function to fetch all the availabilities
-async function getAvailabilities() {
-  const res = await fetch(`/api/v1/availability/all`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const dataJson = await res.json();
-
-  if (dataJson.success === false) return [];
-
-  // Sort availabilities by start time
-  const data = dataJson.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-  return data;
-}
-
-async function getShifts() {
-  const res = await fetch(`/api/v1/shift/fetch`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const dataJson = await res.json();
-  if (dataJson.success === false) return [];
-
-  const data = dataJson.data;
-
-  return data;
-}
-
 function getOverlapAvailabilities(availabilities) {
   // Array to store overlapping events
   const overlaps = [];
@@ -164,6 +137,11 @@ function getOverlapAvailabilities(availabilities) {
       const otherEvent = availabilities[j];
       const otherStart = new Date(otherEvent.startTime);
       const otherEnd = new Date(otherEvent.endTime);
+
+      // Check if the availabilities are in the past or today
+      if (moment(currentStart).isSame(moment(), 'day') || moment(currentStart).isBefore(moment())) {
+        continue;
+      }
 
       // Calculate the start and end times of the overlap
       const overlapStart = new Date(Math.max(currentStart, otherStart));
@@ -225,13 +203,4 @@ function getShiftEvents(shifts) {
   }
 
   return shiftEvents;
-}
-
-async function deleteShift(id) {
-  fetch(`/api/v1/shift/delete/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
 }

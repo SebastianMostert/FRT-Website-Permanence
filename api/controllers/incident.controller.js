@@ -94,7 +94,7 @@ export const createIncident = async (req, res, next) => {
         team.alerted = true;
         team.save();
 
-        res.status(201).json({ message: 'Team created successfully', team });
+        res.status(201).json(team);
     } catch (error) {
         console.error(error);
         next(errorHandler(500, 'An error occurred while updating team.'));

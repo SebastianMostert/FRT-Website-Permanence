@@ -1,26 +1,22 @@
 import { Button, Col, Row } from 'react-bootstrap';
 import IncidentCard from './IncidentCard';
 import { useEffect, useState } from 'react';
+import { useApiClient } from '../../ApiContext';
 
 const Incidents = () => {
     const [incidents, setIncidents] = useState([]);
     const marginPx = 5; // Adjust margin as needed
 
+    const apiClient = useApiClient();
+
     useEffect(() => {
         async function fetchData() {
-            const res = await fetch('/api/v1/incident/fetch', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            const data = await res.json();
-            setIncidents(data);
+            const incidents = await apiClient.incident.get();
+            setIncidents(incidents);
         }
 
         fetchData();
-    }, []);
+    }, [apiClient.incident]);
 
     return (
         <div className='select-none'>

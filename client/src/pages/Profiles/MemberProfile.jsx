@@ -18,6 +18,7 @@ import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import { NotAuthorized } from '../index';
 import FullNameInput from '../../components/Inputs/FullName';
+import { useApiClient } from '../../ApiContext';
 
 export default function Profile() {
     const { t } = useTranslation();
@@ -28,7 +29,20 @@ export default function Profile() {
     const [trainingFirstAidCourse, setTrainingFirstAidCourse] = useState(false);
     const [trainingSAP1, setTrainingSAP1] = useState(false);
     const [trainingSAP2, setTrainingSAP2] = useState(false);
+    const [classesAPI, setClassesAPI] = useState(null);
+
     const { currentUser, loading } = useSelector((state) => state.user)
+    const apiClient = useApiClient();
+
+    useEffect(() => {
+        async function fetchData() {
+          const classes = await apiClient.exam.getClasses();
+          console.log(classes)
+          setClassesAPI(classes);
+        }
+    
+        fetchData();
+      }, [apiClient.exam]);
 
     useEffect(() => {
         try {
@@ -124,7 +138,7 @@ export default function Profile() {
 
             // Verify class
             if (updatedUserData.studentClass) {
-                const _isClassValid = await isClassValid(updatedUserData.studentClass, t);
+                const _isClassValid = await isClassValid(updatedUserData.studentClass, t, classesAPI);
                 if (!_isClassValid.success) {
                     const msg = `${t('toast.profile.update.failed', { reason: _isClassValid.message })}`
                     dispatch(updateUserFailure(msg));

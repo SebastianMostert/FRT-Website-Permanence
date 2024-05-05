@@ -1,30 +1,7 @@
 import { jsPDF } from 'jspdf'
-import moment from 'moment'
-import { toast } from 'react-toastify'
 
-export async function getClasses() {
+export async function verifyClass(classStr, classes) {
     try {
-        const res = await fetch(`/api/v1/exam/classes`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-
-        return { success: true, data: await res.json() }
-    } catch (error) {
-        return { success: false, data: null }
-    }
-}
-
-export async function verifyClass(classStr) {
-    try {
-        const data = await getClasses();
-
-        if (!data.success) return { success: false, data: null }
-
-        const classes = data.data.classes;
-
         for (let i = 0; i < classes.length; i++) {
             const classObj = classes[i];
             const className = classObj.name;
@@ -37,18 +14,9 @@ export async function verifyClass(classStr) {
     }
 }
 
-export async function getSelectMenuClass(t) {
+export async function getSelectMenuClass(t, classes) {
     try {
         const finalClasses = [];
-
-        // Get all classes
-        const res = await getClasses();
-        if (!res.success) return [
-            { value: '', label: t('input.class.select.label') },
-        ];
-        const data = res.data;
-
-        const classes = data.classes;
 
         // Format them value, label
         for (let i = 0; i < classes.length; i++) {
@@ -90,8 +58,8 @@ export function isPasswordValid(password, t) {
     return { success: true, message: '' };
 }
 
-export async function isClassValid(classStr, t) {
-    const data = await verifyClass(classStr);
+export async function isClassValid(classStr, t, classes) {
+    const data = await verifyClass(classStr, classes);
     if (!data.success) return { success: false, message: t('input.class.error.exists') };
     return { success: true, message: '' };
 }
@@ -203,30 +171,6 @@ export function reportCSV(reportData) {
     URL.revokeObjectURL(url);
 }
 
-export async function createAvailability(start, end, user, t) {
-    try {
-        const res = await fetch('/api/v1/availability/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: user.IAM, startTime: start, endTime: end }),
-        })
-
-        const data = await res.json()
-
-        if (data?.success != true) {
-            toast.error(`${t('toast.availability.create.error')}`);
-            return { success: false, data: null }
-        }
-        toast.success(`${t('toast.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
-        return { success: true, data: data.availability }
-    } catch (error) {
-        toast.error(`${t('toast.availability.create.error')}`);
-        return { success: false, data: null }
-    }
-}
-
 export function validateDate(date, startTime, endTime, events) {
     // Get the current date
     const currentDate = new Date();
@@ -242,19 +186,21 @@ export function validateDate(date, startTime, endTime, events) {
 
     let overlappingEvent = null;
 
+    // else if (new Date(date) <= nextWeekDeadline) {
+    //     // Create a "fake" event for dates after the next week's deadline
+    //     overlappingEvent = {
+    //         extendedProps: {
+    //             type: 'after_deadline',
+    //         },
+    //     };
+    // } 
+
     // Check if the selected date is in the past
     if (new Date(date) < currentDate) {
         // Create a "fake" event for past dates
         overlappingEvent = {
             extendedProps: {
                 type: 'past_date',
-            },
-        };
-    } else if (new Date(date) <= nextWeekDeadline) {
-        // Create a "fake" event for dates after the next week's deadline
-        overlappingEvent = {
-            extendedProps: {
-                type: 'after_deadline',
             },
         };
     } else {
@@ -315,26 +261,6 @@ export function validateDate(date, startTime, endTime, events) {
         isValid: !overlappingEvent,
         event: overlappingEvent,
     };
-}
-
-export function firstDayAfterDeadline() {
-    // This function returns the first WEEKDAY after the next deadline 
-    const currentDate = new Date();
-    let nextWeekDeadline = new Date(currentDate);
-    if (currentDate.getDay() <= 5) {
-        nextWeekDeadline.setDate(currentDate.getDate() + (5 - currentDate.getDay())); // Friday of this week
-    } else {
-        nextWeekDeadline.setDate(currentDate.getDate() + (12 - currentDate.getDay())); // Friday of next week
-    }
-    nextWeekDeadline.setHours(14, 0, 0, 0); // Set the time to 2pm
-
-    // Find the first weekday after the next deadline
-    const firstDay = new Date(nextWeekDeadline);
-    firstDay.setDate(firstDay.getDate() + 1);
-    while (firstDay.getDay() === 0 || firstDay.getDay() === 6) {
-        firstDay.setDate(firstDay.getDate() + 1);
-    }
-    return firstDay;
 }
 
 export function formatDate(date) {
@@ -398,6 +324,7 @@ export const colors = {
         exams: '#e74c3c',         // Red for exams
         shifts: '#3498db',        // Blue for shifts
         availability: '#27ae60',  // Green for availability
+        expiredAvailability: '#e67e22',  // Orange for expired availability
         overlap: '#f1c40f',       // Yellow for overlap (if needed)
     },
 };

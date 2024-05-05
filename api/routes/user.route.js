@@ -18,6 +18,7 @@ const router = express.Router();
 
 router.get('/', test);
 router.post('/fetch-all', verifyToken, fetchAllUsers);
+router.post('/fetch', verifyToken, fetchAllUsers);
 router.post('/fetch/:IAM', verifyToken, fetchUser);
 router.post('/roles/:IAM', verifyToken, fetchRoles);
 router.post('/update/:id', verifyToken, updateUser);

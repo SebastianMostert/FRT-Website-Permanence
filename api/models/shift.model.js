@@ -30,11 +30,11 @@ const shiftSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
-        teamID: {
-            type: String,
-            required: true,
-        },
-    }]
+    }],
+    teamID: {
+        type: String,
+        required: true,
+    },
 });
 
 const Shift = mongoose.model('Shift', shiftSchema);

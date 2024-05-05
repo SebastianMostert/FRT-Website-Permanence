@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Button, InputGroup, Form } from 'react-bootstrap'; // Assuming Bootstrap for the modal
 import { toast } from 'react-toastify';
 
-const AvailabilityModal = ({ show, handleClose, event, handleDelete, refreshData, updateAvailability }) => {
+const AvailabilityModal = ({ show, handleClose, event, handleDelete, updateAvailability }) => {
     const [editing, setEditing] = useState(false);
     const [startTime, setStartTime] = useState(new Date());
     const [startDate, setStartDate] = useState(new Date());
@@ -43,7 +43,7 @@ const AvailabilityModal = ({ show, handleClose, event, handleDelete, refreshData
                 const newStartDate = new Date(new Date(startDate).toISOString().split('T')[0] + ' ' + startTime);
                 const newEndDate = new Date(new Date(endDate).toISOString().split('T')[0] + ' ' + endTime);
 
-                await updateAvailability(newStartDate, newEndDate, event.id, refreshData);
+                await updateAvailability(newStartDate, newEndDate, event.id);
             } catch (err) {
                 toast.error('An error occured')
             }

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { colors, createAvailability, formatDate, getMember, validateDate, verifyClass } from '../utils';
+import { colors, formatDate, getMember, validateDate, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -17,6 +17,8 @@ import ShiftModal from '../components/Calendar/ShiftModal';
 import ExamModal from '../components/Modals/ExamModal';
 
 import { NoMobilePage, NotAuthorized } from './index'
+import { useApiClient } from '../ApiContext';
+import moment from 'moment';
 
 const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
@@ -53,19 +55,32 @@ export default function Calendar() {
     const [refreshTriggerShift, setRefreshTriggerShift] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [classes, setClasses] = useState([]);
+
+    const apiClient = useApiClient();
+
     useEffect(() => {
         async function fetchData() {
-            toastIdLoading.current = toast.info(`${t('toast.calendar.loading')}`, { autoClose: false });
             setIsLoading(true);
 
-            const calendarEvents = await getExams(currentUser);
+            const [exams, availabilities, classes, shifts] = await Promise.all([
+                apiClient.exam.getByIAM(IAM),
+                apiClient.availability.getByIAM(IAM),
+                apiClient.exam.getClasses(),
+                apiClient.shift.get(IAM),
+            ]);
+
+            console.log(shifts)
+
+            setClasses(classes);
+
+            const calendarEvents = await getExams(currentUser, exams, classes);
 
             if (!calendarEvents.success) {
                 toast.error(`${t('toast.calendar.loading.error')}`);
             }
 
-            const calendarAvailabilities = await getAvailabilities(IAM);
-            const shifts = await getShifts();
+            const calendarAvailabilities = await getAvailabilities(availabilities);
             const calendarShifts = getShiftEvents(shifts);
 
             setCalendarEvent(calendarEvents.data);
@@ -77,7 +92,7 @@ export default function Calendar() {
         }
 
         fetchData();
-    }, [IAM, currentUser, t]);
+    }, [IAM, apiClient.availability, apiClient.exam, apiClient.shift, currentUser, t]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -109,18 +124,15 @@ export default function Calendar() {
             // Check what needs refreshing
             if (refreshTriggerExam) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
-                const calendarEvents = await getExams(currentUser);
-
-                if (!calendarEvents.success) {
-                    toast.error(`${t('toast.calendar.refreshing.error')}`);
-                }
-
-                setCalendarEvent(calendarEvents.data);
+                const exams = await apiClient.exam.getByIAM(IAM);
+                const calendarEvents = await getExams(currentUser, exams, classes);
+                setCalendarEvent(calendarEvents);
             }
 
             if (refreshTriggerAvailability) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.availabilities')}`, { autoClose: false });
-                const calendarAvailabilities = await getAvailabilities(IAM);
+                const availabilities = await apiClient.availability.getByIAM(IAM);
+                const calendarAvailabilities = await getAvailabilities(availabilities);
                 setCalendarAvailability(calendarAvailabilities);
             }
 
@@ -140,7 +152,7 @@ export default function Calendar() {
         setRefreshTriggerAvailability(false);
         setRefreshTriggerExam(false);
         setRefreshTriggerShift(false);
-    }, [IAM, currentUser, refreshTrigger, refreshTriggerAvailability, refreshTriggerExam, refreshTriggerShift, t]);
+    }, [IAM, apiClient.availability, apiClient.exam, classes, currentUser, refreshTrigger, refreshTriggerAvailability, refreshTriggerExam, refreshTriggerShift, t]);
 
     if (!currentUser?.IAM) {
         return <NotAuthorized />
@@ -174,24 +186,30 @@ export default function Calendar() {
         const { isValid, event } = validateDate(date, startTime, endTime);
 
         if (isValid) {
-            const createdAvailability = await createAvailability(start, end, currentUser, t);
+            try {
+                const createdAvailability = await apiClient.availability.create({
+                    IAM: currentUser.IAM,
+                    startTime: new Date(start),
+                    endTime: new Date(end),
+                })
 
-            if (!createdAvailability.success) return;
+                const newAvailabilityEvent = {
+                    title: 'Available',
+                    start: createdAvailability.startTime,
+                    end: createdAvailability.endTime,
+                    backgroundColor: '#0000FF',
+                    id: createdAvailability._id,
+                    extendedProps: { type: AVAILABILITY_TYPE, ...createdAvailability, user: currentUser },
+                };
 
-            const availability = createdAvailability.data;
-            if (!availability) return;
+                setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
+                refreshDataAvailability();
 
-            const newAvailabilityEvent = {
-                title: 'Available',
-                start: availability.startTime,
-                end: availability.endTime,
-                backgroundColor: '#0000FF',
-                id: availability._id,
-                extendedProps: { type: AVAILABILITY_TYPE, ...availability, user: currentUser },
-            };
-
-            setCalendarAvailability([...calendarAvailability, newAvailabilityEvent]);
-            refreshDataAvailability();
+                toast.success(`${t('toast.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
+            } catch (error) {
+                console.error(error);
+                toast.error(`${t('toast.availability.create.error')}`);
+            }
         } else {
             // Display an error message or handle invalid date/time range
             const { extendedProps } = event;
@@ -231,13 +249,16 @@ export default function Calendar() {
     const handleAvailabilityDelete = async (id, IAM) => {
         setShowAvailabilityModal(false);
         try {
-            const result = await deleteAvailability(id, IAM, t);
+            try {
+                await apiClient.availability.delete({
+                    id,
+                    IAM
+                })
 
-            if (result.success) {
                 setCalendarAvailability(calendarAvailability.filter((event) => event.id !== id));
                 toast.success(`${t('toast.calendar.availability.delete.success')}`);
                 refreshDataAvailability();
-            } else {
+            } catch (error) {
                 toast.error(`${t('toast.calendar.availability.delete.error')}`);
             }
         } catch (err) {
@@ -268,7 +289,7 @@ export default function Calendar() {
 
     };
 
-    const handleEventResize = (e) => {
+    const handleEventResize = async (e) => {
         const event = e.event;
         const { start, end } = event;
 
@@ -290,8 +311,21 @@ export default function Calendar() {
             newEndDate.setHours(18, 0, 0, 0);
         }
 
-        updateAvailability(newStartDate, newEndDate, event.id, refreshDataAvailability);
+        await updateAvailability(newStartDate, newEndDate, event.id);
     };
+
+    const updateAvailability = async (start, end, id) => {
+        try {
+            await apiClient.availability.update({
+                id,
+                startTime: start,
+                endTime: end
+            })
+            refreshDataAvailability();
+        } catch (error) {
+            toast.error(`${t('toast.calendar.availability.update.error')}`);
+        }
+    }
 
     const calendarAndModal = (
         <>
@@ -323,7 +357,6 @@ export default function Calendar() {
                         handleClose={() => setShowAvailabilityModal(false)}
                         event={selectedAvailability}
                         handleDelete={handleAvailabilityDelete}
-                        refreshData={refreshDataAvailability}
                         updateAvailability={updateAvailability}
                     />
                     <ShiftModal
@@ -376,9 +409,9 @@ function convertExamTimeToDate(examDate, startTime, endTime) {
     return { startDate, endDate };
 }
 
-async function getExams(user) {
+async function getExams(user, exams, classes) {
     // Check class
-    const hasClass = await verifyClass(user.studentClass);
+    const hasClass = await verifyClass(user.studentClass, classes);
 
     if (!hasClass.success) {
         return { success: false, data: [] }
@@ -386,11 +419,6 @@ async function getExams(user) {
 
     try {
         const calendarEvents = []
-        const examResponse = await fetch(`/api/v1/exam/user/${user.IAM}`, { method: "post" });
-
-        const examsData = await examResponse.json();
-        const exams = examsData.exams;
-
         for (let i = 0; i < exams.length; i++) {
             const exam = exams[i];
 
@@ -424,20 +452,12 @@ async function getExams(user) {
     }
 }
 
-async function getAvailabilities(IAM) {
+async function getAvailabilities(availabilities) {
     try {
         const availabilityEvents = [];
-        const res = await fetch(`/api/v1/availability/get/${IAM}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
 
-        const data = await res.json()
-
-        for (let i = 0; i < data.length; i++) {
-            const availability = data[i];
+        for (let i = 0; i < availabilities.length; i++) {
+            const availability = availabilities[i];
             // Mark as available
             let title = 'Available';
             const isVerifiedAvailability = availability.confirmed;
@@ -448,14 +468,21 @@ async function getAvailabilities(IAM) {
             }
 
             const res = await getMember(availability.IAM)
-            const user = await res.data
+            const user = await res.data;
+
+            let color = colors.events.availability
+
+            // If the availability is in the past or today set the color to orange
+            if (moment(availability.startTime).isSame(moment(), 'day') || moment(availability.startTime).isBefore(moment())) {
+                color = colors.events.expiredAvailability;
+            }
 
             availabilityEvents.push({
                 title,
                 start: availability.startTime,
                 end: availability.endTime,
                 id: availability._id,
-                backgroundColor: colors.events.availability,
+                backgroundColor: color,
                 extendedProps: { ...availability, type: 'availability', user },
                 durationEditable: true,
             });
@@ -501,44 +528,4 @@ async function getShifts() {
     const data = dataJson.data;
 
     return data;
-}
-
-async function deleteAvailability(id, IAM, t) {
-    try {
-        const res = await fetch(`/api/v1/availability/delete/`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ IAM: IAM, id: id }),
-        })
-
-        const data = await res.json()
-
-        if (data?.success != true) return { success: false, message: `${t('toast.calendar.availability.delete.success')}` }
-        return { success: true }
-    } catch (err) {
-        return { success: false, message: err.message }
-    }
-}
-
-async function updateAvailability(start, end, id, refreshData) {
-    try {
-        await fetch(`/api/v1/availability/update/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                startTime: start,
-                endTime: end,
-            }),
-        })
-
-        refreshData();
-
-        return { success: true }
-    } catch (err) {
-        return { success: false, message: err.message }
-    }
 }

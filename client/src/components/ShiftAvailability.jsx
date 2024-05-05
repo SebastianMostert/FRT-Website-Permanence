@@ -4,29 +4,29 @@ import { Table, Button, Placeholder, Card } from 'react-bootstrap';
 import MarkBesetztModal from './MarkBesetztModal'; // Import the modal component
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import AllShiftsCalendar from './Admin/AllShiftsCalendar';
+import { useApiClient } from '../ApiContext';
 
 const ShiftAvailability = ({ selectedTable }) => {
     const { t } = useTranslation();
-    const { currentUser } = useSelector((state) => state.user)
-    const IAM = currentUser.IAM;
     const [showModal, setShowModal] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [availabilty, setAvailability] = useState([]);
     const [shift, setShift] = useState([]);
 
+    const apiClient = useApiClient();
+
     useEffect(() => {
         async function fetchData() {
-            const availabilities = await getAvailabilities(IAM);
-            setAvailability(availabilities);
+            const data = await apiClient.availability.get();
+            setAvailability(data);
 
-            const shifts = await getShifts();
+            const shifts = await apiClient.shift.get();
             setShift(shifts);
         }
 
         fetchData();
-    }, [IAM, currentUser, t]);
+    }, [apiClient.availability, apiClient.shift]);
 
     const markBesetzt = (slot) => {
         setSelectedSlot(slot);
@@ -38,17 +38,6 @@ const ShiftAvailability = ({ selectedTable }) => {
     };
 
     //#region Shifts
-    async function getShifts() {
-        const res = await fetch(`/api/v1/shift/fetch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = (await res.json()).data;
-        return data;
-    }
     const deleteShift = async (id) => {
         // Implement the logic to delete the shift
         // You can make an API call to delete the shift
@@ -66,49 +55,24 @@ const ShiftAvailability = ({ selectedTable }) => {
 
         if (res.status === 200) {
             // Refetch data after deletion
-            const data = await getShifts();
+            const data = await apiClient.shift.get();
             setShift(data);
             toast.success(t('toast.availability.delete.success'));
         }
     };
     //#endregion
-
-    //#region Availabilities
-    async function getAvailabilities() {
-        const res = await fetch(`/api/v1/availability/all`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await res.json();
-
-        return data;
-    }
     const deleteAvailability = async (id, IAM) => {
         try {
-            const res = await fetch(`/api/v1/availability/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ IAM: IAM, id: id }),
-            });
-
-            const data = await res.json();
-
-            if (data?.success !== true) {
-                // Handle error, show alert, etc.
-                return;
+            try {
+                await apiClient.availability.delete({
+                    id,
+                    IAM
+                })
+            } catch (error) {
+                toast.error(`${t('toast.calendar.availability.delete.error')}`);
             }
-
-            // Refetch data after deletion
-            const availabilities = await getAvailabilities();
-            setAvailability(availabilities);
         } catch (err) {
-            // Handle error, show alert, etc.
-            console.error(err);
+            toast.error(`${t('toast.calendar.availability.delete.error')}`);
         }
     };
     const checkOverlap = (time1Start, time1End, time2Start, time2End) => {

@@ -5,85 +5,70 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { colors, getMember } from '../../utils';
 import { toast } from 'react-toastify';
+import { useApiClient } from '../../ApiContext';
+import moment from 'moment';
 
 // Functional component definition for Availabilities
 const Availabilities = () => {
-    // State variables initialization using the useState hook
-    const [isLoading, setIsLoading] = useState(true);
-    const { t } = useTranslation();
-    const { currentUser } = useSelector((state) => state.user);
-    const IAM = currentUser.IAM;
-    const [calendarAvailability, setCalendarAvailability] = useState([]);
+  // State variables initialization using the useState hook
+  const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
+  const { currentUser } = useSelector((state) => state.user);
+  const IAM = currentUser.IAM;
+  const [calendarAvailability, setCalendarAvailability] = useState([]);
 
-    // useEffect hook for fetching data
-    useEffect(() => {
-        async function fetchData() {
-            setIsLoading(true);
-            const data = await getAvailabilities();
-            const availabilityEvents = await getEvents(data);
+  const apiClient = useApiClient();
 
-            setCalendarAvailability(availabilityEvents);
-            setIsLoading(false);
-        }
+  // useEffect hook for fetching data
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const data = await apiClient.availability.get();
+      const availabilityEvents = await getEvents(data);
 
-        fetchData(); // Calling the fetchData function
-    }, [IAM, currentUser, t]); // Dependency array for the useEffect hook
+      setCalendarAvailability(availabilityEvents);
+      setIsLoading(false);
+    }
 
-    // Event click handler function
-    const handleEventClick = async (e) => {
-        const event = e.event;
-        const calendar = e.view.calendar;
+    fetchData(); // Calling the fetchData function
+  }, [IAM, apiClient.availability, currentUser, t]); // Dependency array for the useEffect hook
 
-        await calendar.unselect();
-        if (event.extendedProps && event.extendedProps.type === 'overlap') {
-            const overlapEventIds = event.extendedProps.ids;
-            const overlappingAvailabilities = calendarAvailability.filter((avail) =>
-                overlapEventIds.includes(avail.id)
-            );
-            const overlapTitles = overlappingAvailabilities.map((avail) => avail.title);
+  // Event click handler function
+  const handleEventClick = async (e) => {
+    const event = e.event;
+    const calendar = e.view.calendar;
 
-            // Toast message displaying overlapping availabilities
-            toast.info(`Overlapping Availabilities (${overlapTitles.length}): ${overlapTitles.join(', ')}`, {
-                autoClose: 5000, // Auto close the toast after 5 seconds
-            });
-        }
-    };
+    await calendar.unselect();
+    if (event.extendedProps && event.extendedProps.type === 'overlap') {
+      const overlapEventIds = event.extendedProps.ids;
+      const overlappingAvailabilities = calendarAvailability.filter((avail) =>
+        overlapEventIds.includes(avail.id)
+      );
+      const overlapTitles = overlappingAvailabilities.map((avail) => avail.title);
 
-    // Rendering the Calendar component
-    return (
-        <Calendar
-            events={calendarAvailability}
-            handleDateClick={() => { }}
-            handleEventClick={handleEventClick}
-            handleSelect={() => { }}
-            handleViewDidMount={() => { }}
-            loading={isLoading}
-            selectable={false}
-        />
-    );
+      // Toast message displaying overlapping availabilities
+      toast.info(`Overlapping Availabilities (${overlapTitles.length}): ${overlapTitles.join(', ')}`, {
+        autoClose: 5000, // Auto close the toast after 5 seconds
+      });
+    }
+  };
+
+  // Rendering the Calendar component
+  return (
+    <Calendar
+      events={calendarAvailability}
+      handleDateClick={() => { }}
+      handleEventClick={handleEventClick}
+      handleSelect={() => { }}
+      handleViewDidMount={() => { }}
+      loading={isLoading}
+      selectable={false}
+    />
+  );
 };
 
 // Exporting the Availabilities component as the default export
 export default Availabilities;
-
-// Async function to fetch all the availabilities
-async function getAvailabilities() {
-  const res = await fetch(`/api/v1/availability/all`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const dataJson = await res.json();
-
-  if (dataJson.success === false) return [];
-
-  // Sort availabilities by start time
-  const data = dataJson.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-  return data;
-}
 
 // Async function to fetch availabilities data
 async function getEvents(availabilities) {
@@ -104,6 +89,12 @@ async function getEvents(availabilities) {
       if (isVerifiedAvailability) {
         title = `Confirmed Availability`;
       }
+      let color = colors.events.availability;
+
+      // If the availability is in the past or today set the color to orange
+      if (moment(availability.startTime).isSame(moment(), 'day') || moment(availability.startTime).isBefore(moment())) {
+        color = colors.events.expiredAvailability;
+      }
 
       // Creating event object
       const event = {
@@ -111,7 +102,7 @@ async function getEvents(availabilities) {
         start: availability.startTime,
         end: availability.endTime,
         id: availability._id,
-        backgroundColor: colors.events.availability,
+        backgroundColor: color,
         extendedProps: { ...availability, type: 'availability', user },
       };
 
