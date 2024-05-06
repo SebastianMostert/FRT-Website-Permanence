@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import RemovedExams from '../models/RemovedExams.model.js';
 import { UntisHelper } from 'llis-frt-webuntis';
 import { errorHandler } from '../utils/error.js';
 
@@ -22,6 +23,7 @@ export const getExamsByUser = async (req, res, next) => {
         if (!validUser) {
             throw errorHandler(404, 'No user with this IAM found!');
         }
+
 
         const studentClass = validUser.studentClass;
 
@@ -47,7 +49,10 @@ export const getExamsByUser = async (req, res, next) => {
                     const examClass = examClasses[i];
 
                     if (examClass === studentClass) {
-                        filteredExams.push(exam);
+                        const valid = await validateExam(exam, req.params.IAM);
+                        if (valid) {
+                            filteredExams.push(exam);
+                        }
                     }
                 }
             }
@@ -92,3 +97,150 @@ export const getClasses = async (req, res, next) => {
         next(error);
     }
 };
+
+export const removeTeacher = async (req, res, next) => {
+    const { teacher, IAM } = req.body;
+
+    try {
+        const removedExams = await RemovedExams.findOne({ IAM });
+
+        if (!removedExams) {
+            const teachers = teacher || [];
+
+            const newRemovedExams = new RemovedExams({
+                IAM,
+                teachers,
+                subjects: [],
+                exams: [],
+            });
+            await newRemovedExams.save();
+
+            res.status(200).json(newRemovedExams);
+        } else {
+            const { teachers, subjects, exams } = removedExams;
+            if(teachers.includes(teacher)) {
+                throw errorHandler(400, 'Teacher already removed!');
+            }
+            teachers.push(teacher);
+            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+
+            res.status(200).json(removedExams);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+export const removeSubject = async (req, res, next) => {
+    const { subject, IAM } = req.body;
+
+    try {
+        const removedExams = await RemovedExams.findOne({ IAM });
+
+        if (!removedExams) {
+            const subjects = subject || [];
+
+            const newRemovedExams = new RemovedExams({
+                IAM,
+                teachers: [],
+                subjects,
+                exams: [],
+            });
+            await newRemovedExams.save();
+
+            res.status(200).json(newRemovedExams);
+        } else {
+            const { teachers, subjects, exams } = removedExams;
+            if(subjects.includes(subject)) {
+                throw errorHandler(400, 'Subject already removed!');
+            }
+            subjects.push(subject);
+            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+
+            res.status(200).json(removedExams);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+export const removeExam = async (req, res, next) => {
+    const { exam, IAM } = req.body;
+
+    try {
+        const removedExams = await RemovedExams.findOne({ IAM });
+
+        if (!removedExams) {
+            const exams = exam || [];
+
+            const newRemovedExams = new RemovedExams({
+                IAM,
+                teachers: [],
+                subjects: [],
+                exams,
+            });
+            await newRemovedExams.save();
+
+            res.status(200).json(newRemovedExams);
+        } else {
+            const { teachers, subjects, exams } = removedExams;
+            if(exams.includes(exam)) {
+                throw errorHandler(400, 'Exam already removed!');
+            }
+            exams.push(exam);
+            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+
+            res.status(200).json(removedExams);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+/**
+ * 
+ * @param {*} exam 
+ * @param {*} IAM 
+ */
+const validateExam = async (exam, IAM) => {
+    const removedExams = await RemovedExams.findOne({ IAM });
+
+    if (!exam) {
+        throw errorHandler(400, 'No exam provided!');
+    };
+
+    if (removedExams) {
+        const { teachers, subjects, exams } = removedExams;
+
+        for (let i = 0; i < teachers?.length; i++) {
+            const teacher = teachers[i];
+            const examTeachers = exam.teachers;
+
+            if (examTeachers.includes(teacher)) {
+                return false;
+            }
+        }
+
+        for (let i = 0; i < subjects?.length; i++) {
+            const subject = subjects[i];
+
+            if (subject === exam.subject) {
+                return false;
+            }
+        }
+
+        for (let i = 0; i < exams?.length; i++) {
+            const { _endTime, _startTime, examDate } = exams[i];
+            const { endTime, startTime, examDate: _examDate } = exam;
+
+            if (_endTime == endTime && _startTime == startTime && _examDate == examDate) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}

@@ -40,7 +40,7 @@
     "classnames": "^2.5.1",
     "dotenv": "^16.4.5",
     "dotenv-webpack": "^8.0.1",
-    "frt-api": "^9.0.6",
+    "frt-api": "^9.0.9",
     "i18next": "^23.10.1",
     "jquery": "^3.7.1",
     "js-cookie": "^3.0.5",

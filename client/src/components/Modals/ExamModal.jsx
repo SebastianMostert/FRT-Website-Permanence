@@ -1,12 +1,16 @@
 /* eslint-disable react/prop-types */
 import { Modal, Button, Badge, Row, Col, Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { useApiClient } from '../../ApiContext';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
 const componentTranslationName = 'exam_modal';
 
 const ExamModal = ({ show, handleClose, event, refreshData }) => {
     const { t } = useTranslation();
+    const { currentUser } = useSelector((state) => state.user);
+    const apiClient = useApiClient();
 
     if (!event) return null;
 
@@ -34,23 +38,38 @@ const ExamModal = ({ show, handleClose, event, refreshData }) => {
     const endTime = _endTime.toString().slice(0, 2) + ':' + _endTime.toString().slice(2, 4);
     const formattedExamDate = formatExamDate(examDate.toString());
 
-    const handleJustThisExam = () => {
+    const handleJustThisExam = async () => {
         // Handle just this exam
-        toast.error('Removing exams isn\'t supported yet. We are working on it!');
-        refreshData();
-        handleClose();
+        try {
+            await apiClient.exam.removeExam({
+                exam: {
+                    _endTime,
+                    _startTime,
+                    examDate,
+                }, IAM: currentUser.IAM
+            });
+            refreshData();
+            handleClose();
+        } catch (err) {
+            console.log(err);
+            toast.error('An error occured');
+        }
+
     };
 
-    const handleAllExamsSubject = () => {
+    const handleAllExamsSubject = async () => {
         // Handle all exams of this subject
-        toast.error('Removing all exams of a given subject isn\'t supported yet. We are working on it!');
+        await apiClient.exam.removeSubject({ subject, IAM: currentUser.IAM });
         refreshData();
         handleClose();
     };
 
-    const handleAllExamsTeacher = () => {
+    const handleAllExamsTeacher = async () => {
         // Handle all exams of this teacher
-        toast.error('Removing all exams of a given teacher isn\'t supported yet. We are working on it!');
+        for (let i = 0; i < teachers.length; i++) {
+            const teacher = teachers[i];
+            await apiClient.exam.removeTeacher({ teacher, IAM: currentUser.IAM });
+        }
         refreshData();
         handleClose();
     };

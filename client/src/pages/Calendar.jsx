@@ -125,8 +125,10 @@ export default function Calendar() {
             if (refreshTriggerExam) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
                 const exams = await apiClient.exam.getByIAM(IAM);
+                console.log(exams)
                 const calendarEvents = await getExams(currentUser, exams, classes);
-                setCalendarEvent(calendarEvents);
+                console.log(calendarEvents)
+                setCalendarEvent(calendarEvents.data);
             }
 
             if (refreshTriggerAvailability) {
