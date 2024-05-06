@@ -59,6 +59,7 @@ const CurrentSituation = () => {
 
     return (
         <div className="current-situation select-none teams">
+            <h1>Work In Progress</h1>
             <div className="m-4">
                 {teams.map((team) => (
                     <div key={team.id} className="col">
