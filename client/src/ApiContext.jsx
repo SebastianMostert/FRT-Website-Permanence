@@ -7,7 +7,7 @@ import { ApiClient } from 'frt-api';
 const ApiContext = createContext(null);
 
 export const ApiProvider = ({ children }) => {
-  const apiClient = new ApiClient('http://localhost:5173');
+  const apiClient = new ApiClient('');
   
   return (
     <ApiContext.Provider value={apiClient}>
