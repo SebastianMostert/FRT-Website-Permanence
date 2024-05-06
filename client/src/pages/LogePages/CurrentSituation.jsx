@@ -16,10 +16,10 @@ const CurrentSituation = () => {
             });
 
             // Get the data from the response
-            const data = await res.json();
+            const teams = await res.json();
 
             // Set the data in the state
-            setTeams(data);
+            setTeams(teams);
         } catch (error) {
             console.error('Error fetching data:', error);
         }

@@ -22,6 +22,7 @@ router.post('/fetch', verifyToken, fetchAllUsers);
 router.post('/fetch/:IAM', verifyToken, fetchUser);
 router.post('/roles/:IAM', verifyToken, fetchRoles);
 router.post('/update/:id', verifyToken, updateUser);
+router.post('/update/', verifyToken, updateUser);
 router.post('/notify', verifyToken, notifyUser);
 router.delete('/delete/:id', verifyToken, deleteUser);
 router.post('/fetch/2fa/IAM/:IAM', fetchUserAuthEnabledByIAM);

@@ -16,15 +16,9 @@ export const updateUser = async (req, res, next) => {
   const body = req.body;
   const user = req.user;
 
-  // TODO: FIX
-  // Check if the user is an admin 
-  // if (user.id !== req.params.id) {
-  //   return next(errorHandler(401, 'You can update only your account!'));
-  // }
-
   try {
     // Fetch the user
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.body.id);
     if (!user) {
       return next(errorHandler(404, 'User not found.'));
     }
@@ -55,8 +49,10 @@ export const updateUser = async (req, res, next) => {
 
     const roles = (body?.roles !== undefined) ? body.roles : user.roles;
 
+    console.log(body)
+
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
+      req.body.id,
       {
         $set: {
           firstName,
@@ -84,8 +80,7 @@ export const updateUser = async (req, res, next) => {
       { new: true }
     );
 
-    // Save the updated user
-    await updatedUser.save();
+
 
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);

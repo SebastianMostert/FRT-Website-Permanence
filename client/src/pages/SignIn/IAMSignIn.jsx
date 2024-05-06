@@ -79,7 +79,13 @@ export default function IAMSignIn() {
         render: `${t('toast.sign_in.success')}`,
       });
       dispatch(signInSuccess(data));
-      navigate('/');
+      // Get ?redirect= if present
+      const redirect = window.location.search.split('=')[1];
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       toast.update(toastId.current, {
         type: 'error',
@@ -104,11 +110,11 @@ export default function IAMSignIn() {
         const data = await res.json()
 
         if (!res.ok) {
-          if(res.status == 404) return
+          if (res.status == 404) return
           toast.error(`An error occured`)
           return
         }
-        
+
         setTwoFactorAuthEnabled(data);
       } catch (error) {
         toast.error(`An error occured: ${error.message}`)

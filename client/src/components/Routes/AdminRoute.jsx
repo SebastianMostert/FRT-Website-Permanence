@@ -1,12 +1,13 @@
 import { useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
-import { NotAuthorized } from '../../pages/index'
+import { Navigate, Outlet } from 'react-router-dom'
+import { LoadingPage, NotAuthorized } from '../../pages/index'
 import { useEffect, useState } from 'react';
 import { getRoles } from '../../utils';
 
 export default function PrivateRoute() {
     const { currentUser } = useSelector(state => state.user)
     const [roles, setRoles] = useState([]);
+    const [loading, setLoading] = useState(true);
 
 
     try {
@@ -14,6 +15,8 @@ export default function PrivateRoute() {
             async function fetchData() {
                 const roles = await getRoles(currentUser?.IAM);
                 setRoles(roles);
+
+                setLoading(false);
             }
 
             fetchData();
@@ -21,6 +24,13 @@ export default function PrivateRoute() {
 
         const isAdmin = roles?.includes('admin');
 
+        if (!currentUser) {
+            return <Navigate to={`/sign-in?redirect=${window.location.pathname}`} />
+        }
+
+        if (loading) {
+            return <LoadingPage />
+        }
         return isAdmin ? <Outlet /> : <NotAuthorized />
     } catch (error) {
         return <NotAuthorized />

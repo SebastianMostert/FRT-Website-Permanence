@@ -1,473 +1,599 @@
+// import { useState, useEffect } from 'react';
+// import { Button, Modal } from 'react-bootstrap';
+// import { getSelectMenuClass } from '../../utils';
+// import { useTranslation } from 'react-i18next';
+// import { useApiClient } from '../../ApiContext';
+// import { DataGrid } from '@mui/x-data-grid';
+// import { toast } from 'react-toastify';
+
+// const Users = () => {
+//   const [users, setUsers] = useState([]);
+//   const [editedUser, setEditedUser] = useState(null);
+//   const [deleteConfirmation, setDeleteConfirmation] = useState(false); // State for delete confirmation
+//   const [classOptions, setClassOptions] = useState([]);
+//   const [classesAPI, setClassesAPI] = useState(null);
+
+//   const { t } = useTranslation();
+//   const apiClient = useApiClient();
+
+//   useEffect(() => {
+//     async function fetchData() {
+//       const classes = await apiClient.exam.getClasses();
+//       console.log(classes)
+//       setClassesAPI(classes);
+//     }
+
+//     fetchData();
+//   }, [apiClient.exam]);
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const response = await getSelectMenuClass(t, classesAPI);
+//         setClassOptions(response);
+//       } catch (error) {
+//         console.error(error);
+//       }
+//     };
+//     fetchData();
+//   }, [classesAPI, t]);
+
+//   const fetchUsers = async () => {
+//     try {
+//       const response = await fetch('/api/v1/user/fetch-all', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       });
+//       if (!response.ok) {
+//         throw new Error('Failed to fetch users');
+//       }
+//       const users = await response.json();
+//       setUsers(users);
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   };
+
+//   const deleteUser = async (userId) => {
+//     try {
+//       const response = await fetch(`/api/v1/user/delete/${userId}`, {
+//         method: 'DELETE',
+//       });
+//       if (!response.ok) {
+//         throw new Error('Failed to delete user');
+//       }
+//       fetchUsers();
+//       setDeleteConfirmation(false); // Close the confirmation modal after deletion
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchUsers();
+//   }, []);
+
+
+//   const handleConfirmDelete = () => {
+//     if (editedUser) {
+//       deleteUser(editedUser);
+//     }
+//   };
+
+//   const rows = [];
+//   const columns = [
+//     { field: 'firstName', headerName: 'First Name', width: 150, editable: true },
+//     { field: 'lastName', headerName: 'Last Name', width: 150, editable: true },
+//     { field: 'email', headerName: 'Email', width: 150, editable: true },
+//     { field: 'operationalPosition', headerName: 'Operational Position', width: 150, editable: true },
+//     { field: 'training', headerName: 'Training', width: 150, editable: true },
+//     { field: 'experienceRTW', headerName: 'RTW Experience', width: 150, editable: true },
+//     { field: 'experienceFR', headerName: 'FR Experience', width: 150, editable: true },
+//   ];
+
+//   // Get the data from sortedUsers and push it to rows
+//   users.forEach((user) => {
+//     rows.push({
+//       id: user._id,
+//       firstName: user.firstName,
+//       lastName: user.lastName,
+//       email: user.email,
+//       operationalPosition: user.operationalPosition,
+//       training: user.training.join(', '),
+//       experienceRTW: user.experience.RTW,
+//       experienceFR: user.experience.FR,
+//     });
+//   });
+
+//   const onEditStop = async (params, event) => {
+//     console.log(event);
+
+//     //  Params:
+//     //   {
+//     //     "id": "661c2e1bad02f80a0e0aff5f",
+//     //     "field": "firstName",
+//     //     "row": {
+//     //         "id": "661c2e1bad02f80a0e0aff5f",
+//     //         "firstName": "Pol",
+//     //         "lastName": "Nilles",
+//     //         "email": "nillespol@icloud.com",
+//     //         "operationalPosition": "Chef Agres",
+//     //         "training": "SAP 1, First Aid Course",
+//     //         "experienceRTW": 300,
+//     //         "experienceFR": 0
+//     //     },
+//     //     "rowNode": {
+//     //         "id": "661c2e1bad02f80a0e0aff5f",
+//     //         "depth": 0,
+//     //         "parent": "auto-generated-group-node-root",
+//     //         "type": "leaf",
+//     //         "groupingKey": null
+//     //     },
+//     //     "colDef": {
+//     //         "width": 150,
+//     //         "minWidth": 50,
+//     //         "maxWidth": null,
+//     //         "hideable": true,
+//     //         "sortable": true,
+//     //         "resizable": true,
+//     //         "filterable": true,
+//     //         "groupable": true,
+//     //         "pinnable": true,
+//     //         "aggregable": true,
+//     //         "editable": true,
+//     //         "type": "string",
+//     //         "align": "left",
+//     //         "filterOperators": [
+//     //             {
+//     //                 "value": "contains"
+//     //             },
+//     //             {
+//     //                 "value": "equals"
+//     //             },
+//     //             {
+//     //                 "value": "startsWith"
+//     //             },
+//     //             {
+//     //                 "value": "endsWith"
+//     //             },
+//     //             {
+//     //                 "value": "isEmpty",
+//     //                 "requiresFilterValue": false
+//     //             },
+//     //             {
+//     //                 "value": "isNotEmpty",
+//     //                 "requiresFilterValue": false
+//     //             },
+//     //             {
+//     //                 "value": "isAnyOf"
+//     //             }
+//     //         ],
+//     //         "field": "firstName",
+//     //         "headerName": "First Name",
+//     //         "hasBeenResized": true,
+//     //         "computedWidth": 150
+//     //     },
+//     //     "cellMode": "edit",
+//     //     "hasFocus": true,
+//     //     "tabIndex": 0,
+//     //     "value": "Pol",
+//     //     "formattedValue": "Pol",
+//     //     "isEditable": true,
+//     //     "reason": "enterKeyDown"
+//     // }
+
+//     const userID = params.id;
+
+//     const newUser = {
+
+//     }
+
+//     return
+//     await fetch(`/api/v1/user/update/${userID}`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(newUser),
+//     })
+//   };
+
+//   return (
+//     <div className='users-container select-none'>
+//       <h2>{t('Users')}</h2>
+//       <DataGrid
+//         rows={rows}
+//         columns={columns}
+//         processRowUpdate={(updatedRow, originalRow) => {
+//           // {
+//           //   "id": "661c2e1bad02f80a0e0aff5f",
+//           //   "firstName": "Pols",
+//           //   "lastName": "Nilles",
+//           //   "email": "nillespol@icloud.com",
+//           //   "operationalPosition": "Chef Agres",
+//           //   "training": "SAP 1, First Aid Course",
+//           //   "experienceRTW": 300,
+//           //   "experienceFR": 0
+//           // }
+
+//           console.log(updatedRow.training.split(', '))
+//           const newUser = {
+//             firstName: updatedRow.firstName,
+//             lastName: updatedRow.lastName,
+//             email: updatedRow.email,
+//             operationalPosition: updatedRow.operationalPosition,
+//             training: updatedRow.training.split(', '),
+//             experience: {
+//               RTW: updatedRow.experienceRTW,
+//               FR: updatedRow.experienceFR
+//             }
+//           }
+
+//           console.log(newUser)
+//         }}
+//         onProcessRowUpdateError={(e) => console.log(e)}
+//       />
+
+//       {/* Delete Confirmation Modal */}
+//       <Modal show={deleteConfirmation} onHide={() => setDeleteConfirmation(false)}>
+//         <Modal.Header closeButton>
+//           <Modal.Title>{t('Confirm Deletion')}</Modal.Title>
+//         </Modal.Header>
+//         <Modal.Body>
+//           <p>{t('Are you sure you want to delete this user?')}</p>
+//         </Modal.Body>
+//         <Modal.Footer>
+//           <Button variant="secondary" onClick={() => setDeleteConfirmation(false)}>
+//             {t('Cancel')}
+//           </Button>
+//           <Button variant="danger" onClick={handleConfirmDelete}>
+//             {t('Delete')}
+//           </Button>
+//         </Modal.Footer>
+//       </Modal>
+//     </div>
+//   );
+// };
+
+// export default Users;
+
 import { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, FormControl } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
-import Select from 'react-select';
-import { getSelectMenuClass } from '../../utils';
-import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
+import {
+  GridRowModes,
+  DataGrid,
+  GridToolbarContainer,
+  GridActionsCellItem,
+  GridRowEditStopReasons,
+} from '@mui/x-data-grid';
+import {
+  randomId,
+} from '@mui/x-data-grid-generator';
 import { useApiClient } from '../../ApiContext';
+import { toast } from 'react-toastify';
 
-const Users = () => {
-  const [users, setUsers] = useState([]);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editedUser, setEditedUser] = useState(null);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(false); // State for delete confirmation
-  // eslint-disable-next-line no-unused-vars
-  const [allRoles, setAllRoles] = useState(['admin', 'member', 'public', 'loge']);
-  const [classOptions, setClassOptions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); // State for search term
-  const [classesAPI, setClassesAPI] = useState(null);
+function EditToolbar(props) {
+  // eslint-disable-next-line react/prop-types
+  const { setRows, setRowModesModel } = props;
 
-  const { t } = useTranslation();
+  const handleClick = () => {
+    const id = randomId();
+    setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+    }));
+  };
+
+  return (
+    <GridToolbarContainer>
+      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+        Add user
+      </Button>
+    </GridToolbarContainer>
+  );
+}
+
+const trainings = ['SAP 1', 'SAP 2', 'First Aid Course'];
+const positions = ['Chef Agres', 'Equipier Bin.', 'Stagiaire Bin.'];
+
+export default function Users() {
+  const [rows, setRows] = useState([]);
+  const [rowModesModel, setRowModesModel] = useState({});
+
   const apiClient = useApiClient();
 
-  // State for sorting
-  const [sortConfig, setSortConfig] = useState({
-    key: null,
-    direction: 'ascending',
-  });
+
+  //#region Api calls
+  const updateUser = async (updatedUser) => {
+    console.log(updatedUser)
+    await apiClient.user.update(updatedUser);
+  }
+
+  const deleteUser = async (id) => {
+    await apiClient.user.delete(id);
+  }
+  //#endregion
 
   useEffect(() => {
-    async function fetchData() {
-      const classes = await apiClient.exam.getClasses();
-      console.log(classes)
-      setClassesAPI(classes);
-    }
+    const fetchUsers = async () => {
+      const users = await apiClient.user.get();
+      const newRows = [];
 
-    fetchData();
-  }, [apiClient.exam]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getSelectMenuClass(t, classesAPI);
-        setClassOptions(response);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, [classesAPI, t]);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/v1/user/fetch-all', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Create rows
+      users.forEach((user) => {
+        console.log(user)
+        //   {
+        //     "experience": {
+        //         "RTW": 24,
+        //         "FR": 0
+        //     },
+        //     "notifications": {
+        //         "securityEmails": true,
+        //         "shiftEmails": true,
+        //         "otherEmails": true,
+        //         "newsletterEmails": true
+        //     },
+        //     "_id": "6635fbed255df8fbffff156d",
+        //     "firstName": "Emily",
+        //     "lastName": "O'Dwyer",
+        //     "IAM": "odwem569",
+        //     "studentClass": "S5DE2",
+        //     "training": [
+        //         "SAP 1",
+        //         "First Aid Course"
+        //     ],
+        //     "operationalPosition": "Equipier Bin.",
+        //     "administratifPosition": "None",
+        //     "email": "odwem569@school.lu",
+        //     "verified": true,
+        //     "onBoarded": true,
+        //     "twoFactorAuth": false,
+        //     "roles": [
+        //         "member"
+        //     ],
+        //     "createdAt": "2024-05-04T09:12:13.183Z",
+        //     "updatedAt": "2024-05-04T09:17:54.911Z",
+        //     "__v": 0
+        // }
+        // TODO: Add more fields
+        newRows.push({
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          operationalPosition: user.operationalPosition,
+          training: user.training.join(', '),
+          experienceRTW: user.experience.RTW,
+          experienceFR: user.experience.FR,
+        });
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  const updateUser = async (userId, updatedUserData) => {
-    try {
-      const response = await fetch(`/api/v1/user/update/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUserData),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update user');
-      }
-      await response.json();
-      fetchUsers();
-    } catch (error) {
-      console.error(error);
+      setRows(newRows);
     }
-  };
 
-  const deleteUser = async (userId) => {
-    try {
-      const response = await fetch(`/api/v1/user/delete/${userId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
-      }
-      fetchUsers();
-      setDeleteConfirmation(false); // Close the confirmation modal after deletion
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [apiClient.user]);
 
-  const handleEditUser = (user) => {
-    setEditedUser(user);
-    setShowEditModal(true);
-  };
 
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-    setEditedUser(null);
-  };
-
-  const handleDeleteConfirmation = (userId) => {
-    if (editedUser) {
-      alert('Are you sure you want to delete this user?');
-
-      // Perform the delete operation
-      deleteUser(userId);
-
-      // Close the modal
-      setDeleteConfirmation(false);
+  const handleRowEditStop = (params, event) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
     }
   };
 
-  const handleConfirmDelete = () => {
-    if (editedUser) {
-      deleteUser(editedUser);
-    }
+  const handleEditClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveEdit = () => {
-    if (editedUser) {
-      updateUser(editedUser._id, editedUser);
-      setShowEditModal(false);
-      setEditedUser(null);
-    }
+  const handleSaveClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-
-  const handleChange = (e) => {
-    const { name, value, checked } = e.target;
-    if (name === 'verified') {
-      setEditedUser({
-        ...editedUser,
-        verified: checked,
-      });
-    } else {
-      setEditedUser({
-        ...editedUser,
-        [name]: value,
-      });
-    }
+  const handleDeleteClick = (id) => () => {
+    setRows(rows.filter((row) => row.id !== id));
+    // TODO: Send delete request to backend
   };
 
-  const handleRoleChange = (selectedOptions) => {
-    const roles = selectedOptions.map((option) => option.value);
-    setEditedUser({
-      ...editedUser,
-      roles,
+  const handleCancelClick = (id) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
   };
 
-  const handleClassChange = (selectedOption) => {
-    setEditedUser({
-      ...editedUser,
-      studentClass: selectedOption ? selectedOption.value : null,
-    });
-  };
+  const processRowUpdate = (newRow) => {
+    const updatedRow = { ...newRow, isNew: false };
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
 
-  const handleVerification = (userId) => {
-    const userToUpdate = users.find((user) => user._id === userId);
-    if (!userToUpdate) {
-      console.error("User not found");
+    // Check the trainings
+    const arrayOfEditedTrainings = updatedRow.training.split(', ');
+
+    // Ensure each training is valid
+    for (let i = 0; i < arrayOfEditedTrainings.length; i++) {
+      if (!trainings.includes(arrayOfEditedTrainings[i])) {
+        toast.error('Invalid training');
+        return;
+      }
+    }
+
+    // Check the positions 
+    const arrayOfEditedPositions = updatedRow.operationalPosition.split(', ');
+
+    // Ensure each position is valid
+    for (let i = 0; i < arrayOfEditedPositions.length; i++) {
+      if (!positions.includes(arrayOfEditedPositions[i])) {
+        toast.error('Invalid position');
+        return;
+      }
+    }
+    const { experienceRTW, experienceFR } = updatedRow;
+    if (experienceRTW < 0 || experienceFR < 0) {
+      toast.error('Invalid experience');
       return;
     }
 
-    const updatedUserData = {
-      ...userToUpdate,
-      verified: !userToUpdate.verified, // Toggle verification status
-    };
-    updateUser(userId, updatedUserData);
-  };
-
-  const customStyles = {
-    control: (provided) => ({
-      ...provided,
-      height: '50px',
-    }),
-  };
-
-  // Function to handle sorting
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  // Function to dynamically sort users based on current sortConfig
-  const sortedUsers = users.sort((a, b) => {
-    if (sortConfig.key && a[sortConfig.key] && b[sortConfig.key]) {
-      if (sortConfig.direction === 'ascending') {
-        return a[sortConfig.key].toString().localeCompare(b[sortConfig.key].toString());
-      }
-      if (sortConfig.direction === 'descending') {
-        return b[sortConfig.key].toString().localeCompare(a[sortConfig.key].toString());
+    const updatedUser = {
+      ...updatedRow,
+      experience: {
+        RTW: experienceRTW,
+        FR: experienceFR
       }
     }
-    return 0;
-  });
 
-  // Filter users based on search term
-  const filteredUsers = sortedUsers.filter((user) => {
-    const fullNameFirstName = `${user.firstName} ${user.lastName}`;
-    const fullNameLastName = `${user.lastName} ${user.firstName}`;
-    const fullNameEmail = `${user.email}`;
+    updateUser(updatedUser);
+    return updatedRow;
+  };
 
+  const handleRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel);
+  };
 
-    return fullNameFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fullNameLastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fullNameEmail.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  const columns = [
+    {
+      field: 'firstName',
+      headerName: 'First name',
+      width: 180,
+      editable: true,
+      type: 'string'
+    },
+    {
+      field: 'lastName',
+      headerName: 'Last name',
+      width: 180,
+      editable: true,
+      type: 'string'
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      width: 180,
+      editable: true,
+      type: 'email'
+    },
+    {
+      field: 'operationalPosition',
+      headerName: 'Operational Position',
+      width: 150,
+      editable: true,
+      type: 'string'
+    },
+    {
+      field: 'training',
+      headerName: 'Training',
+      width: 150,
+      editable: true,
+      type: 'string'
+    },
+    {
+      field: 'experienceRTW',
+      headerName: 'RTW Experience',
+      width: 150,
+      editable: true,
+      type: 'number'
+    },
+    {
+      field: 'experienceFR',
+      headerName: 'FR Experience',
+      width: 150,
+      editable: true,
+      type: 'number'
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 100,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              key={0}
+              icon={<SaveIcon />}
+              label="Save"
+              sx={{
+                color: 'primary.main',
+              }}
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              key={1}
+              icon={<CancelIcon />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            key={1}
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={2}
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
+  ];
 
   return (
-    <div className='users-container select-none'>
-      <h2>{t('Users')}</h2>
-      <FormControl
-        type="text"
-        placeholder={t('Search by name or email')}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className='search-input'
-      />
-
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th onClick={() => requestSort('firstName')}>
-              {t('First Name')}{' '}
-              {sortConfig.key === 'firstName' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('lastName')}>
-              {t('Last Name')}{' '}
-              {sortConfig.key === 'lastName' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('IAM')}>
-              {t('IAM')}{' '}
-              {sortConfig.key === 'IAM' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('email')}>
-              {t('Email')}{' '}
-              {sortConfig.key === 'email' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('roles')}>
-              {t('Roles')}{' '}
-              {sortConfig.key === 'roles' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('studentClass')}>
-              {t('Student Class')}{' '}
-              {sortConfig.key === 'studentClass' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th onClick={() => requestSort('verified')}>
-              {t('Verified')}{' '}
-              {sortConfig.key === 'verified' && (
-                <>
-                  {sortConfig.direction === 'ascending' ? (
-                    <FontAwesomeIcon icon={faSortUp} className="sort-icon" />
-                  ) : (
-                    <FontAwesomeIcon icon={faSortDown} className="sort-icon" />
-                  )}
-                </>
-              )}
-            </th>
-            <th>{t('Actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.map((user) => (
-            <tr
-              key={user._id}
-              onDoubleClick={() => handleEditUser(user)}
-              className='user-row'
-            >
-              <td>{user.firstName}</td>
-              <td>{user.lastName}</td>
-              <td>{user.IAM}</td>
-              <td>{user.email}</td>
-              <td>{user.roles.join(', ')}</td>
-              <td>{user.studentClass}</td>
-              <td>{user.verified ? t('Yes') : t('No')}</td>
-              <td>
-                <Button variant="primary" onClick={() => handleEditUser(user)}>
-                  {t('Edit')}
-                </Button>
-                <Button
-                  variant={user.verified ? "danger" : "success"}
-                  onClick={() => handleVerification(user._id)}
-                  style={{ marginLeft: '10px' }}
-                >
-                  {user.verified ? t('Unverify') : t('Verify')}
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-
-      {/* Edit User Modal */}
-      <Modal show={showEditModal} onHide={handleCloseEditModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('Edit User')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {editedUser && (
-            <Form>
-              <Form.Group controlId="formFirstName">
-                <Form.Label>{t('First Name')}</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="firstName"
-                  value={editedUser.firstName}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group controlId="formLastName">
-                <Form.Label>{t('Last Name')}</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="lastName"
-                  value={editedUser.lastName}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group controlId="formIAM">
-                <Form.Label>{t('IAM')}</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="IAM"
-                  value={editedUser.IAM}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group controlId="formEmail">
-                <Form.Label>{t('Email')}</Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  value={editedUser.email}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group controlId="formRoles">
-                <Form.Label>{t('Roles')}</Form.Label>
-                <Select
-                  options={allRoles.map((role) => ({ value: role, label: role }))}
-                  value={editedUser.roles.map((role) => ({ value: role, label: role }))}
-                  isMulti
-                  onChange={handleRoleChange}
-                />
-              </Form.Group>
-              <Form.Group controlId="formStudentClass">
-                <Form.Label>{t('Student Class')}</Form.Label>
-                <Select
-                  options={classOptions}
-                  value={classOptions.find((option) => option.value === editedUser.studentClass)}
-                  onChange={handleClassChange}
-                  isClearable
-                  styles={customStyles}
-                  required
-                />
-              </Form.Group>
-              <Form.Group controlId="formVerified">
-                <Form.Check
-                  type="checkbox"
-                  label={t('Verified')}
-                  name="verified"
-                  checked={editedUser.verified}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Form>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseEditModal}>
-            {t('Close')}
-          </Button>
-          <Button variant="danger" onClick={() => handleDeleteConfirmation(editedUser._id)}>
-            {t('Delete')}
-          </Button>
-          <Button variant="primary" onClick={handleSaveEdit}>
-            {t('Save Changes')}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal show={deleteConfirmation} onHide={() => setDeleteConfirmation(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('Confirm Deletion')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>{t('Are you sure you want to delete this user?')}</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setDeleteConfirmation(false)}>
-            {t('Cancel')}
-          </Button>
-          <Button variant="danger" onClick={handleConfirmDelete}>
-            {t('Delete')}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+    <div className="select-none">
+      <Box
+        sx={{
+          height: 500,
+          width: '100%',
+          '& .actions': {
+            color: 'text.secondary',
+          },
+          '& .textPrimary': {
+            color: 'text.primary',
+          },
+        }}
+      >
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={processRowUpdate}
+          slots={{
+            toolbar: EditToolbar,
+          }}
+          slotProps={{
+            toolbar: { setRows, setRowModesModel },
+          }}
+        />
+      </Box>
     </div>
   );
-
-};
-
-export default Users;
+}
