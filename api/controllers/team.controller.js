@@ -4,6 +4,8 @@ import Team from '../models/team.model.js';
 import { errorHandler } from '../utils/error.js';
 import Shift from '../models/shift.model.js';
 
+// Set timezone to Central European Summer Time
+
 const sendWSUpdate = () => {
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -50,8 +52,6 @@ export const updateTeamMembers = async (req, res, next) => {
         const team = await Team.findById(id);
         if (!team) {
             next(errorHandler(404, 'Team not found.'));
-            status = 6;
-            members = [];
             return
         }
         if (members.length > 3) {
@@ -155,9 +155,7 @@ export const fetchTeam = async (req, res, next) => {
 export const fetchTeams = async (req, res, next) => {
     try {
         const teams = await Team.find();
-        // Get the time at 8 am
         const currentDate = new Date();
-        currentDate.setHours(8);
 
         for (let i = 0; i < teams.length; i++) {
             const team = teams[i];
@@ -172,13 +170,15 @@ export const fetchTeams = async (req, res, next) => {
             }).sort({ startDate: 1 });
 
             if (currentShift) {
+                shiftTimeout(currentShift, team._id);
                 team.startDate = currentShift.startDate;
                 team.endDate = currentShift.endDate;
                 team.members = currentShift.users;
 
                 await team.save();
             } else if (previousShift && nextShift) {
-                // Set the start end date of the shift based on this
+                shiftTimeout({ endDate: nextShift.startDate }, -1);
+
                 team.startDate = previousShift.endDate;
                 team.endDate = nextShift.startDate;
                 team.status = 6;
@@ -217,4 +217,28 @@ export const deleteUser = async (req, res, next) => {
         console.error(error);
         next(errorHandler(500, 'An error occurred while deleting team.'));
     }
+};
+
+const timeouts = {};
+
+const shiftTimeout = (currentShift, teamID) => {
+    // Clear existing timeout for the team, if any
+    if (timeouts[teamID]) {
+        clearTimeout(timeouts[teamID]);
+    }
+
+    const currentDate = new Date();
+    const timeRemaining = currentShift.endDate - currentDate;
+
+    // Check if the current shift has already ended
+    if (timeRemaining <= 0) {
+        // Shift already ended, no need to set timeout
+        return;
+    }
+
+    // Set a timeout to update the data after the current shift ends
+    timeouts[teamID] = setTimeout(() => {
+        // Callback to update the data
+        sendWSUpdate();
+    }, timeRemaining);
 };
