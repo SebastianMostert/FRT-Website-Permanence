@@ -36,6 +36,7 @@ const CurrentSituation = () => {
         // Listen for 'updateTeams' event from the server
         ws.onmessage = (event) => {
             const { type, data } = JSON.parse(event.data);
+            alert(type);
 
             if (type !== 'updateTeams') {
                 return;
