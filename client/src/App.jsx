@@ -7,6 +7,7 @@ import HeaderRoute from './components/Routes/HeaderRoute';
 import SidebarRoute from './components/Routes/SidebarRoute';
 import AdminRoute from './components/Routes/AdminRoute';
 import LoggedInRoute from './components/Routes/LoggedInRoute';
+import LogeRoute from './components/Routes/LogeRoute';
 import { isTinyMobile, userExists } from './utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
@@ -35,6 +36,7 @@ import CurrentSituation from './pages/LogePages/CurrentSituation';
 import Incidents from './pages/LogePages/Incidents';
 import IncidentCreate from './pages/LogePages/IncidentCreate';
 import Stock from './Admin/pages/Stock/Stock';
+import MembersPage from './pages/LogePages/MembersPage';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -92,6 +94,14 @@ function App() {
     <BrowserRouter>
       <TokenValidator />
       <Routes>
+        <Route element={<LogeRoute />}>
+          <Route element={<HeaderRoute />}>
+            <Route path='/current-situation' element={<CurrentSituation />} />
+            <Route path='/members' element={<MembersPage />} />
+            <Route path='/incidents' element={<Incidents />} />
+            <Route path='/incidents/create' element={<IncidentCreate />} />
+          </Route>
+        </Route>
 
         {/* All the Admin Routes */}
         <Route element={<AdminRoute />}>
@@ -116,9 +126,6 @@ function App() {
           </Route>
           <Route element={<LoggedInRoute />}>
             <Route path='/profile' element={<Profile />} />
-            <Route path='/current-situation' element={<CurrentSituation />} />
-            <Route path='/incidents' element={<Incidents />} />
-            <Route path='/incidents/create' element={<IncidentCreate />} />
           </Route>
         </Route>
 

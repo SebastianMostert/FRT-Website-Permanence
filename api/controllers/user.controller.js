@@ -3,6 +3,16 @@ import { errorHandler } from '../utils/error.js';
 import bcryptjs from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import sendEmail from '../utils/sendEmail.js';
+import { wss } from '../index.js';
+import { WebSocket } from 'ws';
+
+const sendWSUpdate = () => {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({ type: 'user' }));
+    }
+  });
+};
 
 // Test
 export const test = (req, res) => {
@@ -14,8 +24,6 @@ export const test = (req, res) => {
 // Update User
 export const updateUser = async (req, res, next) => {
   const body = req.body;
-  const user = req.user;
-
   try {
     // Fetch the user
     const user = await User.findById(req.body.id);
@@ -47,6 +55,9 @@ export const updateUser = async (req, res, next) => {
     const notifications = (body?.notifications !== undefined) ? body.notifications : user.notifications;
     const onBoarded = (body?.onBoarded !== undefined) ? body.onBoarded : user.onBoarded;
 
+    const hasKey = (body?.hasKey !== undefined) ? body.hasKey : user.hasKey;
+    const hasPhone = (body?.hasPhone !== undefined) ? body.hasPhone : user.hasPhone;
+
     const roles = (body?.roles !== undefined) ? body.roles : user.roles;
 
     console.log(body)
@@ -74,14 +85,15 @@ export const updateUser = async (req, res, next) => {
           emailVerified,
           notifications,
           onBoarded,
-          roles
+          roles,
+          hasKey,
+          hasPhone
         },
       },
       { new: true }
     );
 
-
-
+    sendWSUpdate();
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
@@ -99,6 +111,7 @@ export const deleteUser = async (req, res, next) => {
   // }
   try {
     await User.findByIdAndDelete(req.params.id);
+    sendWSUpdate();
     res.status(200).json('User has been deleted...');
   } catch (error) {
     console.error(error);
@@ -140,6 +153,7 @@ export const fetchAllUsers = async (req, res, next) => {
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
+
 // Fetch authenticator enabled
 export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
   const IAM = req.params.IAM;
@@ -156,6 +170,7 @@ export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
+
 export const fetchUserAuthEnabledByEmail = async (req, res, next) => {
   const email = req.params.email;
   try {
@@ -171,6 +186,7 @@ export const fetchUserAuthEnabledByEmail = async (req, res, next) => {
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
+
 export const notifyUser = async (req, res, next) => {
   const emailBody = req.body.emailBody;
 
@@ -178,6 +194,7 @@ export const notifyUser = async (req, res, next) => {
 
   return res.status(200).json({ info });
 };
+
 export const verifyEmail = async (req, res, next) => {
   const { code, time, email } = req.body;
 

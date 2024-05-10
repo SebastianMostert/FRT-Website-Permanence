@@ -51,17 +51,21 @@ export default function Header() {
   const logeLinks = [
     <Nav.Link key="loge" as={Link} to="/current-situation" className="nav-link">
       {t('header.current_situation')}
+    </Nav.Link>,
+    <Nav.Link key="loge" as={Link} to="/incidents" className="nav-link">
+      {t('header.incidents')}
+    </Nav.Link>,
+    <Nav.Link key="loge" as={Link} to="/members" className="nav-link">
+      {t('header.members')}
     </Nav.Link>
   ];
 
   const publicLinks = [
-    <Nav.Link key="loge" as={Link} to="/incidents" className="nav-link">
-      {t('header.incidents')}
-    </Nav.Link>
+    
   ];
 
   return (
-    <Navbar expand="lg" className="shadow-sm bg-slate-200">
+    <Navbar expand="lg" className="shadow-sm bg-slate-200 select-none">
       <Navbar.Brand as={Link} to="/" className='navbar-brand'>
         <img src="https://i.imgur.com/Jlu1pjU.png" alt="Logo" style={logoStyle} />
       </Navbar.Brand>

@@ -101,6 +101,14 @@ const userSchema = new mongoose.Schema(
         required: true,
       },
     },
+    hasPhone: {
+      type: Boolean,
+      default: false,
+    },
+    hasKey: {
+      type: Boolean,
+      default: false,
+    },
     roles: {
       type: [{
         type: String,

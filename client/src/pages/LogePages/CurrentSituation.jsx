@@ -3,7 +3,6 @@ import TeamCard from './TeamCard';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { format } from 'date-fns';
 
-
 const CurrentSituation = () => {
     const [teams, setTeams] = useState([]);
     const socket = useWebSocket();
@@ -40,7 +39,6 @@ const CurrentSituation = () => {
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
-            console.log(data.type);
             if (data.type === 'team') {
                 console.log('Updating data');
                 fetchData();
