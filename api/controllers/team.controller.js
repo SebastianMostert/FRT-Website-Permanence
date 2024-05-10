@@ -172,6 +172,8 @@ export const fetchTeams = async (req, res, next) => {
                 team.status = 2;
                 team.alerted = false;
                 team.members = currentShift.users;
+
+                await team.save();
             } else if (previousShift && nextShift) {
                 // Set the start end date of the shift based on this
                 team.startDate = previousShift.endDate;
@@ -190,6 +192,8 @@ export const fetchTeams = async (req, res, next) => {
                 team.status = 6;
                 team.alerted = false;
                 team.members = [];
+
+                await team.save();
             }
         }
 
