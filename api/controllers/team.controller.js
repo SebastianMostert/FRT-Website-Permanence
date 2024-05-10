@@ -167,6 +167,7 @@ export const fetchTeams = async (req, res, next) => {
             const currentShift = await Shift.findOne({ teamID: team._id, startDate: { $eq: currentDate } }).sort({ startDate: 1 });
 
             if (currentShift) {
+                console.log(currentShift)
                 team.startDate = currentShift.startDate;
                 team.endDate = currentShift.endDate;
                 team.status = 2;
