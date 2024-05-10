@@ -164,7 +164,11 @@ export const fetchTeams = async (req, res, next) => {
             // Get the previous shift and the next shift and the current shift
             const previousShift = await Shift.findOne({ teamID: team._id, startDate: { $lt: currentDate } }).sort({ startDate: -1 });
             const nextShift = await Shift.findOne({ teamID: team._id, startDate: { $gt: currentDate } }).sort({ startDate: 1 });
-            const currentShift = await Shift.findOne({ teamID: team._id, startDate: { $eq: currentDate } }).sort({ startDate: 1 });
+            const currentShift = await Shift.findOne({ 
+    teamID: team._id,
+    startDate: { $lte: currentDate }, // Start date is less than or equal to currentDate
+    endDate: { $gt: currentDate }     // End date is greater than currentDate
+}).sort({ startDate: 1 });
 
             console.log('Previous shift: ', previousShift)
             console.log('Next shift: ', nextShift)
