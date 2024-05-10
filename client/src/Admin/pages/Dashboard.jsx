@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useApiClient } from "../../ApiContext";
+import { useApiClient } from "../../contexts/ApiContext";
 import { BarChart } from '@mui/x-charts/BarChart';
 
 const Dashboard = () => {

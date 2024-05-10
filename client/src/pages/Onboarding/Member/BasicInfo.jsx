@@ -7,7 +7,7 @@ import { getSelectMenuClass, isIAMValid, isPasswordValid } from '../../../utils'
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import Select from 'react-select';
 import FullNameInput from '../../../components/Inputs/FullName';
-import { useApiClient } from '../../../ApiContext';
+import { useApiClient } from '../../../contexts/ApiContext';
 
 const BasicInfo = ({ data, onChange, onNext }) => {
   const { t } = useTranslation();

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import TeamCard from './TeamCard';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 
 const CurrentSituation = () => {
     const [teams, setTeams] = useState([]);
+    const socket = useWebSocket();
 
     // Function to fetch data from the API
     const fetchData = async () => {
@@ -25,38 +27,24 @@ const CurrentSituation = () => {
         }
     };
 
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     // Fetch data on component mount and start polling
     useEffect(() => {
-        // On mount fetch data
-        fetchData();
+        if (socket?.readyState !== 1) return;
 
-        // Establish WebSocket connection when the component mounts
-        const ws = new WebSocket(`wss://${window.location.hostname}:3000`);// Adjust the URL based on your WebSocket server configuration
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
 
-        // Listen for 'updateTeams' event from the server
-        ws.onmessage = (event) => {
-            const { type, data } = JSON.parse(event.data);
-            alert(type);
-
-            if (type !== 'updateTeams') {
-                return;
+            console.log(data.type);
+            if (data.type === 'team') {
+                console.log('Updating data');
+                fetchData();
             }
-
-            const updatedTeam = data;
-
-            const allTeams = [];
-            allTeams.push(updatedTeam);
-            allTeams.push(...teams);
-            
-            setTeams(allTeams);
         }
-
-        // Clean up function to close the WebSocket connection when the component unmounts
-        return () => {
-            ws.close();
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [socket, socket?.readyState]);
 
     return (
         <div className="current-situation select-none teams">

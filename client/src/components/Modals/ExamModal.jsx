@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Modal, Button, Badge, Row, Col, Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 

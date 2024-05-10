@@ -8,16 +8,19 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n.js';
 import './main.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ApiProvider } from './ApiContext.jsx'
+import { ApiProvider } from './contexts/ApiContext.jsx'
+import WebSocketProvider from './WebSocketProvider.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <ApiProvider>
-    <I18nextProvider i18n={i18n}>
-      <Provider store={store}>
-        <PersistGate persistor={persistor} loading={null}>
-          <App />
-        </PersistGate>
-      </Provider>
-    </I18nextProvider>
-  </ApiProvider>
+  <WebSocketProvider>
+    <ApiProvider>
+      <I18nextProvider i18n={i18n}>
+        <Provider store={store}>
+          <PersistGate persistor={persistor} loading={null}>
+            <App />
+          </PersistGate>
+        </Provider>
+      </I18nextProvider>
+    </ApiProvider>
+  </WebSocketProvider>
 );

@@ -57,7 +57,7 @@ wss.on('connection', (ws) => {
 
   // Handle messages from the client
   ws.on('message', (message) => {
-    console.info('Received message:', data);
+    console.info('Received message:', message.toString());
     // You can handle the message here
   });
 
@@ -65,7 +65,6 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     console.info('Client disconnected');
   });
-
 });
 
 const apiVersion = 1;

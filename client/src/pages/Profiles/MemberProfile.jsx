@@ -18,7 +18,7 @@ import { Button, Col, FloatingLabel, Row, Form, FormLabel } from 'react-bootstra
 import { Link } from 'react-router-dom';
 import { NotAuthorized } from '../index';
 import FullNameInput from '../../components/Inputs/FullName';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 
 export default function Profile() {
     const { t } = useTranslation();

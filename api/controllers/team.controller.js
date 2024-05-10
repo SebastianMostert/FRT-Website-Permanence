@@ -4,10 +4,10 @@ import Team from '../models/team.model.js';
 import { errorHandler } from '../utils/error.js';
 import Shift from '../models/shift.model.js';
 
-const sendWSUpdate = (type, data) => {
+const sendWSUpdate = () => {
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type, data }));
+            client.send(JSON.stringify({ type: 'team' }));
         }
     });
 };
@@ -29,7 +29,7 @@ export const createTeam = async (req, res, next) => {
         });
         team.save();
 
-        sendWSUpdate('updateTeams', team);
+        sendWSUpdate();
 
         res.status(201).json({ message: 'Team created successfully', team });
     } catch (error) {
@@ -72,7 +72,7 @@ export const updateTeamMembers = async (req, res, next) => {
         });
 
         const updatedTeam = await Team.findById(id);
-        sendWSUpdate('updateTeams', updatedTeam);
+        sendWSUpdate();
 
         res.status(200).json(updatedTeam);
     } catch (error) {
@@ -104,7 +104,7 @@ export const updateTeamStatus = async (req, res, next) => {
         });
 
         const updatedTeam = await Team.findById(id);
-        sendWSUpdate('updateTeams', updatedTeam);
+        sendWSUpdate();
 
         res.status(200).json(updatedTeam);
     } catch (error) {
@@ -127,7 +127,7 @@ export const updateAlert = async (req, res, next) => {
         });
 
         const updatedTeam = await Team.findById(id);
-        sendWSUpdate('updateTeams', updatedTeam);
+        sendWSUpdate();
 
         res.status(200).json(updatedTeam);
     } catch (error) {
@@ -157,6 +157,7 @@ export const fetchTeams = async (req, res, next) => {
         const teams = await Team.find();
         // Get the time at 8 am
         const currentDate = new Date();
+        currentDate.setHours(8);
 
         for (let i = 0; i < teams.length; i++) {
             const team = teams[i];
@@ -164,21 +165,15 @@ export const fetchTeams = async (req, res, next) => {
             // Get the previous shift and the next shift and the current shift
             const previousShift = await Shift.findOne({ teamID: team._id, startDate: { $lt: currentDate } }).sort({ startDate: -1 });
             const nextShift = await Shift.findOne({ teamID: team._id, startDate: { $gt: currentDate } }).sort({ startDate: 1 });
-            const currentShift = await Shift.findOne({ 
-    teamID: team._id,
-    startDate: { $lte: currentDate }, // Start date is less than or equal to currentDate
-    endDate: { $gt: currentDate }     // End date is greater than currentDate
-}).sort({ startDate: 1 });
+            const currentShift = await Shift.findOne({
+                teamID: team._id,
+                startDate: { $lte: currentDate }, // Start date is less than or equal to currentDate
+                endDate: { $gt: currentDate }     // End date is greater than currentDate
+            }).sort({ startDate: 1 });
 
-            console.log('Previous shift: ', previousShift)
-            console.log('Next shift: ', nextShift)
-            console.log('Current shift: ', currentShift)
-            
             if (currentShift) {
                 team.startDate = currentShift.startDate;
                 team.endDate = currentShift.endDate;
-                team.status = 2;
-                team.alerted = false;
                 team.members = currentShift.users;
 
                 await team.save();

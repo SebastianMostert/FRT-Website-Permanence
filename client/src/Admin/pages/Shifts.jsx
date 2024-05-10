@@ -7,7 +7,7 @@ import MarkBesetztModal from '../../components/MarkBesetztModal';
 import CreateShiftModal from '../../components/Modals/CreateShiftModal';
 import { colors } from '../../utils';
 import DeleteShiftModal from '../../components/Modals/DeleteShiftModal';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
 
 // Functional component definition for Availabilities

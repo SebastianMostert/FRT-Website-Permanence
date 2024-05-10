@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Form } from 'react-bootstrap';
 import { NotAuthorized } from '../index';
 import FullNameInput from '../../components/Inputs/FullName';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const defaultValue = {
     firstName: '',

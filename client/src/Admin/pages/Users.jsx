@@ -277,7 +277,7 @@ import {
 import {
   randomId,
 } from '@mui/x-data-grid-generator';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 import { toast } from 'react-toastify';
 
 function EditToolbar(props) {

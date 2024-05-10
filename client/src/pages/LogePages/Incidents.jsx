@@ -1,7 +1,7 @@
 import { Button, Col, Row } from 'react-bootstrap';
 import IncidentCard from './IncidentCard';
 import { useEffect, useState } from 'react';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const Incidents = () => {
     const [incidents, setIncidents] = useState([]);

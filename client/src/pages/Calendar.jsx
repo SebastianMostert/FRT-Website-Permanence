@@ -17,7 +17,7 @@ import ShiftModal from '../components/Calendar/ShiftModal';
 import ExamModal from '../components/Modals/ExamModal';
 
 import { NoMobilePage, NotAuthorized } from './index'
-import { useApiClient } from '../ApiContext';
+import { useApiClient } from '../contexts/ApiContext';
 import moment from 'moment';
 
 const VIEW_TYPE_KEY = 'viewType';

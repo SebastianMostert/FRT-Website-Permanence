@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserMinus } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
-import { useApiClient } from '../ApiContext';
+import { useApiClient } from '../contexts/ApiContext';
 import { useTranslation } from 'react-i18next';
 
 const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {

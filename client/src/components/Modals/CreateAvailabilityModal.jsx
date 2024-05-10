@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { formatDate, validateDate } from '../../utils';
 import moment from 'moment';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const componentTranslationName = 'create_availability_modal';
 

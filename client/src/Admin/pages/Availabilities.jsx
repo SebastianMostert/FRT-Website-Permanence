@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { colors, getMember } from '../../utils';
 import { toast } from 'react-toastify';
-import { useApiClient } from '../../ApiContext';
+import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
 
 // Functional component definition for Availabilities
