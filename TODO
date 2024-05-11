@@ -15,6 +15,12 @@
 // TODO: The Admin User page needs extra stuff (like a btn to create a new user)
 // TODO: Add Dark/Light mode
 
+// TODO: Add hasKey and hasPhone to the current situation
+// -> If either is false, the status must be 6
+// TODO: Revamp the Create Incident page
+// -> Link the description to the kurzbericht
+// TODO: Add status changing 
+
 // This below is just the placeholder of the item
 const verbandPlaceholder = {
     image: 'ssssssssssssssssssssssssss',

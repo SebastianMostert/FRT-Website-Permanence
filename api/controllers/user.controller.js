@@ -123,6 +123,7 @@ export const deleteUser = async (req, res, next) => {
 export const fetchUser = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
+    console.log(IAM)
     const user = await User.find({ IAM });
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));

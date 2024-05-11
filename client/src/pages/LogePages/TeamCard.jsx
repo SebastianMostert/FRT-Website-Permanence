@@ -162,9 +162,11 @@ const RightSide = ({ members, containerWidth, leftSideWidth }) => {
 const TeamCard = ({ team }) => {
     const { name, members, status, alerted, startDate, endDate } = team;
     const [leftSideWidth, setLeftSideWidth] = useState(0);
+    const [_status, setStatus] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
 
     const cardBodyRef = useRef(null);
+    const margin = 50; // Adjust as needed
 
     useEffect(() => {
         const handleResize = () => {
@@ -181,8 +183,46 @@ const TeamCard = ({ team }) => {
         };
     }, []);
 
-    // Calculate the total width of the LeftSide component and the desired margin
-    const margin = 50; // Adjust as needed
+    useEffect(() => {
+        setStatus(status);
+        const fetchPromises = [];
+
+        if (members.length < 2) setStatus(6);
+
+        for (let i = 0; i < members.length; i++) {
+            const member = members[i];
+
+            // Push each fetch promise into the array
+            fetchPromises.push(
+                fetch(`/api/v1/user/fetch/${member.IAM}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }).then(async (res) => {
+                    const data = await res.json();
+                    const user = data._doc;
+
+                    // Check if user has phone and key
+                    if (!user?.hasPhone || !user?.hasKey) {
+                        throw new Error('User does not have phone or key');
+                    }
+                }).catch(() => {
+                    // Handle errors if any
+                    setStatus(6);
+                })
+            );
+        }
+
+        // Wait for all promises to resolve
+        Promise.all(fetchPromises).then(() => {
+
+        }).catch(error => {
+            // Handle errors if any of the fetch requests fail
+            console.error(error);
+            setStatus(6);
+        });
+    }, [members, status]); // Add dependencies to useEffect
 
     return (
         <Card>
@@ -192,7 +232,7 @@ const TeamCard = ({ team }) => {
                         title={name}
                         startTime={new Date(startDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })}
                         endTime={new Date(endDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })}
-                        status={members.length < 2 ? 6 : status}
+                        status={_status}
                         setLeftSideWidth={setLeftSideWidth}
                         alerted={alerted}
                     />
