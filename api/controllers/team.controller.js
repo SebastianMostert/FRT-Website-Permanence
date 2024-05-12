@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { wss } from '../index.js';
 import Team from '../models/team.model.js';
+import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
 import Shift from '../models/shift.model.js';
 
@@ -174,6 +175,7 @@ export const fetchTeams = async (req, res, next) => {
                 team.startDate = currentShift.startDate;
                 team.endDate = currentShift.endDate;
                 team.members = currentShift.users;
+                team.status = await getShiftStatus(currentShift, team.status);
 
                 await team.save();
             } else if (previousShift && nextShift) {
@@ -211,7 +213,7 @@ export const fetchTeams = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     const id = req.params.id;
     try {
-        await User.findByIdAndDelete(id);
+        await Team.findByIdAndDelete(id);
         res.status(200).json('Team has been deleted...');
     } catch (error) {
         console.error(error);
@@ -242,3 +244,30 @@ const shiftTimeout = (currentShift, teamID) => {
         sendWSUpdate();
     }, timeRemaining);
 };
+
+const getShiftStatus = async (shift, defaultStatus) => {
+    let status = defaultStatus;
+    // If there are less than 2 members in the team, set status to 6
+    if (shift.users.length < 2) {
+        status = 6;
+    }
+
+    // Check if each member has a key and a phone
+    for (let i = 0; i < shift.users.length; i++) {
+        const member = shift.users[i];
+
+        const user = await User.findOne({ IAM: member.IAM });
+
+        if (!user) {
+            status = 6;
+            break;
+        }
+
+        if (!user.hasKey || !user.hasPhone) {
+            status = 6;
+            break;
+        }
+    }
+
+    return status;
+}

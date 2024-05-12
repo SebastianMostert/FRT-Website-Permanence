@@ -5,10 +5,6 @@ const incidentSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    name: {
-        type: String,
-        required: true,
-    },
     teamId: {
         type: String,
         required: true,
@@ -24,7 +20,17 @@ const incidentSchema = new mongoose.Schema({
     ambulanceCalled: {
         type: Boolean,
         required: true,
-    }
+    },
+    urgenceLevel: {
+        type: Number,
+        required: true,
+        default: 4,
+    },
+    resolved: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 });
 
 const Incident = mongoose.model('Incident', incidentSchema);

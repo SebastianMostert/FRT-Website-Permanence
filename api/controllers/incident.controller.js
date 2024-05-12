@@ -16,14 +16,14 @@ const sendWSUpdate = (type, data) => {
 // Create Incident
 export const createIncident = async (req, res, next) => {
     try {
-        let missionNumber;
+        let missionNumber = await getMissionNumber();
 
         const {
             ambulanceCalled,
             incidentInfo,
             location,
-            name,
-            teamId
+            teamId,
+            urgenceLevel
         } = req.body;
 
         // Fetch the team
@@ -39,40 +39,14 @@ export const createIncident = async (req, res, next) => {
             return;
         }
 
-        // Get the current date
-        const currentDate = new Date();
-        const year = currentDate.getFullYear().toString();
-        let month = (currentDate.getMonth() + 1).toString();
-        if (month.length === 1) {
-            month = '0' + month;
-        }
-
-        let day = currentDate.getDate().toString();
-        if (day.length === 1) {
-            day = '0' + day;
-        }
-        let missionNumberPrefix = parseInt(year + month + day);
-
-        // Get the number of incidents on that day
-        // TODO: Fix
-        const incidents = await Report.find({ missionNumber: { $gte: missionNumberPrefix } });
-        const numberOfIncidents = incidents.length;
-
-        // Create the mission number
-        if (numberOfIncidents === 0) {
-            missionNumber = missionNumberPrefix + '01';
-        } else {
-            missionNumber = missionNumberPrefix + (numberOfIncidents + 1).toString();
-        }
-
         // Create the incident
         const incident = new Incident({
             ambulanceCalled,
             incidentInfo,
             location,
-            name,
             teamId,
-            missionNumber
+            missionNumber,
+            urgenceLevel
         });
         await incident.save();
 
@@ -87,6 +61,12 @@ export const createIncident = async (req, res, next) => {
             missionNumber,
             firstResponders,
             archived: false,
+            missionInfo: {
+                quickReport: incident.incidentInfo,
+                location: incident.location,
+                ambulanceCalled: incident.ambulanceCalled,
+                urgenceLevel: incident.urgenceLevel
+            }
         });
         await report.save();
 
@@ -126,4 +106,48 @@ export const fetchAllIncidents = async (req, res, next) => {
         console.error(error);
         next(errorHandler(500, 'An error occurred while fetching incidents.'));
     }
+}
+
+async function getMissionNumber() {
+    let missionNumber;
+    // YYYYMMDD
+    // Always has to be 2 characters
+    const currentYear = new Date().getFullYear().toString();
+    let currentMonth = (new Date().getMonth() + 1).toString();
+    if (currentMonth.length === 1) {
+        currentMonth = '0' + currentMonth;
+    }
+    let currentDay = new Date().getDate().toString();
+    if (currentDay.length === 1) {
+        currentDay = '0' + currentDay;
+    }
+
+    const prefix = currentYear + currentMonth + currentDay;
+
+    const incidents = await Incident.find();
+
+    // Now get the number of incidents on that day
+    let numberOfIncidents = 0;
+
+    for (let i = 0; i < incidents.length; i++) {
+        const incident = incidents[i];
+        const missionNumber_ = incident.missionNumber.toString();
+        const subStr = missionNumber_.substring(0, 8);
+        if (missionNumber_.substring(0, 8) === prefix) {
+            numberOfIncidents++;
+        }
+    }
+
+    if (numberOfIncidents === 0) {
+        missionNumber = prefix + '01';
+    } else {
+        let numberOfIncidents_ = (numberOfIncidents + 1).toString();
+        if (numberOfIncidents_.length === 1) {
+            numberOfIncidents_ = '0' + (numberOfIncidents + 1).toString();
+        }
+        missionNumber = prefix + numberOfIncidents_;
+    }
+    
+    // Return the mission number as a number
+    return parseInt(missionNumber);
 }

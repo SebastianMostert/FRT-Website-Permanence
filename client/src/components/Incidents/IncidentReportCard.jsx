@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Card, Accordion, ButtonGroup, DropdownButton, Dropdown, InputGroup } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import ExportReportModal from '../Modals/ExportReportModal';
-
+import { LoadingPage } from '../../pages';
+import { getRoles } from '../../utils';
 
 const IncidentReportCard = ({
     report,
@@ -14,29 +15,24 @@ const IncidentReportCard = ({
 }) => {
     const [showExportModal, setShowExportModal] = useState(false);
     const [exportType, setExportType] = useState('pdf');
+    const [isEditable, setIsEditable] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [roles, setRoles] = useState([]);
     const { t } = useTranslation();
 
     const missionNumber = report.missionNumber.toString();
     const archived = report.archived;
     const users = report.users;
 
-    const handleEdit = () => {
-        onEdit();
-    };
 
     const handleExport = () => {
         onExport(report, exportType);
         setShowExportModal(false);
     };
 
-    const handleArchive = () => {
-        onArchive();
-    };
-
-    const handleUnarchive = () => {
-        // Call the onArchive function, as it's the same function to toggle archive/unarchive
-        onArchive();
-    };
+    const handleArchive = () => onArchive();
+    const handleUnarchive = () => onArchive();
+    const handleEdit = () => onEdit();
 
     const extractMissionInfo = () => {
         const year = missionNumber.substring(0, 4);
@@ -54,13 +50,31 @@ const IncidentReportCard = ({
 
     const missionInfo = extractMissionInfo();
 
-    // Check if the current user is one of the First Responders
-    const isCurrentUserFirstResponder = users.some(user => user.IAM === currentUser.IAM);
+    useEffect(() => {
+        async function fetchData() {
+            const roles = await getRoles(currentUser?.IAM);
+            setRoles(roles);
+            setLoading(false);
+        }
 
-    // Check if the incident is from today
-    const isToday = new Date().toLocaleDateString() === `${missionInfo.day}/${missionInfo.month}/${missionInfo.year}`;
+        fetchData();
+    }, [currentUser?.IAM]);
 
-    const isEditable = !archived && isCurrentUserFirstResponder && isToday;
+    useEffect(() => {
+        // Check if the current user is one of the First Responders
+        const isCurrentUserFirstResponder = users.some(user => user.IAM === currentUser.IAM);
+        // Check if the incident is from today
+        const isToday = new Date().toLocaleDateString() === `${missionInfo.day}/${missionInfo.month}/${missionInfo.year}`;
+        // Check if the user is an admin
+        const isAdmin = roles.includes('admin');
+
+        if (missionNumber.length === 10 && isToday && (isCurrentUserFirstResponder || isAdmin)) setIsEditable(true);
+        else setIsEditable(false);
+    }, [currentUser.IAM, missionInfo.day, missionInfo.month, missionInfo.year, missionNumber.length, roles, users]);
+
+    if (loading) {
+        return <LoadingPage />
+    }
 
     return (
         <Card>

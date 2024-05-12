@@ -6,10 +6,12 @@ import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
 import MissionNumber from '../Inputs/MissionNumber';
-import { updateReport } from '../../utils';
+import { getRoles, updateReport } from '../../utils';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import MissionInformation from './MissionInformation';
+import { useSelector } from 'react-redux';
+import { LoadingPage } from '../../pages';
 
 const defaultValues = {
     firstRespondersValues: [
@@ -140,6 +142,7 @@ const defaultValues = {
         valuablesGivenTo: '',
         SepasContacted: false,
         ambulanceOnSite: false,
+        urgenceLevel: 4,
     },
     archived: false,
 }
@@ -153,13 +156,15 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     const [missionInfo, setMissionInfo] = useState(defaultValues.missionInfo);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [isNewReport, setIsNewReport] = useState(false);
+    const [roles, setRoles] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [validated, setValidated] = useState(false);
 
+    const { currentUser } = useSelector(state => state.user);
     const { t } = useTranslation();
 
     const handleResponderChange = (updatedResponders) => {
-
         setFirstResponders(updatedResponders);
     };
 
@@ -308,6 +313,43 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
         }
     }, [missionNumber, setIsEditable]);
 
+    useEffect(() => {
+        async function fetchData() {
+            const roles = await getRoles(currentUser?.IAM);
+            setRoles(roles);
+            setLoading(false);
+        }
+
+        fetchData();
+    }, [currentUser?.IAM]);
+
+    useEffect(() => {
+        const extractMissionInfo = () => {
+            const year = missionNumber.substring(0, 4);
+            const month = missionNumber.substring(4, 6);
+            const day = missionNumber.substring(6, 8);
+            const incidentNumber = missionNumber.substring(8);
+
+            return {
+                year,
+                month,
+                day,
+                incidentNumber,
+            };
+        };
+
+        const extractedMissionInfo = extractMissionInfo();
+
+        // Check if the current user is one of the First Responders
+        const isCurrentUserFirstResponder = firstResponders.some(user => user.iam === currentUser.IAM);
+        // Check if the incident is from today
+        const isToday = new Date().toLocaleDateString() === `${extractedMissionInfo.day}/${extractedMissionInfo.month}/${extractedMissionInfo.year}`;
+        // Check if the user is an admin
+        const isAdmin = roles.includes('admin');
+
+        if (missionNumber.length === 10 && isToday && (isCurrentUserFirstResponder || isAdmin)) setIsEditable(true);
+        else setIsEditable(false);
+    })
     if (!dataLoaded) {
         return (
             <Container>
@@ -428,6 +470,8 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
             </Accordion>
         );
     }
+
+    if (loading) return <LoadingPage />
 
     return (
         <Container className='select-none'>

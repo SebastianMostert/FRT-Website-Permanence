@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from 'react';
-import { Card, Badge } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
+import StatusSquare from '../../components/StatusSquare';
+import StatusChanger from '../../components/StatusChanger';
 
 const MemberSection = ({ member, position }) => {
     return (
@@ -27,70 +29,6 @@ const MemberSection = ({ member, position }) => {
 const TimeSlot = ({ startTime, endTime }) => {
     return (
         <span style={{ marginLeft: '10px', fontWeight: 'lighter' }}>{startTime} - {endTime}</span>
-    );
-};
-
-const StatusSquare = ({ status, alerted }) => {
-    const squareSize = '40px'; // Adjust the size as needed
-
-    let statusText;
-    let statusVariant;
-    let statusDescription;
-
-    switch (status.toString()) {
-        case "1":
-            statusText = alerted ? '1c' : '1';
-            statusVariant = alerted ? 'warning' : 'secondary';
-            statusDescription = 'On the way back from incident';
-            break;
-        case "2":
-            statusText = alerted ? '2c' : '2';
-            statusVariant = alerted ? 'warning' : 'secondary';
-            statusDescription = 'On call';
-            break;
-        case "3":
-            statusText = '3';
-            statusVariant = 'warning';
-            statusDescription = 'On the way to incident';
-            break;
-        case "4":
-            statusText = '4';
-            statusVariant = 'warning';
-            statusDescription = 'At the incident';
-            break;
-        case "5":
-            statusText = '5';
-            statusVariant = 'danger';
-            statusDescription = 'Request to speak';
-            break;
-        case "6":
-            statusText = '6';
-            statusVariant = 'danger';
-            statusDescription = 'Unavailable';
-            break;
-        default:
-            statusText = '';
-            statusVariant = 'light';
-            statusDescription = '';
-    }
-
-    return (
-        <div style={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
-            <Badge
-                bg={statusVariant}
-                style={{
-                    width: squareSize,
-                    height: squareSize,
-                    marginRight: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-            >
-                {statusText}
-                <span className="sr-only">{statusDescription}</span>
-            </Badge>
-        </div>
     );
 };
 
@@ -123,7 +61,8 @@ const Title = ({ title }) => {
     );
 };
 
-const LeftSide = ({ title, startTime, endTime, status, setLeftSideWidth, alerted }) => {
+const LeftSide = ({ title, startTime, endTime, status, setLeftSideWidth, alerted, teamID }) => {
+    const [showStatusChanger, setShowStatusChanger] = useState(false);
     const leftSideRef = useRef(null);
 
     useEffect(() => {
@@ -134,10 +73,21 @@ const LeftSide = ({ title, startTime, endTime, status, setLeftSideWidth, alerted
     }, [setLeftSideWidth]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexShrink: 0 }} ref={leftSideRef}>
-            <StatusSquare status={status} alerted={alerted} />
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'row', alignItems: 'center', flexShrink: 0 }} ref={leftSideRef}>
+            {/* Render the StatusSquare */}
+            <div onClick={() => setShowStatusChanger(!showStatusChanger)}>
+                <StatusSquare status={status} alerted={alerted} />
+            </div>
+            {/* Render the Title */}
             <Title title={title} />
+            {/* Render the TimeSlot */}
             <TimeSlot startTime={startTime} endTime={endTime} />
+            {/* Render the StatusChanger component as an overlay */}
+            {showStatusChanger && (
+                <div style={{ position: 'absolute', top: '100%', left: 0 }}>
+                    <StatusChanger currentStatus={status} close={() => setShowStatusChanger(false)} teamID={teamID} />
+                </div>
+            )}
         </div>
     );
 };
@@ -160,7 +110,7 @@ const RightSide = ({ members, containerWidth, leftSideWidth }) => {
 };
 
 const TeamCard = ({ team }) => {
-    const { name, members, status, alerted, startDate, endDate } = team;
+    const { name, members, status, alerted, startDate, endDate, _id } = team;
     const [leftSideWidth, setLeftSideWidth] = useState(0);
     const [_status, setStatus] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -235,6 +185,7 @@ const TeamCard = ({ team }) => {
                         status={_status}
                         setLeftSideWidth={setLeftSideWidth}
                         alerted={alerted}
+                        teamID={_id}
                     />
                     {/* Add some space between the left and right sides */}
                     <div style={{ marginLeft: `${margin}px` }} />

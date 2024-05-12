@@ -4,7 +4,6 @@ import { sendReportsUpdated } from '../utils/invalidateCache.js';
 
 export const createShift = async (req, res, next) => {
   const { startDate, endDate, title, users, teamID } = req.body;
-  console.log(req.body)
   try {
     if (!startDate) return res.status(400).json({ success: false, message: 'Missing start date' });
     if (!endDate) return res.status(400).json({ success: false, message: 'Missing end date' });
