@@ -3,5 +3,6 @@
     "button.submit": "Submit",
     "button.update": "Update",
     "button.create": "Create",
-    "button.close": "Close"
+    "button.close": "Close",
+    "button.create_incident": "Create Incident"
 }

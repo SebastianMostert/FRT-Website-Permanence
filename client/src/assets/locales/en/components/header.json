@@ -4,5 +4,8 @@
     "header.reports": "Reports",
     "header.admin": "Admin",
     "header.sign_in": "Sign In",
-    "header.logged_in_as": "Logged in as:"
+    "header.logged_in_as": "Logged in as:",
+    "header.current_situation": "Current Situation",
+    "header.incidents": "Incidents",
+    "header.members": "Members"
 }

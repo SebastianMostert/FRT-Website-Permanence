@@ -1,0 +1,16 @@
+{
+    "incidents.new_incident": "New Incident",
+    "incident_create.title": "Create Incident",
+    "incident_create.no_team": "Unfortunately, there are no teams available at the moment.",
+    "incident_create.team": "Team:",
+    "incident_create.ambulance_called": "Ambulance Called:",
+    "incident_create.incident_info": "Incident Info:",
+    "incident_create.location": "Location:",
+
+    "emergency_level.4": "Low Level Emergency",
+    "emergency_level.3": "Medium Level Emergency",
+    "emergency_level.2": "High Level Emergency",
+    "emergency_level.1": "Critical Level Emergency",
+
+    "incident_create.ambulance_warning": "You have indicated that the incident is a {{emergency_level_msg}} ({{emergency_level}}). You should call an Ambulance immediately."
+}

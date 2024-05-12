@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 import { useApiClient } from '../../contexts/ApiContext';
 import Slider from '@mui/material/Slider';
+import { useTranslation } from 'react-i18next';
 
 const IncidentCreate = () => {
     const [name, setName] = useState('');
@@ -14,6 +15,8 @@ const IncidentCreate = () => {
     const [location, setLocation] = useState('');
     const [ambulanceCalled, setAmbulanceCalled] = useState(false);
     const [error, setError] = useState(false);
+
+    const { t } = useTranslation();
 
     const apiClient = useApiClient();
 
@@ -104,16 +107,16 @@ const IncidentCreate = () => {
 
         switch (level) {
             case 4:
-                msg = `Low level Emergency`;
+                msg = t(`emergency_level.4`);
                 break;
             case 3:
-                msg = `Medium level Emergency`;
+                msg = t(`emergency_level.3`);
                 break;
             case 2:
-                msg = `High level Emergency`;
+                msg = t(`emergency_level.2`);
                 break;
             case 1:
-                msg = `Critical level Emergency`;
+                msg = t(`emergency_level.1`);
                 break;
         }
         return msg;
@@ -133,17 +136,16 @@ const IncidentCreate = () => {
     // TODO: Add the Urgence Level to the post request
     return (
         <Container className="mt-5 select-none">
-            <h1 className="mb-4">New Incident</h1>
+            <h1 className="mb-4">{t('incident_create.title')}</h1>
             {error ? (
-                <Alert variant="danger">Unfortunately all teams are occupied. Please try again later.</Alert>
+                <Alert variant="danger">{t('incident_create.no_team')}</Alert>
             ) : (
                 <>
-                    {console.log(gravity)}
-                    {gravity <= 2 && ambulanceCalled == false && <Alert variant="warning">You have indicated that the incident is a {valueLabelFormat(gravity)} ({valuetext(gravity)}). You should call an Ambulance immediately.</Alert>}
+                    {gravity <= 2 && ambulanceCalled == false && <Alert variant="warning">{t('incident_create.ambulance_warning', { emergency_level_msg: valueLabelFormat(gravity), emergency_level: valuetext(gravity) })}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         {/* Team Selection */}
                         <Form.Group controlId="formTeam" className="mb-3">
-                            <Form.Label className="fw-bold">Select Team:</Form.Label>
+                            <Form.Label className="fw-bold">{t('incident_create.team')}</Form.Label>
                             <Form.Select value={team} onChange={(e) => setTeam(e.target.value)} required>
                                 {filteredTeams.map(team => (
                                     <option key={team.id} value={team.id}>{team.name}</option>
@@ -153,13 +155,13 @@ const IncidentCreate = () => {
 
                         {/* Incident Information */}
                         <Form.Group controlId="formIncidentInfo" className="mb-3">
-                            <Form.Label className="fw-bold">Incident Information:</Form.Label>
+                            <Form.Label className="fw-bold">{t('incident_create.incident_info')}</Form.Label>
                             <Form.Control as="textarea" placeholder="Enter incident information" value={incidentInfo} onChange={(e) => setIncidentInfo(e.target.value)} rows={5} required />
                         </Form.Group>
 
                         {/* Location */}
                         <Form.Group controlId="formLocation" className="mb-3">
-                            <Form.Label className="fw-bold">Location:</Form.Label>
+                            <Form.Label className="fw-bold">{t('incident_create.location')}</Form.Label>
                             <Form.Control type="text" placeholder="Enter location" value={location} onChange={(e) => setLocation(e.target.value)} required />
                         </Form.Group>
 
@@ -183,7 +185,7 @@ const IncidentCreate = () => {
                         <Form.Group controlId="formAmbulanceCalled" className="mb-3">
                             <Form.Check
                                 type="checkbox"
-                                label={<><FontAwesomeIcon icon={faTruckMedical} />{' Ambulance Called'}</>}
+                                label={<><FontAwesomeIcon icon={faTruckMedical} />{' '}{t('incident_create.ambulance_called')}</>}
                                 checked={ambulanceCalled}
                                 onChange={(e) => setAmbulanceCalled(e.target.checked)}
                                 style={{ fontSize: '1.25rem', fontWeight: 'bold' }} // Customize checkbox style
@@ -192,7 +194,7 @@ const IncidentCreate = () => {
 
                         {/* Submit Button */}
                         <div className="d-grid">
-                            <Button variant="primary" type="submit">Create Incident</Button>
+                            <Button variant="primary" type="submit">{t('button.create_incident')}</Button>
                         </div>
                     </Form>
                 </>

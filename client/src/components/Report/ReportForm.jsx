@@ -141,7 +141,7 @@ const defaultValues = {
         location: '',
         valuablesGivenTo: '',
         SepasContacted: false,
-        ambulanceOnSite: false,
+        ambulanceCalled: false,
         urgenceLevel: 4,
     },
     archived: false,

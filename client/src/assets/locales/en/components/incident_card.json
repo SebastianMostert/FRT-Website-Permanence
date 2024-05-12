@@ -1,0 +1,11 @@
+{
+    "status.team_status": "Team Status: ",
+    "status.incident_info": "Incident Information: ",
+    "status.location": "Location: ",
+    "status.ambulance_called": "Ambulance Called: ",
+    "status.team_members": "Team Members: ",
+
+    "status.first_name": "First Name:",
+    "status.last_name": "Last Name:",
+    "status.position": "Position:"
+}

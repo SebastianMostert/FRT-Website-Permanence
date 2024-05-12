@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Card, Badge, Accordion } from 'react-bootstrap';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const StatusBadge = ({ status, alerted }) => {
+    const { t } = useTranslation();
+
     const getStatusDetails = () => {
         switch (status.toString()) {
             case "1":
-                return { text: alerted ? '1c' : '1', variant: alerted ? 'warning' : 'secondary', description: 'On the way back from incident' };
+                return { text: alerted ? '1c' : '1', variant: alerted ? 'warning' : 'secondary', description: t('status.free_on_radio') };
             case "2":
-                return { text: alerted ? '2c' : '2', variant: alerted ? 'warning' : 'secondary', description: 'On call' };
+                return { text: alerted ? '2c' : '2', variant: alerted ? 'warning' : 'secondary', description: t('status.on_call') };
             case "3":
-                return { text: '3', variant: 'warning', description: 'On the way to incident' };
+                return { text: '3', variant: 'warning', description: t('status.on_the_way_to_incident') };
             case "4":
-                return { text: '4', variant: 'warning', description: 'At the incident' };
+                return { text: '4', variant: 'warning', description: t('status.at_incident') };
             case "5":
-                return { text: '5', variant: 'danger', description: 'Request to speak' };
+                return { text: '5', variant: 'danger', description: t('status.request_to_speak') };
             case "6":
-                return { text: '6', variant: 'danger', description: 'Unavailable' };
+                return { text: '6', variant: 'danger', description: t('status.unavailable') };
             default:
                 return { text: '', variant: 'light', description: '' };
         }
@@ -33,6 +36,7 @@ const StatusBadge = ({ status, alerted }) => {
 };
 
 const IncidentCard = ({ incident }) => {
+    const { t } = useTranslation();
     const [team, setTeam] = useState({
         name: "",
         status: "",
@@ -62,21 +66,21 @@ const IncidentCard = ({ incident }) => {
             <Card.Body>
                 <Card.Title className="mb-3">{name}</Card.Title>
                 <div className="mb-3 d-flex align-items-center">
-                    <strong className="me-3">Team Status:</strong>
+                    <strong className="me-3">{t('status.team_status')}</strong>
                     <StatusBadge status={team.status} alerted={team.alerted} />
                     <Badge bg={team.alerted ? 'success' : 'danger'}>{team.alerted ? 'Alerted' : 'Not Alerted'}</Badge>
                 </div>
                 <div className="mb-3">
-                    <strong>Incident Information:</strong> {incidentInfo}
+                    <strong>{t('status.incident_info')}</strong> {incidentInfo}
                 </div>
                 <div className="mb-3">
-                    <strong>Location:</strong> {location}
+                    <strong>{t('status.location')}</strong> {location}
                 </div>
                 <div className="mb-3">
-                    <strong>Ambulance Called:</strong> <Badge bg={ambulanceCalled ? 'success' : 'danger'}>{ambulanceCalled ? 'Yes' : 'No'}</Badge>
+                    <strong>{t('status.ambulance_called')}</strong> <Badge bg={ambulanceCalled ? 'success' : 'danger'}>{ambulanceCalled ? 'Yes' : 'No'}</Badge>
                 </div>
                 <div>
-                    <strong>Team Members:</strong>
+                    <strong>{t('status.team_members')}</strong>
                     <Accordion flush>
                         {team.members.map((member, index) => (
                             <UserAccordion key={index} user={member} index={index} />
@@ -89,6 +93,7 @@ const IncidentCard = ({ incident }) => {
 };
 
 const UserAccordion = ({ user, index }) => {
+    const { t } = useTranslation();
     return (
         <Accordion.Item eventKey={index.toString()}>
             <Accordion.Header>
@@ -97,13 +102,13 @@ const UserAccordion = ({ user, index }) => {
             </Accordion.Header>
             <Accordion.Body>
                 <div>
-                    <strong>First Name:</strong> {user.firstName}
+                    <strong>{t('status.first_name')}</strong> {user.firstName}
                 </div>
                 <div>
-                    <strong>Last Name:</strong> {user.lastName}
+                    <strong>{t('status.last_name')}</strong> {user.lastName}
                 </div>
                 <div>
-                    <strong>Position:</strong> {user.position}
+                    <strong>{t('status.position')}</strong> {user.position}
                 </div>
                 <div>
                     <strong>IAM:</strong> {user.IAM}

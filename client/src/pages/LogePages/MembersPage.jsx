@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { useApiClient } from '../../contexts/ApiContext';
-import { Container, Row, Col, Card, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey, faWalkieTalkie } from '@fortawesome/free-solid-svg-icons';
 import { LoadingPage } from '../ErrorPages';
+import { useTranslation } from 'react-i18next';
 
 const MAX_KEYS = 3;
 const MAX_PHONES = 3;
@@ -17,6 +18,8 @@ const MembersPage = () => {
   const [phonesContainer, setPhonesContainer] = useState(0);
   const [loading, setLoading] = useState(true);
   const apiClient = useApiClient();
+
+  const { t } = useTranslation();
 
   const socket = useWebSocket();
 
@@ -98,7 +101,6 @@ const MembersPage = () => {
       const data = JSON.parse(event.data);
 
       if (data.type === 'user') {
-        console.log('Updating data');
         fetchData();
         fetchTeams();
       }
@@ -161,7 +163,7 @@ const MembersPage = () => {
 
   return (
     <Container className='select-none'>
-      <h1 className="mt-4">Members Page</h1>
+      <h1 className="mt-4">{t('members_page.title')}</h1>
       <Row className="mt-4">
         <Col md={2}>
           <DragNDropContainers
@@ -194,6 +196,7 @@ const MembersPage = () => {
 };
 
 const DragNDropContainers = ({ keysContainer, phonesContainer, handleDragStart }) => {
+  const { t } = useTranslation();
   const width = 'calc(50% - 10px)';
   const margin = '5px';
 
@@ -202,27 +205,22 @@ const DragNDropContainers = ({ keysContainer, phonesContainer, handleDragStart }
 
   return (
     <div>
-      <h3>Phones & Keys</h3>
+      <h3>{t('members_page.phones_and_keys')}</h3>
       <div style={{ display: 'inline-block', width, marginRight: margin }}>
         <Card>
           <Card.Body style={{ display: 'flex', flexWrap: 'wrap' }}>
             {Array.from({ length: keysContainer }).map((_, index) => (
               <div key={`key-${index}`} draggable onDragStart={(e) => handleDragStart(e, 'key')} id={`key-${index}`} style={{ marginRight: '10px', marginBottom: '10px' }}>
-                <OverlayTrigger
-                  placement="bottom"
-                  overlay={<Tooltip>Drag Key</Tooltip>}
-                >
-                  <InventorySlot
-                    hasItem={true}
-                    icon={faKey}
-                    handleDrop={() => { }}
-                    index={index}
-                    handleUserDragOver={() => { }}
-                    type="key"
-                    handleDragStart={() => { }}
-                    handleUserDrop={() => { }}
-                  />
-                </OverlayTrigger>
+                <InventorySlot
+                  hasItem={true}
+                  icon={faKey}
+                  handleDrop={() => { }}
+                  index={index}
+                  handleUserDragOver={() => { }}
+                  type="key"
+                  handleDragStart={() => { }}
+                  handleUserDrop={() => { }}
+                />
               </div>
             ))}
             {/* Empty inventory for used keys */}
@@ -248,21 +246,16 @@ const DragNDropContainers = ({ keysContainer, phonesContainer, handleDragStart }
           <Card.Body style={{ display: 'flex', flexWrap: 'wrap' }}>
             {Array.from({ length: phonesContainer }).map((_, index) => (
               <div key={`phone-${index}`} draggable onDragStart={(e) => handleDragStart(e, 'phone')} id={`phone-${index}`} style={{ marginRight: '10px', marginBottom: '10px' }}>
-                <OverlayTrigger
-                  placement="bottom"
-                  overlay={<Tooltip>Drag Phone</Tooltip>}
-                >
-                  <InventorySlot
-                    hasItem={true}
-                    icon={faWalkieTalkie}
-                    handleDrop={() => { }}
-                    index={index}
-                    handleUserDragOver={() => { }}
-                    type="phone"
-                    handleDragStart={() => { }}
-                    handleUserDrop={() => { }}
-                  />
-                </OverlayTrigger>
+                <InventorySlot
+                  hasItem={true}
+                  icon={faWalkieTalkie}
+                  handleDrop={() => { }}
+                  index={index}
+                  handleUserDragOver={() => { }}
+                  type="phone"
+                  handleDragStart={() => { }}
+                  handleUserDrop={() => { }}
+                />
               </div>
             ))}
             {/* Empty inventory for used phones */}
