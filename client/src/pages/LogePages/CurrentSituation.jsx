@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import TeamCard from './TeamCard';
 import { useWebSocket } from '../../contexts/WebSocketContext';
-import { format } from 'date-fns';
+import DateAndTime from '../../components/DateAndTime';
 
 const CurrentSituation = () => {
     const [teams, setTeams] = useState([]);
@@ -49,7 +49,9 @@ const CurrentSituation = () => {
     return (
         <div className="current-situation select-none teams">
             <div className="m-4">
-                <DateAndTime />
+                <div className="flex justify-center mb-3">
+                    <DateAndTime />
+                </div>
                 <div>
                     {teams.map((team) => (
                         <div key={team.id}>
@@ -58,35 +60,6 @@ const CurrentSituation = () => {
                     ))}
                 </div>
             </div>
-        </div>
-    );
-};
-
-const DateAndTime = () => {
-    const initialFormatedDate = format(new Date(), "MMM dd, yyyy");
-    const initialFormatedTime = format(new Date(), "HH:mm:ss.SSS");
-    const initialFormatedDateTime = `${initialFormatedDate} at ${initialFormatedTime}`;
-    const [currentDateTime, setCurrentDateTime] = useState(initialFormatedDateTime);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const currentDate = new Date();
-            const formatedDate = format(currentDate, "MMM dd, yyyy");
-            const formattedTime = format(currentDate, "HH:mm:ss.SSS");
-
-            const formattedDateTime = `${formatedDate} at ${formattedTime}`;
-            setCurrentDateTime(formattedDateTime);
-        }, 100);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <div className="text-center mb-4">
-            <p className="text-3xl font-bold text-gray-800">
-                {currentDateTime.slice(0, -4)}
-                <span className="text-xs relative">{currentDateTime.slice(-4)}</span>
-            </p>
         </div>
     );
 };

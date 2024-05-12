@@ -5,6 +5,7 @@ import { Container, Row, Col, Card, OverlayTrigger, Tooltip } from 'react-bootst
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey, faWalkieTalkie } from '@fortawesome/free-solid-svg-icons';
+import { LoadingPage } from '../ErrorPages';
 
 const MAX_KEYS = 3;
 const MAX_PHONES = 3;
@@ -14,6 +15,7 @@ const MembersPage = () => {
   const [usersOnCall, setUsersOnCall] = useState([]);
   const [keysContainer, setKeysContainer] = useState(0);
   const [phonesContainer, setPhonesContainer] = useState(0);
+  const [loading, setLoading] = useState(true);
   const apiClient = useApiClient();
 
   const socket = useWebSocket();
@@ -89,7 +91,8 @@ const MembersPage = () => {
       }
     };
 
-    if (socket?.readyState !== 1) return;
+    if (socket?.readyState !== 1) return setLoading(true);
+    else setLoading(false);
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -153,6 +156,8 @@ const MembersPage = () => {
       console.error(error);
     }
   };
+
+  if (loading) return <LoadingPage />
 
   return (
     <Container className='select-none'>
