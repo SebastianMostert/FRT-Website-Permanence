@@ -97,10 +97,6 @@ const MembersPage = () => {
       if (data.type === 'user') {
         console.log('Updating data');
         fetchData();
-      }
-
-      if (data.type === 'team') {
-        console.log('Updating data');
         fetchTeams();
       }
     }
