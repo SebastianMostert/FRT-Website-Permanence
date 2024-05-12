@@ -24,9 +24,10 @@ export const test = (req, res) => {
 // Update User
 export const updateUser = async (req, res, next) => {
   const body = req.body;
+  console.log(body);
   try {
     // Fetch the user
-    const user = await User.findById(req.body.id);
+    const user = await User.findById(req.body.id || req.body._id);
     if (!user) {
       return next(errorHandler(404, 'User not found.'));
     }
@@ -61,7 +62,7 @@ export const updateUser = async (req, res, next) => {
     const roles = (body?.roles !== undefined) ? body.roles : user.roles;
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.body.id,
+      req.body.id || req.body._id,
       {
         $set: {
           firstName,

@@ -1,264 +1,3 @@
-// import { useState, useEffect } from 'react';
-// import { Button, Modal } from 'react-bootstrap';
-// import { getSelectMenuClass } from '../../utils';
-// import { useTranslation } from 'react-i18next';
-// import { useApiClient } from '../../ApiContext';
-// import { DataGrid } from '@mui/x-data-grid';
-// import { toast } from 'react-toastify';
-
-// const Users = () => {
-//   const [users, setUsers] = useState([]);
-//   const [editedUser, setEditedUser] = useState(null);
-//   const [deleteConfirmation, setDeleteConfirmation] = useState(false); // State for delete confirmation
-//   const [classOptions, setClassOptions] = useState([]);
-//   const [classesAPI, setClassesAPI] = useState(null);
-
-//   const { t } = useTranslation();
-//   const apiClient = useApiClient();
-
-//   useEffect(() => {
-//     async function fetchData() {
-//       const classes = await apiClient.exam.getClasses();
-//       console.log(classes)
-//       setClassesAPI(classes);
-//     }
-
-//     fetchData();
-//   }, [apiClient.exam]);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const response = await getSelectMenuClass(t, classesAPI);
-//         setClassOptions(response);
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     };
-//     fetchData();
-//   }, [classesAPI, t]);
-
-//   const fetchUsers = async () => {
-//     try {
-//       const response = await fetch('/api/v1/user/fetch-all', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       });
-//       if (!response.ok) {
-//         throw new Error('Failed to fetch users');
-//       }
-//       const users = await response.json();
-//       setUsers(users);
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-
-//   const deleteUser = async (userId) => {
-//     try {
-//       const response = await fetch(`/api/v1/user/delete/${userId}`, {
-//         method: 'DELETE',
-//       });
-//       if (!response.ok) {
-//         throw new Error('Failed to delete user');
-//       }
-//       fetchUsers();
-//       setDeleteConfirmation(false); // Close the confirmation modal after deletion
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUsers();
-//   }, []);
-
-
-//   const handleConfirmDelete = () => {
-//     if (editedUser) {
-//       deleteUser(editedUser);
-//     }
-//   };
-
-//   const rows = [];
-//   const columns = [
-//     { field: 'firstName', headerName: 'First Name', width: 150, editable: true },
-//     { field: 'lastName', headerName: 'Last Name', width: 150, editable: true },
-//     { field: 'email', headerName: 'Email', width: 150, editable: true },
-//     { field: 'operationalPosition', headerName: 'Operational Position', width: 150, editable: true },
-//     { field: 'training', headerName: 'Training', width: 150, editable: true },
-//     { field: 'experienceRTW', headerName: 'RTW Experience', width: 150, editable: true },
-//     { field: 'experienceFR', headerName: 'FR Experience', width: 150, editable: true },
-//   ];
-
-//   // Get the data from sortedUsers and push it to rows
-//   users.forEach((user) => {
-//     rows.push({
-//       id: user._id,
-//       firstName: user.firstName,
-//       lastName: user.lastName,
-//       email: user.email,
-//       operationalPosition: user.operationalPosition,
-//       training: user.training.join(', '),
-//       experienceRTW: user.experience.RTW,
-//       experienceFR: user.experience.FR,
-//     });
-//   });
-
-//   const onEditStop = async (params, event) => {
-//     console.log(event);
-
-//     //  Params:
-//     //   {
-//     //     "id": "661c2e1bad02f80a0e0aff5f",
-//     //     "field": "firstName",
-//     //     "row": {
-//     //         "id": "661c2e1bad02f80a0e0aff5f",
-//     //         "firstName": "Pol",
-//     //         "lastName": "Nilles",
-//     //         "email": "nillespol@icloud.com",
-//     //         "operationalPosition": "Chef Agres",
-//     //         "training": "SAP 1, First Aid Course",
-//     //         "experienceRTW": 300,
-//     //         "experienceFR": 0
-//     //     },
-//     //     "rowNode": {
-//     //         "id": "661c2e1bad02f80a0e0aff5f",
-//     //         "depth": 0,
-//     //         "parent": "auto-generated-group-node-root",
-//     //         "type": "leaf",
-//     //         "groupingKey": null
-//     //     },
-//     //     "colDef": {
-//     //         "width": 150,
-//     //         "minWidth": 50,
-//     //         "maxWidth": null,
-//     //         "hideable": true,
-//     //         "sortable": true,
-//     //         "resizable": true,
-//     //         "filterable": true,
-//     //         "groupable": true,
-//     //         "pinnable": true,
-//     //         "aggregable": true,
-//     //         "editable": true,
-//     //         "type": "string",
-//     //         "align": "left",
-//     //         "filterOperators": [
-//     //             {
-//     //                 "value": "contains"
-//     //             },
-//     //             {
-//     //                 "value": "equals"
-//     //             },
-//     //             {
-//     //                 "value": "startsWith"
-//     //             },
-//     //             {
-//     //                 "value": "endsWith"
-//     //             },
-//     //             {
-//     //                 "value": "isEmpty",
-//     //                 "requiresFilterValue": false
-//     //             },
-//     //             {
-//     //                 "value": "isNotEmpty",
-//     //                 "requiresFilterValue": false
-//     //             },
-//     //             {
-//     //                 "value": "isAnyOf"
-//     //             }
-//     //         ],
-//     //         "field": "firstName",
-//     //         "headerName": "First Name",
-//     //         "hasBeenResized": true,
-//     //         "computedWidth": 150
-//     //     },
-//     //     "cellMode": "edit",
-//     //     "hasFocus": true,
-//     //     "tabIndex": 0,
-//     //     "value": "Pol",
-//     //     "formattedValue": "Pol",
-//     //     "isEditable": true,
-//     //     "reason": "enterKeyDown"
-//     // }
-
-//     const userID = params.id;
-
-//     const newUser = {
-
-//     }
-
-//     return
-//     await fetch(`/api/v1/user/update/${userID}`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(newUser),
-//     })
-//   };
-
-//   return (
-//     <div className='users-container select-none'>
-//       <h2>{t('Users')}</h2>
-//       <DataGrid
-//         rows={rows}
-//         columns={columns}
-//         processRowUpdate={(updatedRow, originalRow) => {
-//           // {
-//           //   "id": "661c2e1bad02f80a0e0aff5f",
-//           //   "firstName": "Pols",
-//           //   "lastName": "Nilles",
-//           //   "email": "nillespol@icloud.com",
-//           //   "operationalPosition": "Chef Agres",
-//           //   "training": "SAP 1, First Aid Course",
-//           //   "experienceRTW": 300,
-//           //   "experienceFR": 0
-//           // }
-
-//           console.log(updatedRow.training.split(', '))
-//           const newUser = {
-//             firstName: updatedRow.firstName,
-//             lastName: updatedRow.lastName,
-//             email: updatedRow.email,
-//             operationalPosition: updatedRow.operationalPosition,
-//             training: updatedRow.training.split(', '),
-//             experience: {
-//               RTW: updatedRow.experienceRTW,
-//               FR: updatedRow.experienceFR
-//             }
-//           }
-
-//           console.log(newUser)
-//         }}
-//         onProcessRowUpdateError={(e) => console.log(e)}
-//       />
-
-//       {/* Delete Confirmation Modal */}
-//       <Modal show={deleteConfirmation} onHide={() => setDeleteConfirmation(false)}>
-//         <Modal.Header closeButton>
-//           <Modal.Title>{t('Confirm Deletion')}</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//           <p>{t('Are you sure you want to delete this user?')}</p>
-//         </Modal.Body>
-//         <Modal.Footer>
-//           <Button variant="secondary" onClick={() => setDeleteConfirmation(false)}>
-//             {t('Cancel')}
-//           </Button>
-//           <Button variant="danger" onClick={handleConfirmDelete}>
-//             {t('Delete')}
-//           </Button>
-//         </Modal.Footer>
-//       </Modal>
-//     </div>
-//   );
-// };
-
-// export default Users;
-
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -279,6 +18,7 @@ import {
 } from '@mui/x-data-grid-generator';
 import { useApiClient } from '../../contexts/ApiContext';
 import { toast } from 'react-toastify';
+import { Checkbox, Input, ListItemText, MenuItem, Select } from '@mui/material';
 
 function EditToolbar(props) {
   // eslint-disable-next-line react/prop-types
@@ -303,7 +43,8 @@ function EditToolbar(props) {
 }
 
 const trainings = ['SAP 1', 'SAP 2', 'First Aid Course'];
-const positions = ['Chef Agres', 'Equipier Bin.', 'Stagiaire Bin.'];
+const positions = ['Chef Agres', 'Equipier Bin.', 'Stagiaire Bin.', 'None'];
+const roles = ['admin', 'loge', 'member'];
 
 export default function Users() {
   const [rows, setRows] = useState([]);
@@ -314,7 +55,6 @@ export default function Users() {
 
   //#region Api calls
   const updateUser = async (updatedUser) => {
-    console.log(updatedUser)
     await apiClient.user.update(updatedUser);
   }
 
@@ -360,8 +100,6 @@ export default function Users() {
         //     "roles": [
         //         "member"
         //     ],
-        //     "createdAt": "2024-05-04T09:12:13.183Z",
-        //     "updatedAt": "2024-05-04T09:17:54.911Z",
         //     "__v": 0
         // }
         // TODO: Add more fields
@@ -374,6 +112,7 @@ export default function Users() {
           training: user.training.join(', '),
           experienceRTW: user.experience.RTW,
           experienceFR: user.experience.FR,
+          verified: user.verified,
         });
       });
 
@@ -466,14 +205,14 @@ export default function Users() {
     {
       field: 'firstName',
       headerName: 'First name',
-      width: 180,
+      width: 125,
       editable: true,
       type: 'string'
     },
     {
       field: 'lastName',
       headerName: 'Last name',
-      width: 180,
+      width: 125,
       editable: true,
       type: 'string'
     },
@@ -488,8 +227,7 @@ export default function Users() {
       field: 'operationalPosition',
       headerName: 'Operational Position',
       width: 150,
-      editable: true,
-      type: 'string'
+      editable: false
     },
     {
       field: 'training',
@@ -501,16 +239,23 @@ export default function Users() {
     {
       field: 'experienceRTW',
       headerName: 'RTW Experience',
-      width: 150,
+      width: 120,
       editable: true,
       type: 'number'
     },
     {
       field: 'experienceFR',
       headerName: 'FR Experience',
-      width: 150,
+      width: 120,
       editable: true,
       type: 'number'
+    },
+    {
+      field: 'verified',
+      headerName: 'Verified',
+      width: 100,
+      editable: true,
+      type: 'boolean'
     },
     {
       field: 'actions',
