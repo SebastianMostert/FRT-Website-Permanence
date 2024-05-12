@@ -70,8 +70,9 @@ function TokenValidator() {
       });
       dispatch(signOut());
 
+      // Get the current 
       // Go to home page
-      window.location.href = '/';
+      window.location.href = `/sign-in?redirect=${window.location.pathname}`;
     } catch (error) {
       console.error(error);
     }

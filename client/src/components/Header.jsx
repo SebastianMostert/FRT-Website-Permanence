@@ -91,7 +91,7 @@ export default function Header() {
               {t('header.logged_in_as')} <Link to="/profile" className='no-underline'>{currentUser.firstName} {currentUser.lastName}</Link>
             </span>
           ) : (
-            <Nav.Link as={Link} to="/profile" className="nav-link">
+            <Nav.Link as={Link} to="/sign-in" className="nav-link">
               {t('header.sign_in')}
             </Nav.Link>
           )}
