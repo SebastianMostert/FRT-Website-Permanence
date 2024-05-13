@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Calendar from '../../components/Calendar/Calendar';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { colors, getMember } from '../../utils';
+import { getColors, getMember } from '../../utils';
 import { toast } from 'react-toastify';
 import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
@@ -11,6 +11,7 @@ import moment from 'moment';
 // Functional component definition for Availabilities
 const Availabilities = () => {
   // State variables initialization using the useState hook
+  const [colors, setColors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
@@ -19,19 +20,30 @@ const Availabilities = () => {
 
   const apiClient = useApiClient();
 
+  useEffect(() => {
+    const fetchColors = async () => {
+      const data = await getColors(currentUser.IAM);
+      setColors(data);
+    }
+
+    fetchColors();
+  }, [colors, currentUser.IAM]);
+
   // useEffect hook for fetching data
   useEffect(() => {
+    if(!colors) return;
     async function fetchData() {
       setIsLoading(true);
       const data = await apiClient.availability.get();
-      const availabilityEvents = await getEvents(data);
+      const availabilityEvents = await getEvents(data, colors);
 
       setCalendarAvailability(availabilityEvents);
       setIsLoading(false);
     }
 
     fetchData(); // Calling the fetchData function
-  }, [IAM, apiClient.availability, currentUser, t]); // Dependency array for the useEffect hook
+  }, [IAM, apiClient.availability, colors, currentUser, t]); // Dependency array for the useEffect hook
+
 
   // Event click handler function
   const handleEventClick = async (e) => {
@@ -71,7 +83,7 @@ const Availabilities = () => {
 export default Availabilities;
 
 // Async function to fetch availabilities data
-async function getEvents(availabilities) {
+async function getEvents(availabilities, colors) {
   try {
     const availabilityEvents = [];
 
@@ -89,11 +101,11 @@ async function getEvents(availabilities) {
       if (isVerifiedAvailability) {
         title = `Confirmed Availability`;
       }
-      let color = colors.events.availability;
+      let color = colors.availability;
 
       // If the availability is in the past or today set the color to orange
       if (moment(availability.startTime).isSame(moment(), 'day') || moment(availability.startTime).isBefore(moment())) {
-        color = colors.events.expiredAvailability;
+        color = colors.expiredAvailability;
       }
 
       // Creating event object

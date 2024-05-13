@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import MarkBesetztModal from '../../components/MarkBesetztModal';
 import CreateShiftModal from '../../components/Modals/CreateShiftModal';
-import { colors } from '../../utils';
+import { getColors } from '../../utils';
 import DeleteShiftModal from '../../components/Modals/DeleteShiftModal';
 import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
@@ -13,6 +13,7 @@ import moment from 'moment';
 // Functional component definition for Availabilities
 const Shifts = () => {
   // State variables initialization using the useState hook
+  const [colors, setColors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
@@ -28,15 +29,25 @@ const Shifts = () => {
 
   const apiClient = useApiClient();
 
+  useEffect(() => {
+    const fetchColors = async () => {
+      const data = await getColors(currentUser.IAM);
+      setColors(data);
+    }
+
+    fetchColors();
+  }, [colors, currentUser.IAM]);
+
   // useEffect hook for fetching data
   useEffect(() => {
+    if(!colors) return;
     async function fetchData() {
       setIsLoading(true);
       const data = await apiClient.availability.get();
       const shifts = await apiClient.shift.get();
 
-      const overlapEvents = getOverlapAvailabilities(data);
-      const shiftEvents = getShiftEvents(shifts);
+      const overlapEvents = getOverlapAvailabilities(data, colors);
+      const shiftEvents = getShiftEvents(shifts, colors);
 
       setCalendarOverlaps(overlapEvents);
       setCalendarShifts(shiftEvents);
@@ -45,7 +56,7 @@ const Shifts = () => {
     }
 
     fetchData(); // Calling the fetchData function
-  }, [IAM, apiClient.availability, apiClient.shift, currentUser, t]); // Dependency array for the useEffect hook
+  }, [IAM, apiClient.availability, apiClient.shift, colors, currentUser, t]); // Dependency array for the useEffect hook
 
   // Event click handler function
   const handleEventClick = async (e) => {
@@ -115,7 +126,7 @@ const Shifts = () => {
 // Exporting the Availabilities component as the default export
 export default Shifts;
 
-function getOverlapAvailabilities(availabilities) {
+function getOverlapAvailabilities(availabilities, colors) {
   // Array to store overlapping events
   const overlaps = [];
 
@@ -162,7 +173,7 @@ function getOverlapAvailabilities(availabilities) {
             title: `Overlap`, // Title indicating overlap
             start: overlapStart, // Start time of the overlap
             end: overlapEnd, // End time of the overlap
-            backgroundColor: colors.events.overlap,
+            backgroundColor: colors.overlap,
             extendedProps: { type: 'overlap', ids: [currentEvent._id, otherEvent._id], events: [currentEvent, otherEvent] }, // Include IDs of both overlapping availabilities
           });
         } else {
@@ -185,7 +196,7 @@ function getOverlapAvailabilities(availabilities) {
   return overlaps;
 }
 
-function getShiftEvents(shifts) {
+function getShiftEvents(shifts, colors) {
   const shiftEvents = [];
 
   for (let i = 0; i < shifts.length; i++) {
@@ -196,7 +207,7 @@ function getShiftEvents(shifts) {
       start: shift.startDate,
       end: shift.endDate,
       id: shift._id,
-      backgroundColor: colors.events.shifts,
+      backgroundColor: colors.shifts,
       extendedProps: { ...shift, type: 'shift' },
     };
     shiftEvents.push(event);

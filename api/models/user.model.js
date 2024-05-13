@@ -116,6 +116,10 @@ const userSchema = new mongoose.Schema(
       }],
       default: ['public'],
     },
+    eventColors: {
+      type: Object,
+      default: {},
+    },
   },
   { timestamps: true }
 );

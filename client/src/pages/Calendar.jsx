@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
-import { colors, formatDate, getMember, validateDate, verifyClass } from '../utils';
+import { formatDate, getColors, getMember, validateDate, verifyClass } from '../utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -32,6 +32,8 @@ export default function Calendar() {
     const toastIdRefreshing = useRef(null);
     const IAM = currentUser.IAM;
 
+    const [colors, setColors] = useState({});
+
     const [calendarEvent, setCalendarEvent] = useState([]);
     const [calendarAvailability, setCalendarAvailability] = useState([]);
     const [calendarShift, setCalendarShift] = useState([]);
@@ -60,6 +62,15 @@ export default function Calendar() {
     const apiClient = useApiClient();
 
     useEffect(() => {
+        const fetchColors = async () => {
+            const data = await getColors(currentUser.IAM);
+            setColors(data);
+        }
+
+        fetchColors();
+    }, [currentUser.IAM]);
+
+    useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
 
@@ -74,14 +85,14 @@ export default function Calendar() {
 
             setClasses(classes);
 
-            const calendarEvents = await getExams(currentUser, exams, classes);
+            const calendarEvents = await getExams(currentUser, exams, classes, colors);
 
             if (!calendarEvents.success) {
                 toast.error(`${t('toast.calendar.loading.error')}`);
             }
 
-            const calendarAvailabilities = await getAvailabilities(availabilities);
-            const calendarShifts = getShiftEvents(shifts);
+            const calendarAvailabilities = await getAvailabilities(availabilities, colors);
+            const calendarShifts = getShiftEvents(shifts, currentUser.IAM, colors);
 
             setCalendarEvent(calendarEvents.data);
             setCalendarAvailability(calendarAvailabilities);
@@ -92,7 +103,7 @@ export default function Calendar() {
         }
 
         fetchData();
-    }, [IAM, apiClient.availability, apiClient.exam, apiClient.shift, currentUser, t]);
+    }, [IAM, apiClient.availability, apiClient.exam, apiClient.shift, colors, currentUser, t]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -126,7 +137,7 @@ export default function Calendar() {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
                 const exams = await apiClient.exam.getByIAM(IAM);
                 console.log(exams)
-                const calendarEvents = await getExams(currentUser, exams, classes);
+                const calendarEvents = await getExams(currentUser, exams, classes, colors);
                 console.log(calendarEvents)
                 setCalendarEvent(calendarEvents.data);
             }
@@ -134,14 +145,14 @@ export default function Calendar() {
             if (refreshTriggerAvailability) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.availabilities')}`, { autoClose: false });
                 const availabilities = await apiClient.availability.getByIAM(IAM);
-                const calendarAvailabilities = await getAvailabilities(availabilities);
+                const calendarAvailabilities = await getAvailabilities(availabilities, colors);
                 setCalendarAvailability(calendarAvailabilities);
             }
 
             if (refreshTriggerShift) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.shifts')}`, { autoClose: false });
                 const shifts = await getShifts();
-                const calendarShifts = getShiftEvents(shifts);
+                const calendarShifts = getShiftEvents(shifts, currentUser.IAM, colors);
                 setCalendarShift(calendarShifts);
             }
 
@@ -154,7 +165,7 @@ export default function Calendar() {
         setRefreshTriggerAvailability(false);
         setRefreshTriggerExam(false);
         setRefreshTriggerShift(false);
-    }, [IAM, apiClient.availability, apiClient.exam, classes, currentUser, refreshTrigger, refreshTriggerAvailability, refreshTriggerExam, refreshTriggerShift, t]);
+    }, [IAM, apiClient.availability, apiClient.exam, classes, colors, currentUser, refreshTrigger, refreshTriggerAvailability, refreshTriggerExam, refreshTriggerShift, t]);
 
     if (!currentUser?.IAM) {
         return <NotAuthorized />
@@ -199,7 +210,7 @@ export default function Calendar() {
                     title: 'Available',
                     start: createdAvailability.startTime,
                     end: createdAvailability.endTime,
-                    backgroundColor: '#0000FF',
+                    backgroundColor: colors.availability,
                     id: createdAvailability._id,
                     extendedProps: { type: AVAILABILITY_TYPE, ...createdAvailability, user: currentUser },
                 };
@@ -279,7 +290,6 @@ export default function Calendar() {
 
         const dateStr = formatDate(date);
         const { isValid, event } = validateDate(date);
-
 
         if (!isValid) {
             const type = event.extendedProps.type;
@@ -411,7 +421,7 @@ function convertExamTimeToDate(examDate, startTime, endTime) {
     return { startDate, endDate };
 }
 
-async function getExams(user, exams, classes) {
+async function getExams(user, exams, classes, colors) {
     // Check class
     const hasClass = await verifyClass(user.studentClass, classes);
 
@@ -435,14 +445,14 @@ async function getExams(user, exams, classes) {
                 start: startDate,
                 end: endDate,
                 extendedProps: { ...exam, type: 'exam' },
-                backgroundColor: colors.events.exams,
+                backgroundColor: colors.exams,
             });
 
             calendarEvents.push({
                 start: oneHourBeforeStart,
                 end: endDate,
                 display: 'background',
-                backgroundColor: colors.events.exams,
+                backgroundColor: colors.exams,
                 extendedProps: { ...exam, type: 'exam' },
             });
         }
@@ -454,7 +464,7 @@ async function getExams(user, exams, classes) {
     }
 }
 
-async function getAvailabilities(availabilities) {
+async function getAvailabilities(availabilities, colors) {
     try {
         const availabilityEvents = [];
 
@@ -472,11 +482,11 @@ async function getAvailabilities(availabilities) {
             const res = await getMember(availability.IAM)
             const user = await res.data;
 
-            let color = colors.events.availability
+            let color = colors.availability
 
             // If the availability is in the past or today set the color to orange
             if (moment(availability.startTime).isSame(moment(), 'day') || moment(availability.startTime).isBefore(moment())) {
-                color = colors.events.expiredAvailability;
+                color = colors.expiredAvailability;
             }
 
             availabilityEvents.push({
@@ -496,18 +506,29 @@ async function getAvailabilities(availabilities) {
     }
 }
 
-function getShiftEvents(shifts) {
+function getShiftEvents(shifts, currentUserIAM, colors) {
     const shiftEvents = [];
 
     for (let i = 0; i < shifts.length; i++) {
         const shift = shifts[i];
+        let color = colors.shifts;
+        let shiftTitle = 'Shift: ';
+
+        for (let i = 0; i < shift.users.length; i++) {
+            const user = shift.users[i];
+            const userIAM = user.IAM;
+            if (i > 0) shiftTitle += ', ';
+            shiftTitle += user.firstName[0].toUpperCase() + '. ' + user.lastName;
+
+            if (userIAM === currentUserIAM) color = colors.myShifts;
+        }
 
         const event = {
-            title: shift.title,
+            title: shiftTitle,
             start: shift.startDate,
             end: shift.endDate,
             id: shift._id,
-            backgroundColor: colors.events.shifts,
+            backgroundColor: color,
             extendedProps: { ...shift, type: 'shift' },
         };
         shiftEvents.push(event);

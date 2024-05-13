@@ -31,12 +31,13 @@ import Dashboard from './Admin/pages/Dashboard';
 import Users from './Admin/pages/Users';
 import Availabilities from './Admin/pages/Availabilities';
 import Shifts from './Admin/pages/Shifts';
-import Settings from './Admin/pages/Settings';
+import AdminSettings from './Admin/pages/AdminSettings';
 import CurrentSituation from './pages/LogePages/CurrentSituation';
 import Incidents from './pages/LogePages/Incidents';
 import IncidentCreate from './pages/LogePages/IncidentCreate';
 import Stock from './Admin/pages/Stock/Stock';
 import MembersPage from './pages/LogePages/MembersPage';
+import Settings from './pages/Settings';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -111,7 +112,7 @@ function App() {
             <Route path='/admin/users' element={<Users />} />
             <Route path='/admin/availabilities' element={<Availabilities />} />
             <Route path='/admin/shifts' element={<Shifts />} />
-            <Route path='/admin/settings' element={<Settings />} />
+            <Route path='/admin/settings' element={<AdminSettings />} />
             <Route path='/admin/stock' element={<Stock />} />
           </Route>
         </Route>
@@ -127,6 +128,7 @@ function App() {
           </Route>
           <Route element={<LoggedInRoute />}>
             <Route path='/profile' element={<Profile />} />
+            <Route path='/settings' element={<Settings />} />
           </Route>
         </Route>
 

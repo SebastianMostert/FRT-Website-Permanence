@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Navbar, Nav } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { getRoles } from '../utils';
+import AccountMenu from './AccountMenu';
 
 export default function Header() {
   const { t } = useTranslation();
@@ -61,7 +62,7 @@ export default function Header() {
   ];
 
   const publicLinks = [
-    
+
   ];
 
   return (
@@ -85,17 +86,9 @@ export default function Header() {
             </>
           )}
         </Nav>
-        <Nav className="ml-3 mr-3">
-          {currentUser ? (
-            <span>
-              {t('header.logged_in_as')} <Link to="/profile" className='no-underline'>{currentUser.firstName} {currentUser.lastName}</Link>
-            </span>
-          ) : (
-            <Nav.Link as={Link} to="/sign-in" className="nav-link">
-              {t('header.sign_in')}
-            </Nav.Link>
-          )}
-        </Nav>
+        <div className="mr-4">
+          <AccountMenu />
+        </div>
       </Navbar.Collapse>
     </Navbar>
   );

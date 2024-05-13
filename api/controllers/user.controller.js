@@ -61,6 +61,8 @@ export const updateUser = async (req, res, next) => {
 
     const roles = (body?.roles !== undefined) ? body.roles : user.roles;
 
+    const eventColors = (body?.eventColors !== undefined) ? body.eventColors : user.eventColors;
+
     const updatedUser = await User.findByIdAndUpdate(
       req.body.id || req.body._id,
       {
@@ -86,7 +88,8 @@ export const updateUser = async (req, res, next) => {
           onBoarded,
           roles,
           hasKey,
-          hasPhone
+          hasPhone,
+          eventColors
         },
       },
       { new: true }
@@ -121,6 +124,7 @@ export const deleteUser = async (req, res, next) => {
 // Fetch User
 export const fetchUser = async (req, res, next) => {
   const IAM = req.params.IAM;
+  console.log(IAM)
   try {
     const user = await User.find({ IAM });
     if (!user || user.length === 0) {
