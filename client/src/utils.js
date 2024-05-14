@@ -333,23 +333,25 @@ export const getColors = async (IAM) => {
 
     if (!eventColors) return colors.events;
 
-    if (!Object.keys(eventColors).length) return colors.events;
+    if (!Object.keys(eventColors).length) {
+        return colors.events;
+    }
 
     // Check if eventColors contain the same keys as colors.events
-    if (Object.keys(eventColors).every((key) => key in colors.events)) {
+    if (!Object.keys(eventColors).every((key) => key in colors.events)) {
         return eventColors;
     }
 
-    return user.eventColors;
+    return eventColors;
 }
 
 const colors = {
     events: {
-        exams: '#e74c3c',         // Red for exams
-        shifts: '#3498db',        // Blue for shifts
-        availability: '#27ae60',  // Green for availability
-        expiredAvailability: '#e67e22',  // Orange for expired availability
-        overlap: '#f1c40f',       // Yellow for overlap (if needed)
-        myShifts: '#f39c12',      // Orange for my shifts
+        exams: '#000000', // Black as default
+        shifts: '#000000', // Black as default
+        availability: '#000000', // Black as default
+        expiredAvailability: '#000000', // Black as default
+        overlap: '#000000', // Black as default
+        myShifts: '#000000', // Black as default
     },
 };

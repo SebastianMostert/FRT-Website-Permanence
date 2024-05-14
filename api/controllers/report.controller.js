@@ -3,6 +3,7 @@ import { sendReportsUpdated } from '../utils/invalidateCache.js'
 
 export const createReport = async (req, res, next) => {
     const body = req.body
+    console.log(body)
 
     try {
         const newReport = new Report(body);

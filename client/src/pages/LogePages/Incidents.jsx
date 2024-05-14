@@ -13,8 +13,16 @@ const Incidents = () => {
 
     useEffect(() => {
         async function fetchData() {
-            const incidents = await apiClient.incident.get();
-            setIncidents(incidents);
+
+            const res = await fetch("/api/v1/report/fetch-all", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const data = await res.json()
+            setIncidents(data);
         }
 
         fetchData();
@@ -35,11 +43,13 @@ const Incidents = () => {
             </Button>
 
             <Row xs={1} md={2} lg={3} className="gx-3" style={{ margin: 0, padding: 0 }}>
-                {incidents.map((incident) => (
-                    <Col key={incident.id} style={{ marginBottom: '15px' }}>
-                        <IncidentCard incident={incident} />
-                    </Col>
-                ))}
+                {incidents.map((incident) => {
+                    return (
+                        <Col key={incident._id} style={{ marginBottom: '15px' }}>
+                            <IncidentCard incident={incident} />
+                        </Col>
+                    )
+                })}
             </Row>
         </div>
     );

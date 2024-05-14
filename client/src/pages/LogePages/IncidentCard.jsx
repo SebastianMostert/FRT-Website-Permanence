@@ -37,34 +37,35 @@ const StatusBadge = ({ status, alerted }) => {
 
 const IncidentCard = ({ incident }) => {
     const { t } = useTranslation();
-    const [team, setTeam] = useState({
-        name: "",
-        status: "",
-        alerted: false,
-        members: [],
-    });
 
-    const { name, incidentInfo, location, ambulanceCalled } = incident;
+    console.log(incident);
+    // const { name, incidentInfo, location, ambulanceCalled } = incident;
+    const { firstResponders, missionNumber } = incident;
 
-    useEffect(() => {
-        async function fetchTeam() {
-            const res = await fetch(`/api/v1/team/fetch/${incident.teamId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await res.json();
-            setTeam(data);
-        }
+    // Declare values
+    const team = {
+        status: '6',
+        alerted: false
+    }
+    const ambulanceCalled = false;
+    const incidentInfo = '';
+    const location = '';
 
-        fetchTeam();
-    }, [incident.teamId]);
+    // The first 8 numbers of the mission number are the year, month, and day YYYYMMDD 
+    const strMissionNumber = missionNumber.toString();
+
+    const year = strMissionNumber.substring(0, 4);
+    const month = strMissionNumber.substring(4, 6);
+    const day = strMissionNumber.substring(6, 8);
+
+    const formattedDate = `${year}-${month}-${day}`;
+
+
 
     return (
         <Card className="shadow-sm mb-4">
             <Card.Body>
-                <Card.Title className="mb-3">{name}</Card.Title>
+                <Card.Title className="mb-3">Incident from the {formattedDate}</Card.Title>
                 <div className="mb-3 d-flex align-items-center">
                     <strong className="me-3">{t('status.team_status')}</strong>
                     <StatusBadge status={team.status} alerted={team.alerted} />
@@ -82,7 +83,7 @@ const IncidentCard = ({ incident }) => {
                 <div>
                     <strong>{t('status.team_members')}</strong>
                     <Accordion flush>
-                        {team.members.map((member, index) => (
+                        {firstResponders.map((member, index) => (
                             <UserAccordion key={index} user={member} index={index} />
                         ))}
                     </Accordion>
@@ -93,25 +94,49 @@ const IncidentCard = ({ incident }) => {
 };
 
 const UserAccordion = ({ user, index }) => {
+    const [fullUser, setFullUser] = useState({});
+
     const { t } = useTranslation();
+    const { position, iam } = user;
+
+    // Fetch the full user
+    useEffect(() => {
+        if (!position || !iam) return;
+        async function fetchUser() {
+            const res = await fetch(`/api/v1/user/fetch/${iam}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await res.json();
+            setFullUser(data._doc);
+        }
+        fetchUser();
+    }, [iam, position]);
+
+    if (!fullUser) return null
+    const { firstName, lastName } = fullUser;
+    if (!firstName || !lastName) return null;
+
     return (
         <Accordion.Item eventKey={index.toString()}>
             <Accordion.Header>
-                {`${user.firstName[0].toUpperCase()}. ${user.lastName}`}
-                <span className="ms-2 text-muted">{user.position}</span>
+                {`${firstName[0].toUpperCase()}. ${lastName}`}
+                <span className="ms-2 text-muted">{position}</span>
             </Accordion.Header>
             <Accordion.Body>
                 <div>
-                    <strong>{t('status.first_name')}</strong> {user.firstName}
+                    <strong>{t('status.first_name')}</strong> {firstName}
                 </div>
                 <div>
-                    <strong>{t('status.last_name')}</strong> {user.lastName}
+                    <strong>{t('status.last_name')}</strong> {lastName}
                 </div>
                 <div>
-                    <strong>{t('status.position')}</strong> {user.position}
+                    <strong>{t('status.position')}</strong> {position}
                 </div>
                 <div>
-                    <strong>IAM:</strong> {user.IAM}
+                    <strong>IAM:</strong> {iam}
                 </div>
             </Accordion.Body>
         </Accordion.Item>
@@ -125,20 +150,15 @@ StatusBadge.propTypes = {
 
 IncidentCard.propTypes = {
     incident: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        teamId: PropTypes.string.isRequired,
-        incidentInfo: PropTypes.string.isRequired,
-        location: PropTypes.string.isRequired,
-        ambulanceCalled: PropTypes.bool.isRequired,
+        firstResponders: PropTypes.array.isRequired,
+        missionNumber: PropTypes.number.isRequired
     }).isRequired
 };
 
 UserAccordion.propTypes = {
     user: PropTypes.shape({
-        firstName: PropTypes.string.isRequired,
-        lastName: PropTypes.string.isRequired,
         position: PropTypes.string.isRequired,
-        IAM: PropTypes.string.isRequired,
+        iam: PropTypes.string,
     }).isRequired,
     index: PropTypes.number.isRequired
 };

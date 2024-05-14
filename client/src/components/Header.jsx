@@ -50,13 +50,13 @@ export default function Header() {
   ];
 
   const logeLinks = [
-    <Nav.Link key="loge" as={Link} to="/current-situation" className="nav-link">
+    <Nav.Link key="current_situation" as={Link} to="/current-situation" className="nav-link">
       {t('header.current_situation')}
     </Nav.Link>,
-    <Nav.Link key="loge" as={Link} to="/incidents" className="nav-link">
+    <Nav.Link key="incidents" as={Link} to="/incidents" className="nav-link">
       {t('header.incidents')}
     </Nav.Link>,
-    <Nav.Link key="loge" as={Link} to="/members" className="nav-link">
+    <Nav.Link key="members" as={Link} to="/members" className="nav-link">
       {t('header.members')}
     </Nav.Link>
   ];

@@ -55,7 +55,6 @@ const reportSchema = new mongoose.Schema({
     archived: {
         type: Boolean,
         default: false,
-        default: {}
     },
 });
 

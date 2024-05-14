@@ -414,6 +414,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 />
             ),
             header: t('report.first_responders.title'),
+            key: 'firstResponders',
         },
         patientInfo: {
             body: (
@@ -424,6 +425,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 />
             ),
             header: t('report.patient.title'),
+            key: 'patientInfo',
         },
         abcdeSchema: {
             body: (
@@ -434,6 +436,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 />
             ),
             header: t('report.abcde.title'),
+            key: 'abcdeSchema',
         },
         samplerSchema: {
             body: (
@@ -444,6 +447,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 />
             ),
             header: t('report.sampler.title'),
+            key: 'samplerSchema',
         },
         missionInformation: {
             // TODO: Fix this
@@ -455,12 +459,13 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 />
             ),
             header: t('report.mission_information.title'),
+            key: 'missionInformation',
         },
     };
 
-    const CustomAccordion = ({ body, header }) => {
+    const CustomAccordion = ({ body, header, key }) => {
         return (
-            <Accordion defaultActiveKey="0">
+            <Accordion defaultActiveKey="0" key={key}>
                 <Accordion.Item eventKey="0">
                     <Accordion.Header>{header}</Accordion.Header>
                     <Accordion.Body>

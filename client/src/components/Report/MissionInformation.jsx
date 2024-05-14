@@ -136,7 +136,7 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
                 </Form.Label>
                 <Form.Check
                     type="switch"
-                    onChange={() => handleMissionInfoChange({ name: 'sepasContacted', value: !missionInfo.sepasContacted })}
+                    onChange={() => handleMissionInfoChange({ target: { name: 'sepasContacted', value: !missionInfo.sepasContacted } })}
                     checked={missionInfo.sepasContacted}
                 />
             </InputGroup>
@@ -147,7 +147,7 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
                 </Form.Label>
                 <Form.Check
                     type="switch"
-                    onChange={() => handleMissionInfoChange({ name: 'ambulanceCalled', value: !missionInfo.ambulanceCalled })}
+                    onChange={() => handleMissionInfoChange({ target: { name: 'ambulanceCalled', value: !missionInfo.ambulanceCalled } })}
                     checked={missionInfo.ambulanceCalled}
                 />
             </InputGroup>
