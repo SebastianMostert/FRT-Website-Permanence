@@ -40,16 +40,13 @@ const IncidentCard = ({ incident }) => {
 
     console.log(incident);
     // const { name, incidentInfo, location, ambulanceCalled } = incident;
-    const { firstResponders, missionNumber } = incident;
-
+    const { firstResponders, missionNumber, missionInfo } = incident;
+    const { ambulanceCalled, incidentInfo, location } = missionInfo;
     // Declare values
     const team = {
         status: '6',
         alerted: false
     }
-    const ambulanceCalled = false;
-    const incidentInfo = '';
-    const location = '';
 
     // The first 8 numbers of the mission number are the year, month, and day YYYYMMDD 
     const strMissionNumber = missionNumber.toString();
