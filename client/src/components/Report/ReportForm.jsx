@@ -347,7 +347,14 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
         // Check if the user is an admin
         const isAdmin = roles.includes('admin');
 
+        // TODO: Fix
         if (missionNumber.length === 10 && isToday && (isCurrentUserFirstResponder || isAdmin)) setIsEditable(true);
+        else setIsEditable(false);
+
+        
+        if (missionNumber.length === 10 && isToday) {
+            setIsEditable(true)
+        }
         else setIsEditable(false);
     })
     if (!dataLoaded) {
