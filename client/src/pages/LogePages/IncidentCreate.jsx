@@ -132,8 +132,6 @@ const IncidentCreate = () => {
         return value;
     }
 
-
-    // TODO: Add the Urgence Level to the post request
     return (
         <Container className="mt-5 select-none">
             <h1 className="mb-4">{t('incident_create.title')}</h1>

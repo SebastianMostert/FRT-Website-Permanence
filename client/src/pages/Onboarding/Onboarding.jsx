@@ -189,9 +189,6 @@ const App = () => {
   return (
     <div className={darkMode ? 'dark-bg' : 'light-bg'} style={{ minHeight: '100vh' }}>
       <ProgressBar variant='success' now={calculateProgress()} className="mb-3" />
-      {/* TODO */}
-      {/* <button onClick={toggleDarkMode}>Toggle Dark Mode</button> */}
-
       <TransitionGroup>
         <SwitchTransition>
           <CSSTransition

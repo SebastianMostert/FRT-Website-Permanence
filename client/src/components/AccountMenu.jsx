@@ -26,8 +26,6 @@ function AccountMenu() {
 
   const apiClient = useApiClient();
 
-  // TODO: Check if the user is currently logged in
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -68,7 +66,6 @@ function AccountMenu() {
               aria-haspopup="true"
               aria-expanded={open ? 'true' : undefined}
             >
-              {/* TODO: Get user initials. Use John Smith for now.*/}
               {currentUser ?
                 <Avatar sx={{ width: size, height: size }}>{initials}</Avatar> :
                 <Avatar sx={{ width: size, height: size }}><LoginIcon /></Avatar>

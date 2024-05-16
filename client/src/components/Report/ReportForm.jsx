@@ -471,7 +471,6 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
             key: 'samplerSchema',
         },
         missionInformation: {
-            // TODO: Fix this
             body: (
                 <MissionInformation
                     isEditable={isEditable}
