@@ -29,7 +29,7 @@ const reportSchema = new mongoose.Schema({
         },
         firstName: defaultStr,
         lastName: defaultStr,
-        IAM: defaultStr,
+        iam: defaultStr,
         matricule: defaultStr,
     },
     abcdeSchema: {
