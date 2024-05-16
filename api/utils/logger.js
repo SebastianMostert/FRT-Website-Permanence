@@ -44,7 +44,7 @@ export function logHTTPRequest(endpoint, IP) {
 }
 
 async function saveToDB(type, obj) {
-    if (process.env.ENVIRONMENT != 'Prod') return;
+    if (process.env.ENVIRONMENT != 'prod') return;
     const logs = await Logs.find();
     let firstLog = logs[0];
 
