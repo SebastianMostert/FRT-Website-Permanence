@@ -2,9 +2,16 @@ import User from '../models/user.model.js';
 import Availability from '../models/availability.model.js';
 import { errorHandler } from '../utils/error.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js';
+import { logServerError } from '../utils/logger.js';
+
+/** 
+ * LOGGER INFO
+ * All HTTP requests are logged to the logger.
+*/
 
 // Create availability
 export const createAvailability = async (req, res, next) => {
+    logHTTPRequest('/availability/create', req.ip);
     try {
         const { IAM, startTime, endTime } = req.body;
         const validIAM = IAM.toLowerCase();
@@ -15,37 +22,41 @@ export const createAvailability = async (req, res, next) => {
         res.status(201).json(newAvailability);
         sendReportsUpdated('availabilities_updated');
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
 
 // Get availability by IAM
 export const getAvailabilities = async (req, res, next) => {
+    const { IAM } = req.body;
+    logHTTPRequest(`/availability/get/IAM/${IAM}`, req.ip);
     try {
-        const validIAM = req.params.IAM.toLowerCase();
+        const validIAM = IAM.toLowerCase();
         const availabilities = await Availability.find({ IAM: validIAM });
 
         res.status(200).json(availabilities);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
 
 export const getAvailabilityByID = async (req, res, next) => {
+    const { id } = req.params;
+    logHTTPRequest(`/availability/get/ID/${id}`, req.ip);
     try {
-        const { id } = req.params;
         const availability = await Availability.findById(id);
         res.status(200).json(availability);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 }
 
 // Get all availabilities
 export const getAllAvailabilities = async (req, res, next) => {
+    logHTTPRequest('/availability/get', req.ip);
     try {
         const availabilities = await Availability.find();
 
@@ -56,24 +67,25 @@ export const getAllAvailabilities = async (req, res, next) => {
         for (let i = 0; i < availabilities.length; i++) {
             const availability = availabilities[i];
             const profile = await User.findOne({ IAM: availability.IAM?.toLocaleLowerCase() });
-            if(!profile) continue
-            if(!profile.firstName) continue
-            if(!profile.lastName) continue
+            if (!profile) continue
+            if (!profile.firstName) continue
+            if (!profile.lastName) continue
             const name = `${profile.firstName[0].toUpperCase()}. ${profile.lastName}`;
             availabilitiesWithName.push({ ...availability.toObject(), name });
         }
 
         res.status(200).json(availabilitiesWithName);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
 
 // Delete availability
 export const deleteAvailability = async (req, res, next) => {
+    const { IAM, id } = req.body;
+    logHTTPRequest(`/availability/delete/${id}`, req.ip);
     try {
-        const { IAM, id } = req.body;
         const validIAM = IAM.toLowerCase();
 
         const deleted = await Availability.deleteOne({
@@ -87,17 +99,16 @@ export const deleteAvailability = async (req, res, next) => {
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
 
 // Update
 export const updateAvailability = async (req, res, next) => {
+    const { id } = req.params;
+    logHTTPRequest(`/availability/update/${id}`, req.ip);
     try {
-        // Param
-        const { id } = req.params;
-
         const { startTime, endTime } = req.body;
 
         const updated = await Availability.findByIdAndUpdate(id, {
@@ -111,7 +122,7 @@ export const updateAvailability = async (req, res, next) => {
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'Internal Server Error'));
     }
 }

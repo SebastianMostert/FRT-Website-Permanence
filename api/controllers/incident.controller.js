@@ -4,6 +4,7 @@ import Incident from '../models/incident.model.js';
 import Report from '../models/report.model.js';
 import { errorHandler } from '../utils/error.js';
 import Team from '../models/team.model.js';
+import { logServerError } from '../utils/logger.js';
 
 const sendWSUpdate = (type, data) => {
     wss.clients.forEach((client) => {
@@ -76,7 +77,7 @@ export const createIncident = async (req, res, next) => {
 
         res.status(201).json(team);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -92,7 +93,7 @@ export const fetchIncident = async (req, res, next) => {
         }
         res.status(200).json(incident);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -103,7 +104,7 @@ export const fetchAllIncidents = async (req, res, next) => {
         const incidents = await Incident.find();
         res.status(200).json(incidents);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while fetching incidents.'));
     }
 }

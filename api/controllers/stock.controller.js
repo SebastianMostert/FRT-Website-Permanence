@@ -1,5 +1,6 @@
 import Container from '../models/stock.model.js';
 import { errorHandler } from '../utils/error.js';
+import { logServerError } from '../utils/logger.js';
 
 // Test
 export const test = (req, res) => {
@@ -102,7 +103,7 @@ export const deleteContainer = async (req, res) => {
         await Container.findByIdAndDelete(id);
         res.json({ message: 'Container deleted successfully' });
     } catch (error) {
-        console.error(error)
+        logServerError(error);
         errorHandler(error, res);
     }
 }
@@ -127,7 +128,7 @@ export const deletePlaceholder = async (req, res) => {
         await container.save();
         res.json({ message: 'Placeholder deleted successfully' });
     } catch (error) {
-        console.error(error)
+        logServerError(error);
         errorHandler(error, res);
     }
 }
@@ -160,7 +161,7 @@ export const deleteItem = async (req, res) => {
 
         res.json({ message: 'Item deleted successfully' });
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         errorHandler(error, res);
     }
 }

@@ -9,9 +9,16 @@ import sendEmail from '../utils/sendEmail.js';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
 import { errorHandler } from '../utils/error.js';
+import { logServerError, logHTTPRequest } from '../utils/logger.js';
+
+/** 
+ * LOGGER INFO
+ * All HTTP requests are logged to the logger.
+*/
 
 // Sign Up
 export const signup = async (req, res, next) => {
+  logHTTPRequest('/auth/signup', req.ip);
   try {
     req.body.IAM = req.body.IAM.toLowerCase(); // Convert IAM to lowercase
     req.body.password = bcryptjs.hashSync(req.body.password, 10);
@@ -24,6 +31,7 @@ export const signup = async (req, res, next) => {
     // Remove message
     res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
+    logServerError(error);
     res.status(500).json({ error });
     next(error);
   }
@@ -31,6 +39,7 @@ export const signup = async (req, res, next) => {
 
 // Sign In
 export const signin = async (req, res, next) => {
+  logHTTPRequest('/auth/signin', req.ip);
   try {
     let { IAM, password, code } = req.body;
     IAM = IAM.toLowerCase(); // Convert IAM to lowercase
@@ -52,18 +61,20 @@ export const signin = async (req, res, next) => {
 
     res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     next(error);
   }
 };
 
 // Sign Out
 export const signout = (req, res) => {
+  logHTTPRequest('/auth/signout', req.ip);
   res.clearCookie('access_token').status(200).json('Signout success!');
 };
 
 // Validate
 export const validate = (req, res, next) => {
+  logHTTPRequest('/auth/validate', req.ip);
   // Get the token
   const token = req.cookies.access_token;
 
@@ -79,29 +90,6 @@ export const validate = (req, res, next) => {
   });
 };
 
-/**
- * Check if IAM is a member IAM
- * @param {string} IAM The IAM of the user
- * @returns {boolean} Whether the user is a member
- */
-async function isMemberIAM(IAM) {
-  try {
-    const memberIAM = await MemberIAM.findOne({ IAM: IAM.toLowerCase() });
-
-    if (!memberIAM) {
-      return false;
-    }
-
-    if (memberIAM.IAM === IAM.toLowerCase()) {
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    throw errorHandler(500, 'Internal Server Error');
-  }
-}
-
 // Add a forgot password and reset password function
 /**
  * Forgot password function
@@ -110,6 +98,7 @@ async function isMemberIAM(IAM) {
  * @param {object} next The next middleware function
  */
 export const forgotPassword = async (req, res) => {
+  logHTTPRequest('/auth/forgot-password', req.ip);
   const { email, otp } = req.body;
   try {
     // Get the user 
@@ -180,7 +169,7 @@ export const forgotPassword = async (req, res) => {
       message: 'Reset token sent to email',
     });
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     res.status(500).json({
       success: false,
       message: 'Failed to send reset token',
@@ -195,6 +184,7 @@ export const forgotPassword = async (req, res) => {
  * @param {object} next The next middleware function
  */
 export const resetPassword = async (req, res) => {
+  logHTTPRequest('/auth/reset-password', req.ip);
   const { token, newPassword, totp } = req.body;
 
   // TODO: Implement TOTP validation
@@ -295,7 +285,7 @@ export const resetPassword = async (req, res) => {
       message: 'Password reset successful',
     });
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     res.status(500).json({
       success: false,
       message: 'Failed to reset password',
@@ -304,6 +294,7 @@ export const resetPassword = async (req, res) => {
 };
 
 export const addTwoFactorAuthentication = async (req, res) => {
+  logHTTPRequest('/auth/2fa/add', req.ip);
   try {
     // Get the user from the request, assuming you are sending user ID in the request
     const { IAM } = req.body;
@@ -346,12 +337,13 @@ export const addTwoFactorAuthentication = async (req, res) => {
       return res.json({ dataUrl });
     });
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     res.status(500).json({ error: 'Server Error' });
   }
 };
 
 export const validateTwoFactorCode = async (req, res) => {
+  logHTTPRequest('/auth/2fa/validate', req.ip);
   try {
     const { IAM, code } = req.body;
 
@@ -379,12 +371,13 @@ export const validateTwoFactorCode = async (req, res) => {
       return res.status(400).json({ error: 'Invalid two-factor authentication code' });
     }
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     res.status(500).json({ error: 'Server Error' });
   }
 };
 
 export const removeTwoFactorAuthentication = async (req, res) => {
+  logHTTPRequest('/auth/2fa/remove', req.ip);
   try {
     const { IAM, code, password } = req.body;
 
@@ -407,10 +400,34 @@ export const removeTwoFactorAuthentication = async (req, res) => {
 
     return res.status(200).json({ message: 'Two-factor authentication disabled successfully' });
   } catch (error) {
-    console.error(error);
+    logServerError(error);
     res.status(500).json({ error: 'Server Error' });
   }
 };
+
+/**
+ * Check if IAM is a member IAM
+ * @param {string} IAM The IAM of the user
+ * @returns {boolean} Whether the user is a member
+ */
+async function isMemberIAM(IAM) {
+  try {
+    const memberIAM = await MemberIAM.findOne({ IAM: IAM.toLowerCase() });
+
+    if (!memberIAM) {
+      return false;
+    }
+
+    if (memberIAM.IAM === IAM.toLowerCase()) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    logServerError(error);
+    throw errorHandler(500, 'Internal Server Error');
+  }
+}
 
 function validate2FaCode(secret, token) {
   const verified = speakeasy.totp.verify({

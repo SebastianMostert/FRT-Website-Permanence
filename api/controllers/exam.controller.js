@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import RemovedExams from '../models/RemovedExams.model.js';
 import { UntisHelper } from 'llis-frt-webuntis';
 import { errorHandler } from '../utils/error.js';
+import { logServerError } from '../utils/logger.js';
 
 export const test = (req, res) => {
     res.json({
@@ -62,7 +63,7 @@ export const getExamsByUser = async (req, res, next) => {
             throw errorHandler(404, 'No class found for this user!');
         }
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 };
@@ -93,7 +94,7 @@ export const getClasses = async (req, res, next) => {
         })
         res.status(200).json(classes);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 };
@@ -127,7 +128,7 @@ export const removeTeacher = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 };
@@ -161,7 +162,7 @@ export const removeSubject = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 };
@@ -195,7 +196,7 @@ export const removeExam = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 };

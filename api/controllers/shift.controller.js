@@ -1,6 +1,7 @@
 import Shift from '../models/shift.model.js';
 import Team from '../models/team.model.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js';
+import { logServerError } from '../utils/logger.js';
 
 export const createShift = async (req, res, next) => {
   const { startDate, endDate, title, users, teamID } = req.body;
@@ -43,7 +44,7 @@ export const createShift = async (req, res, next) => {
     res.status(201).json({ success: true, data: createdShifts });
     sendReportsUpdated('shifts_updated')
   } catch (error) {
-    console.error(error)
+    logServerError(error);
     res.status(500).json({ success: false, message: 'Failed to create shifts.', error: error.message });
   }
 };

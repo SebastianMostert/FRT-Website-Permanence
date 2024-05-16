@@ -1,5 +1,6 @@
 import Report from '../models/report.model.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js'
+import { logServerError } from '../utils/logger.js';
 
 export const createReport = async (req, res, next) => {
     const body = req.body
@@ -9,7 +10,7 @@ export const createReport = async (req, res, next) => {
         res.status(201).json({ message: 'Report created successfully' });
         sendReportsUpdated('reports_updated');
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 }
@@ -23,7 +24,7 @@ export const updateReport = async (req, res, next) => {
         res.status(200).json({ message: 'Report updated successfully' });
         sendReportsUpdated('reports_updated');
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 }
@@ -35,7 +36,7 @@ export const getReport = async (req, res, next) => {
         const report = await Report.findOne({ missionNumber: id });
         res.status(200).json(report);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 }
@@ -45,7 +46,7 @@ export const getAllReports = async (req, res, next) => {
         const reports = await Report.find();
         res.status(200).json(reports);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 }
@@ -57,7 +58,7 @@ export const deleteReport = async (req, res, next) => {
         res.status(200).json({ message: 'Report deleted successfully' });
         sendReportsUpdated('reports_updated');
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(error);
     }
 }

@@ -4,6 +4,7 @@ import Team from '../models/team.model.js';
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
 import Shift from '../models/shift.model.js';
+import { logServerError } from '../utils/logger.js';
 
 // Set timezone to Central European Summer Time
 
@@ -36,7 +37,7 @@ export const createTeam = async (req, res, next) => {
 
         res.status(201).json({ message: 'Team created successfully', team });
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -77,7 +78,7 @@ export const updateTeamMembers = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -109,7 +110,7 @@ export const updateTeamStatus = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -132,7 +133,7 @@ export const updateAlert = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -147,7 +148,7 @@ export const fetchTeam = async (req, res, next) => {
         }
         res.status(200).json(team);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while fetching team.'));
     }
 };
@@ -204,7 +205,7 @@ export const fetchTeams = async (req, res, next) => {
 
         res.status(200).json(teams);
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while fetching teams.'));
     }
 };
@@ -216,7 +217,7 @@ export const deleteUser = async (req, res, next) => {
         await Team.findByIdAndDelete(id);
         res.status(200).json('Team has been deleted...');
     } catch (error) {
-        console.error(error);
+        logServerError(error);
         next(errorHandler(500, 'An error occurred while deleting team.'));
     }
 };
