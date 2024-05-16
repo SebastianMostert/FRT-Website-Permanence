@@ -29,6 +29,8 @@ export default function Header() {
     fetchData();
   }, [currentUser?.IAM]);
 
+  if(roles.length === 0) setRoles(['public']);
+
   const isAdmin = roles?.includes('admin');
   const isMember = roles?.includes('member');
   const isLoge = roles?.includes('loge');

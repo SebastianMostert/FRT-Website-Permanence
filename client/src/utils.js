@@ -297,6 +297,14 @@ export async function getRoles(IAM) {
         return [];
     }
 
+    if (!roles.length) {
+        return [];
+    }
+
+    if (roles.length == 0) {
+        return [];
+    }
+
     // Return the roles
     return roles;
 }

@@ -48,9 +48,10 @@ function TokenValidator() {
 
   // Function to validate token
   const validateToken = async () => {
-    const data = await apiClient.auth.validate();
-
-    if (!data.valid) handleSignOut();
+    await apiClient.auth.validate().catch((error) => {
+      console.error(error);
+      handleSignOut();
+    })
   };
 
   const exists = async (IAM) => {
