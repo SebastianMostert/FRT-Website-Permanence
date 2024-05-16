@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   signOut,
 } from '../redux/user/userSlice';
+import { useApiClient } from '../contexts/ApiContext';
 
 function AccountMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -22,6 +23,8 @@ function AccountMenu() {
   const { currentUser } = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
+
+  const apiClient = useApiClient();
 
   // TODO: Check if the user is currently logged in
 
@@ -40,12 +43,7 @@ function AccountMenu() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/v1/auth/signout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await apiClient.auth.signout();
       dispatch(signOut());
 
       handleNavigate('/');

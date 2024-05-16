@@ -8,7 +8,6 @@ const StatusChanger = ({ currentStatus, close, teamID }) => {
 
     const handleStatusChange = async (newStatus) => {
         setStatus(newStatus);
-        console.log(teamID);
         await fetch(`/api/v1/team/update-status/${teamID}`, {
             method: 'POST',
             headers: {

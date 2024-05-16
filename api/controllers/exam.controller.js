@@ -118,7 +118,7 @@ export const removeTeacher = async (req, res, next) => {
             res.status(200).json(newRemovedExams);
         } else {
             const { teachers, subjects, exams } = removedExams;
-            if(teachers.includes(teacher)) {
+            if (teachers.includes(teacher)) {
                 throw errorHandler(400, 'Teacher already removed!');
             }
             teachers.push(teacher);
@@ -152,7 +152,7 @@ export const removeSubject = async (req, res, next) => {
             res.status(200).json(newRemovedExams);
         } else {
             const { teachers, subjects, exams } = removedExams;
-            if(subjects.includes(subject)) {
+            if (subjects.includes(subject)) {
                 throw errorHandler(400, 'Subject already removed!');
             }
             subjects.push(subject);
@@ -186,7 +186,7 @@ export const removeExam = async (req, res, next) => {
             res.status(200).json(newRemovedExams);
         } else {
             const { teachers, subjects, exams } = removedExams;
-            if(exams.includes(exam)) {
+            if (exams.includes(exam)) {
                 throw errorHandler(400, 'Exam already removed!');
             }
             exams.push(exam);

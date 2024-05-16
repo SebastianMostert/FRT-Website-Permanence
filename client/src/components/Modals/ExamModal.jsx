@@ -51,7 +51,7 @@ const ExamModal = ({ show, handleClose, event, refreshData }) => {
             refreshData();
             handleClose();
         } catch (err) {
-            console.log(err);
+            console.error(err);
             toast.error('An error occured');
         }
 

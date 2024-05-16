@@ -18,7 +18,6 @@ import {
 } from '@mui/x-data-grid-generator';
 import { useApiClient } from '../../contexts/ApiContext';
 import { toast } from 'react-toastify';
-import { Checkbox, Input, ListItemText, MenuItem, Select } from '@mui/material';
 
 function EditToolbar(props) {
   // eslint-disable-next-line react/prop-types
@@ -70,7 +69,6 @@ export default function Users() {
 
       // Create rows
       users.forEach((user) => {
-        console.log(user)
         //   {
         //     "experience": {
         //         "RTW": 24,
@@ -93,7 +91,6 @@ export default function Users() {
         //     ],
         //     "operationalPosition": "Equipier Bin.",
         //     "administratifPosition": "None",
-        //     "email": "odwem569@school.lu",
         //     "verified": true,
         //     "onBoarded": true,
         //     "twoFactorAuth": false,

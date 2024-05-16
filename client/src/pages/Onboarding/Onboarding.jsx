@@ -30,6 +30,7 @@ import '../../App.css'; // Create this CSS file for transitions
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import RoleSelector from './RoleSelector';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const defaultValue = {
   email: null,
@@ -59,6 +60,8 @@ const App = () => {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
+
+  const apiClient = useApiClient();
 
   const handleNextStep = () => {
     const newStep = onboardingStep + 1;
@@ -101,15 +104,10 @@ const App = () => {
       return toast.error(`${t("toast.sign_up.create.failed", { reason: _isIAMValid.message })}`);
     }
 
-    const res = await fetch('/api/v1/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    const resData = await apiClient.auth.signup({
+      ...data,
+    })
 
-    const resData = await res.json();
     if (resData.success === false) {
       toast.error(`${t('toast.sign_up.create.error')}`);
       return;
@@ -176,14 +174,7 @@ const App = () => {
   const signIn = async () => {
     try {
       dispatch(signInStart());
-      const res = await fetch('/api/v1/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ IAM: data.IAM, password: data.password }),
-      });
-      const resData = await res.json();
+      const resData = await apiClient.auth.signin({ IAM: data.IAM, password: data.password });
       if (resData.success === false) {
         dispatch(signInFailure(resData));
         return;

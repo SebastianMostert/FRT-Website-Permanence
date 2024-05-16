@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const defaultValues = {
   email: '',
@@ -13,6 +14,8 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const { t } = useTranslation();
   const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(false);
+
+  const apiClient = useApiClient();
 
   const fetchUser = async () => {
     try {
@@ -51,19 +54,8 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch('api/v1/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setMessage(t('forgot_password.success'));
-      } else {
-        setMessage(t('forgot_password.error'));
-      }
+      await apiClient.auth.password.forgot({ email: formData.email, code: formData.otp });
+      setMessage(t('forgot_password.success'));
     } catch (error) {
       setMessage(t('forgot_password.error'));
       console.error(error);

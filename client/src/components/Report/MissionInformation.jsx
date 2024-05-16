@@ -11,8 +11,6 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
     const [gravity, setGravity] = useState(missionInfo.urgenceLevel);
     const { t } = useTranslation();
     const disabled = !isEditable;
-    console.log(missionInfo);
-
 
     const handleSliderChange = (newValue) => {
         setGravity(newValue);

@@ -63,7 +63,6 @@ const CreateAvailabilityModal = ({ show, handleClose }) => {
 
             const { firstName, lastName, IAM } = _user;
 
-            console.log(_user);
             return {
                 IAM,
                 firstName,
@@ -243,7 +242,5 @@ async function createShift(shiftObj) {
         body: JSON.stringify(shiftObj),
     })
 
-    const data = await res.json();
-
-    console.log(data);
+    await res.json();
 }

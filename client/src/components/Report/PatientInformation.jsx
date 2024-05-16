@@ -10,7 +10,7 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
 
     const [ageInputEnabled, setAgeInputEnabled] = useState(!disabled);
 
-    const { feedback: iamFeedback, showFeedback: iamShowFeedback, minLength: iamMinLength } = isValidIamInput(patientInfo.iam, t);
+    const { feedback: iamFeedback, showFeedback: iamShowFeedback, minLength: iamMinLength } = isValidIamInput(patientInfo.IAM, t);
     const { feedback: matriculeFeedback, showFeedback: matriculeShowFeedback, minLength: matriculeMinLength } = isValidMatriculeInput(patientInfo.matricule, t);
 
     const updateAge = (age) => {
@@ -120,8 +120,8 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                         type="text"
                         placeholder={t('patient_information.iam.placeholder')}
-                        name="iam"
-                        value={patientInfo.iam}
+                        name="IAM"
+                        value={patientInfo.IAM}
                         onChange={(e) => onChangeIAM(e)}
                         minLength={iamMinLength}
                         maxLength={8}

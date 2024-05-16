@@ -9,7 +9,7 @@ import Select from 'react-select';
 import { useApiClient } from '../contexts/ApiContext';
 import { useTranslation } from 'react-i18next';
 
-const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
+const MarkBesetztModal = ({ show, handleClose, event }) => {
     const { t } = useTranslation();
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,10 +32,10 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
 
         const fetchUsers = async () => {
             const users = await Promise.all(
-                IAMList.map(async (iam, index) => {
-                    const res = await getMember(iam);
+                IAMList.map(async (IAM, index) => {
+                    const res = await getMember(IAM);
                     if (res.success) {
-                        const availabilityId = availabilityIdsList[index].trim().replace(`${iam}: `, '');
+                        const availabilityId = availabilityIdsList[index].trim().replace(`${IAM}: `, '');
 
                         return {
                             IAM: res.data.IAM,
@@ -204,7 +204,6 @@ const MarkBesetztModal = ({ show, handleClose, shifts, event }) => {
         // Ensure that there is no other shift
         // for (let i = 0; i < shifts.length; i++) {
         //     const shift = shifts[i];
-        //     console.log(shift)
         //     const shiftStart = new Date(shift.startDate);
         //     const shiftEnd = new Date(shift.endDate);
         //     if (shiftStart >= shiftEnd) continue;

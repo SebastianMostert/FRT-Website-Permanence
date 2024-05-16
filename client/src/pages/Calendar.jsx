@@ -62,29 +62,17 @@ export default function Calendar() {
     const apiClient = useApiClient();
 
     useEffect(() => {
-        const fetchColors = async () => {
-            const data = await getColors(currentUser.IAM);
-            setColors(data);
-        }
-
-        fetchColors();
-    }, [currentUser.IAM]);
-
-    useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
+            
+            const exams = await apiClient.exam.getByIAM(IAM);
+            const availabilities = await apiClient.availability.getByIAM(IAM);
+            const classes = await apiClient.exam.getClasses();
+            const shifts = await apiClient.shift.get(IAM);
+            const colors = await getColors(currentUser.IAM);
 
-            const [exams, availabilities, classes, shifts] = await Promise.all([
-                apiClient.exam.getByIAM(IAM),
-                apiClient.availability.getByIAM(IAM),
-                apiClient.exam.getClasses(),
-                apiClient.shift.get(IAM),
-            ]);
-
-            console.log(shifts)
-
+            setColors(colors);
             setClasses(classes);
-
             const calendarEvents = await getExams(currentUser, exams, classes, colors);
 
             if (!calendarEvents.success) {
@@ -136,9 +124,7 @@ export default function Calendar() {
             if (refreshTriggerExam) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
                 const exams = await apiClient.exam.getByIAM(IAM);
-                console.log(exams)
                 const calendarEvents = await getExams(currentUser, exams, classes, colors);
-                console.log(calendarEvents)
                 setCalendarEvent(calendarEvents.data);
             }
 

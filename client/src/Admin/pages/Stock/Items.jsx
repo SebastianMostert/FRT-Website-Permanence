@@ -145,7 +145,6 @@ const AddItemModal = ({ show, onHide, handleAddItem }) => {
 
     const handleDetectedBarcode = (barcode) => {
         // Handle the detected barcode
-        console.log("Detected barcode:", barcode);
         setBarcode(barcode); // Set the detected barcode in the state
     };
 

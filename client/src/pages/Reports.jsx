@@ -54,10 +54,10 @@ const Reports = () => {
     const users = [];
 
     for (let i = 0; i < firstResponders.length; i++) {
-      const iam = firstResponders[i].iam;
-      if (!iam) continue;
+      const IAM = firstResponders[i].IAM;
+      if (!IAM) continue;
       const position = firstResponders[i].position;
-      const res = await getMember(iam);
+      const res = await getMember(IAM);
       if (res.success === false) {
         toast(res.message);
         return [];

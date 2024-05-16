@@ -39,7 +39,6 @@ export default function Profile() {
     useEffect(() => {
         async function fetchData() {
             const classes = await apiClient.exam.getClasses();
-            console.log(classes)
             setClassesAPI(classes);
         }
 
@@ -159,12 +158,7 @@ export default function Profile() {
 
     const handleSignOut = async () => {
         try {
-            await fetch('/api/v1/auth/signout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            await apiClient.auth.signout();
             dispatch(signOut())
             toast.info(`${t('toast.profile.signed_out')}`);
         } catch (error) {

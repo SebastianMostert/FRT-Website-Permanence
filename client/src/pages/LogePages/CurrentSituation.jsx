@@ -39,10 +39,7 @@ const CurrentSituation = () => {
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
-            if (data.type === 'team') {
-                console.log('Updating data');
-                fetchData();
-            }
+            if (data.type === 'team') fetchData();
         }
     }, [socket, socket?.readyState]);
 

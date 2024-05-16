@@ -12,6 +12,7 @@ import { Form, Button, InputGroup } from 'react-bootstrap';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 
 import { ForgotPassword } from '../index'
+import { useApiClient } from '../../contexts/ApiContext';
 
 const defaultValues = {
   IAM: '',
@@ -33,6 +34,7 @@ export default function IAMSignIn() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const apiClient = useApiClient();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -52,14 +54,9 @@ export default function IAMSignIn() {
       toastId.current = toast.info(`${t('toast.sign_in.loading')}`, {
         autoClose: false,
       });
-      dispatch(signInStart()); const res = await fetch('/api/v1/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
+      dispatch(signInStart());
+
+      const data = await apiClient.auth.signin({ IAM: formData.IAM, password: formData.password, code: formData.code });
       if (data.success === false) {
 
         if (!data.message.startsWith("Two-factor")) setFailedAttempts((prevAttempts) => prevAttempts + 1);
@@ -97,10 +94,10 @@ export default function IAMSignIn() {
   };
 
   useEffect(() => {
-    const iam = formData.IAM.toLocaleLowerCase();
+    const IAM = formData.IAM.toLocaleLowerCase();
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/v1/user/fetch/2fa/IAM/${iam}`, {
+        const res = await fetch(`/api/v1/user/fetch/2fa/IAM/${IAM}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -122,7 +119,7 @@ export default function IAMSignIn() {
       }
     }
 
-    if (iam.length == 8) fetchUser();
+    if (IAM.length == 8) fetchUser();
     else setTwoFactorAuthEnabled(null);
   }, [navigate, formData.IAM]);
 

@@ -22,7 +22,6 @@ const BasicInfo = ({ data, onChange, onNext }) => {
   useEffect(() => {
     async function fetchData() {
       const classes = await apiClient.exam.getClasses();
-      console.log(classes)
       setClassesAPI(classes);
     }
 
@@ -135,7 +134,7 @@ const BasicInfo = ({ data, onChange, onNext }) => {
               </Form.Group>
             </Col>
             <Col>
-              <Form.Group controlId='iam'>
+              <Form.Group controlId='IAM'>
                 <FloatingLabel
                   label="IAM"
                   className="mb-3 text-gray-400"

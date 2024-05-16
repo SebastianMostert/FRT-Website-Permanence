@@ -306,12 +306,12 @@ export const resetPassword = async (req, res) => {
 export const addTwoFactorAuthentication = async (req, res) => {
   try {
     // Get the user from the request, assuming you are sending user ID in the request
-    const { iam } = req.body;
+    const { IAM } = req.body;
 
     // Generate a new secret for the user
     const secret = speakeasy.generateSecret({ length: 20 });
 
-    const user = await User.findOne({ IAM: iam });
+    const user = await User.findOne({ IAM });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -323,7 +323,7 @@ export const addTwoFactorAuthentication = async (req, res) => {
 
     // Save the secret key to the user document in the database
     await User.findOneAndUpdate({
-      IAM: iam,
+      IAM,
     }, {
       $set: {
         twoFactorAuthSecret: secret.base32,
@@ -353,10 +353,10 @@ export const addTwoFactorAuthentication = async (req, res) => {
 
 export const validateTwoFactorCode = async (req, res) => {
   try {
-    const { iam, code } = req.body;
+    const { IAM, code } = req.body;
 
     // Find the user by ID
-    const user = await User.findOne({ IAM: iam });
+    const user = await User.findOne({ IAM });
 
     // Check if user has a secret key for 2FA
     if (!user.twoFactorAuthSecret) {
@@ -369,7 +369,7 @@ export const validateTwoFactorCode = async (req, res) => {
     if (verified) {
       // Code is valid, you can now enable 2FA for the user
       await User.findOneAndUpdate({
-        IAM: iam
+        IAM
       }, {
         $set: { twoFactorAuth: true }
       });
@@ -386,18 +386,18 @@ export const validateTwoFactorCode = async (req, res) => {
 
 export const removeTwoFactorAuthentication = async (req, res) => {
   try {
-    const { iam, code, password } = req.body;
+    const { IAM, code, password } = req.body;
 
-    if (!iam) return res.status(400).json({ error: 'Missing IAM' });
+    if (!IAM) return res.status(400).json({ error: 'Missing IAM' });
     if (!code) return res.status(400).json({ error: 'Missing code' });
     if (!password) return res.status(400).json({ error: 'Missing password' });
 
     // Validate password
-    const { statusCode, statusText, success: validPassword } = await validatePassword(iam, password, code);
+    const { statusCode, statusText, success: validPassword } = await validatePassword(IAM, password, code);
     if (!validPassword) return res.status(statusCode).json({ error: statusText });
 
     await User.findOneAndUpdate({
-      IAM: iam
+      IAM
     }, {
       $set: {
         twoFactorAuth: false,

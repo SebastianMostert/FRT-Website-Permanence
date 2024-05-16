@@ -24,7 +24,6 @@ export const test = (req, res) => {
 // Update User
 export const updateUser = async (req, res, next) => {
   const body = req.body;
-  console.log(body);
   try {
     // Fetch the user
     const user = await User.findById(req.body.id || req.body._id);
@@ -124,7 +123,6 @@ export const deleteUser = async (req, res, next) => {
 // Fetch User
 export const fetchUser = async (req, res, next) => {
   const IAM = req.params.IAM;
-  console.log(IAM)
   try {
     const user = await User.find({ IAM });
     if (!user || user.length === 0) {

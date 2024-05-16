@@ -105,7 +105,7 @@ const BasicInfo = ({ data, onChange, onNext }) => {
                             </Form.Group>
                         </Col>
                         <Col>
-                            <Form.Group controlId='iam'>
+                            <Form.Group controlId='IAM'>
                                 <FloatingLabel
                                     label="IAM"
                                     className="mb-3 text-gray-400"
@@ -115,7 +115,7 @@ const BasicInfo = ({ data, onChange, onNext }) => {
                                         placeholder="IAM"
                                         value={data.IAM}
                                         onChange={(e) => onChange('IAM', e.target.value)}
-                                        id='iam'
+                                        id='IAM'
                                         minLength={8}
                                         maxLength={8}
                                     />

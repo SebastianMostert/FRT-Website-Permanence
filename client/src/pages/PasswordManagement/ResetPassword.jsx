@@ -4,12 +4,15 @@ import { Form, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { isPasswordValid } from '../../utils';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const { token } = useParams(); // Get the token from the URL
     const { t } = useTranslation();
+
+    const apiClient = useApiClient();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,25 +30,10 @@ const ResetPassword = () => {
         if (password !== confirmPassword) return toast.error(t('reset_password.error.passwords_mismatch'));
 
         try {
-            const baseURL = window.location.origin;
-            const response = await fetch(`${baseURL}/api/v1/auth/reset-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    token,
-                    newPassword: password,
-                }),
-            });
-
-            if (response.ok) {
-                toast.success(t('reset_password.success'));
-                setPassword('');
-                setConfirmPassword('');
-            } else {
-                toast.error(t('reset_password.error'));
-            }
+            await apiClient.auth.password.reset({ token, newPassword: password });
+            toast.success(t('reset_password.success'));
+            setPassword('');
+            setConfirmPassword('');
         } catch (error) {
             toast.error(t('reset_password.error'));
             console.error(error);

@@ -21,7 +21,6 @@ const Shifts = () => {
   const [calendarOverlaps, setCalendarOverlaps] = useState([]);
   const [calendarShifts, setCalendarShifts] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [shifts, setShifts] = useState([]);
   const [_event, setEvent] = useState(null);
   const [showCreateShiftModal, setShowCreateShiftModal] = useState(null);
   const [showDeleteShiftModal, setShowDeleteShiftModal] = useState(false);
@@ -51,7 +50,6 @@ const Shifts = () => {
 
       setCalendarOverlaps(overlapEvents);
       setCalendarShifts(shiftEvents);
-      setShifts(shifts);
       setIsLoading(false);
     }
 
@@ -106,7 +104,6 @@ const Shifts = () => {
       <MarkBesetztModal
         show={showModal}
         handleClose={() => setShowModal(false)}
-        shifts={shifts}
         event={_event}
       />
       <CreateShiftModal

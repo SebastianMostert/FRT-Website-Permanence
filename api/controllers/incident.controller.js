@@ -53,7 +53,7 @@ export const createIncident = async (req, res, next) => {
         const firstResponders = [];
         for (let i = 0; i < team.members.length; i++) {
             const { IAM, position } = team.members[i];
-            firstResponders.push({ position, iam: IAM });
+            firstResponders.push({ position, IAM });
         }
 
         // Create a report

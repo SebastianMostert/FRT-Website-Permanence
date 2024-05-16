@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
 import { Button, Form, Alert, Container, Row, Col, FloatingLabel } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const TwoFactorAuthRemove = () => {
     const [code, setCode] = useState('');
@@ -13,10 +13,12 @@ const TwoFactorAuthRemove = () => {
     const { currentUser } = useSelector((state) => state.user);
     const { t } = useTranslation();
 
+    const apiClient = useApiClient();
+
     const handleRemove2FA = async () => {
         try {
-            await axios.post('/api/v1/auth/2fa/remove', {
-                iam: currentUser.IAM,
+            await apiClient.auth.twoFA.remove({
+                IAM: currentUser.IAM,
                 code,
                 password,
             });

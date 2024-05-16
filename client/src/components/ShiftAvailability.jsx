@@ -280,7 +280,6 @@ const ShiftAvailability = ({ selectedTable }) => {
                 handleClose={handleCloseModal}
                 setAvailabilities={setAvailability}
                 availabilities={availabilty}
-                shifts={shift}
                 IAMList={selectedSlot?.IAM.split(', ')}
                 availabilityIdsList={selectedSlot?.availabilityIds.split(', ')}
                 date={selectedSlot?.date}

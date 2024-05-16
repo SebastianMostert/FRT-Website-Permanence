@@ -46,7 +46,6 @@ const Containers = () => {
             // Check what needs refreshing
             if (refreshTrigger) {
                 const containers = await getContainers();
-                console.log(containers)
                 setContainers(containers)
             }
         }

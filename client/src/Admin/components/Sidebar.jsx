@@ -130,7 +130,6 @@ const OPEN_KEY = 'sidebarOpen';
 const Sidebar = ({ children }) => {
     const theme = useTheme();
     const isOpenDefault = window.localStorage.getItem(OPEN_KEY) === 'true';
-    console.log(isOpenDefault)
 
     const [open, setOpen] = useState(isOpenDefault);
 

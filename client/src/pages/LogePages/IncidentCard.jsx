@@ -38,10 +38,9 @@ const StatusBadge = ({ status, alerted }) => {
 const IncidentCard = ({ incident }) => {
     const { t } = useTranslation();
 
-    console.log(incident);
     // const { name, incidentInfo, location, ambulanceCalled } = incident;
     const { firstResponders, missionNumber, missionInfo } = incident;
-    const { ambulanceCalled, incidentInfo, location } = missionInfo;
+    const { ambulanceCalled, quickReport, location } = missionInfo;
     // Declare values
     const team = {
         status: '6',
@@ -57,8 +56,6 @@ const IncidentCard = ({ incident }) => {
 
     const formattedDate = `${year}-${month}-${day}`;
 
-
-
     return (
         <Card className="shadow-sm mb-4">
             <Card.Body>
@@ -69,7 +66,7 @@ const IncidentCard = ({ incident }) => {
                     <Badge bg={team.alerted ? 'success' : 'danger'}>{team.alerted ? 'Alerted' : 'Not Alerted'}</Badge>
                 </div>
                 <div className="mb-3">
-                    <strong>{t('status.incident_info')}</strong> {incidentInfo}
+                    <strong>{t('status.incident_info')}</strong> {quickReport}
                 </div>
                 <div className="mb-3">
                     <strong>{t('status.location')}</strong> {location}
@@ -94,13 +91,13 @@ const UserAccordion = ({ user, index }) => {
     const [fullUser, setFullUser] = useState({});
 
     const { t } = useTranslation();
-    const { position, iam } = user;
+    const { position, IAM } = user;
 
     // Fetch the full user
     useEffect(() => {
-        if (!position || !iam) return;
+        if (!position || !IAM) return;
         async function fetchUser() {
-            const res = await fetch(`/api/v1/user/fetch/${iam}`, {
+            const res = await fetch(`/api/v1/user/fetch/${IAM}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,7 +107,7 @@ const UserAccordion = ({ user, index }) => {
             setFullUser(data._doc);
         }
         fetchUser();
-    }, [iam, position]);
+    }, [IAM, position]);
 
     if (!fullUser) return null
     const { firstName, lastName } = fullUser;
@@ -133,7 +130,7 @@ const UserAccordion = ({ user, index }) => {
                     <strong>{t('status.position')}</strong> {position}
                 </div>
                 <div>
-                    <strong>IAM:</strong> {iam}
+                    <strong>IAM:</strong> {IAM}
                 </div>
             </Accordion.Body>
         </Accordion.Item>
@@ -148,14 +145,15 @@ StatusBadge.propTypes = {
 IncidentCard.propTypes = {
     incident: PropTypes.shape({
         firstResponders: PropTypes.array.isRequired,
-        missionNumber: PropTypes.number.isRequired
+        missionNumber: PropTypes.number.isRequired,
+        missionInfo: PropTypes.object.isRequired
     }).isRequired
 };
 
 UserAccordion.propTypes = {
     user: PropTypes.shape({
         position: PropTypes.string.isRequired,
-        iam: PropTypes.string,
+        IAM: PropTypes.string,
     }).isRequired,
     index: PropTypes.number.isRequired
 };

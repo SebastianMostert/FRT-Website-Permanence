@@ -38,20 +38,17 @@ import IncidentCreate from './pages/LogePages/IncidentCreate';
 import Stock from './Admin/pages/Stock/Stock';
 import MembersPage from './pages/LogePages/MembersPage';
 import Settings from './pages/Settings';
+import { useApiClient } from './contexts/ApiContext';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  const apiClient = useApiClient();
+
   // Function to validate token
   const validateToken = async () => {
-    const res = await fetch('/api/v1/auth/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await res.json();
+    const data = await apiClient.auth.validate();
 
     if (!data.valid) handleSignOut();
   };
@@ -63,12 +60,7 @@ function TokenValidator() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/v1/auth/signout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await apiClient.auth.signout();
       dispatch(signOut());
 
       // Get the current 

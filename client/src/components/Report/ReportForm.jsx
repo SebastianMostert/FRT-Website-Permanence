@@ -15,16 +15,16 @@ import { LoadingPage } from '../../pages';
 
 const defaultValues = {
     firstRespondersValues: [
-        { position: 'Chef Agres', iam: '' },
-        { position: 'Equipier Bin.', iam: '' },
-        { position: 'Stagiaire Bin.', iam: '' },
+        { position: 'Chef Agres', IAM: '' },
+        { position: 'Equipier Bin.', IAM: '' },
+        { position: 'Stagiaire Bin.', IAM: '' },
     ],
     patientInfoValues: {
         age: '',
         gender: '',
         firstName: '',
         lastName: '',
-        iam: '',
+        IAM: '',
         matricule: '',
     },
     ABCDEValues: {
@@ -299,7 +299,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
 
                 if (data?.firstResponders.length > 0) {
                     while (data?.firstResponders.length < 3) {
-                        data.firstResponders.push({ position: 'Stagiaire Bin.', iam: '' });
+                        data.firstResponders.push({ position: 'Stagiaire Bin.', IAM: '' });
                     }
                 }
 
@@ -341,21 +341,35 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
         const extractedMissionInfo = extractMissionInfo();
 
         // Check if the current user is one of the First Responders
-        const isCurrentUserFirstResponder = firstResponders.some(user => user.iam === currentUser.IAM);
+        const isCurrentUserFirstResponder = firstResponders.some(user => user.IAM === currentUser.IAM);
         // Check if the incident is from today
         const isToday = new Date().toLocaleDateString() === `${extractedMissionInfo.day}/${extractedMissionInfo.month}/${extractedMissionInfo.year}`;
         // Check if the user is an admin
         const isAdmin = roles.includes('admin');
+        // Check if the firstResponders contains iam's that arent empty
+        const nonEmptyFirstResponders = firstResponders.some(user => user.IAM !== '');
 
-        // TODO: Fix
-        if (missionNumber.length === 10 && isToday && (isCurrentUserFirstResponder || isAdmin)) setIsEditable(true);
-        else setIsEditable(false);
-
-        
-        if (missionNumber.length === 10 && isToday) {
-            setIsEditable(true)
+        if (missionNumber.length === 10) {
+            if (isToday) {
+                // Check if there is an IAM. If not, allow the user to edit
+                if(!nonEmptyFirstResponders) {
+                    console.warn('There are no first responders so we allow the user to edit');
+                    setIsEditable(true);
+                }
+                if (isCurrentUserFirstResponder || isAdmin) {
+                    setIsEditable(true);
+                } else {
+                    console.warn('The user is not a first responder');
+                    setIsEditable(false);
+                }
+            } else {
+                console.warn('The incident is not from today');
+                setIsEditable(false);
+            }
+        } else {
+            console.warn('Invalid mission number');
+            setIsEditable(false);
         }
-        else setIsEditable(false);
     })
     if (!dataLoaded) {
         return (

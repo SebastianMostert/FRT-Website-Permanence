@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
 import { Button, Form, Image, Alert, Container, Row, Col, InputGroup, FloatingLabel } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useApiClient } from '../../contexts/ApiContext';
 
 const TwoFactorAuthSetup = () => {
     const [code, setCode] = useState('');
@@ -13,13 +13,15 @@ const TwoFactorAuthSetup = () => {
     const { currentUser } = useSelector((state) => state.user);
     const { t } = useTranslation();
 
+    const apiClient = useApiClient();
+
     useEffect(() => {
         const generateQRCode = async () => {
             try {
-                const response = await axios.post('/api/v1/auth/2fa/add', {
-                    iam: currentUser.IAM,
+                const data = await apiClient.auth.twoFA.add({
+                    IAM: currentUser.IAM,
                 });
-                setQrCode(response.data.dataUrl);
+                setQrCode(data.dataUrl);
                 setError('');
             } catch (err) {
                 const errorMsg = err.response.data.error;
@@ -34,8 +36,8 @@ const TwoFactorAuthSetup = () => {
 
     const handleValidateCode = async () => {
         try {
-            await axios.post('/api/v1/auth/2fa/validate', {
-                iam: currentUser.IAM,
+            await apiClient.auth.twoFA.validate({
+                IAM: currentUser.IAM,
                 code,
             });
             // Code is validated, you can now redirect or show a success message

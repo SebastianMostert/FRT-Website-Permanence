@@ -9,7 +9,7 @@ const FirstResponders = ({ firstResponders, handleResponderChange, isEditable })
     const onChange = (index, e) => {
         const { value } = e.target;
         const updatedResponders = [...firstResponders];
-        updatedResponders[index].iam = value;
+        updatedResponders[index].IAM = value;
 
         handleResponderChange(updatedResponders);
     };
@@ -32,7 +32,7 @@ const FirstResponders = ({ firstResponders, handleResponderChange, isEditable })
                                 style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                                 type="text"
                                 placeholder={t('first_responders.iam.placeholder')}
-                                value={responder.iam}
+                                value={responder.IAM}
                                 onChange={(e) => onChange(index, e)}
                                 minLength={minLength}
                                 maxLength={8}
@@ -67,8 +67,8 @@ function isValid(responder, t) {
     }
 
     // If the user is a stagiaire and the iam is not empty validate it:
-    if (isStagiaire && responder.iam.length > 0) {
-        const { valid, message } = isValidIAM(responder.iam, t);
+    if (isStagiaire && responder.IAM.length > 0) {
+        const { valid, message } = isValidIAM(responder.IAM, t);
         if (!valid) {
             setFeedback(message);
         }
@@ -76,7 +76,7 @@ function isValid(responder, t) {
 
     // If the user is not a stagiaire validate the IAM
     if (!isStagiaire) {
-        const { valid, message } = isValidIAM(responder.iam, t);
+        const { valid, message } = isValidIAM(responder.IAM, t);
         if (!valid) {
             setFeedback(message);
         }
@@ -95,6 +95,7 @@ function isValid(responder, t) {
     return { showFeedback, minLength, feedback };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function isValidIAM(IAM = '', t) {
     // Check the length of the IAM it must be 8
     if (IAM.length != 8) {
