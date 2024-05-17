@@ -22,7 +22,7 @@ export const createAvailability = async (req, res, next) => {
         res.status(201).json(newAvailability);
         sendReportsUpdated('availabilities_updated');
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
