@@ -63,6 +63,7 @@ export const getExamsByUser = async (req, res, next) => {
             throw errorHandler(404, 'No class found for this user!');
         }
     } catch (error) {
+        console.error(error)
         logServerError(error);
         next(error);
     }
