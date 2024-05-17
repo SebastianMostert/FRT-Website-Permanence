@@ -61,7 +61,7 @@ const ExposureEnvironment = ({ value = {}, onChange, isEditable }) => {
                                 onChange={(e) => handleInputChange('weitereVerletzungen', e.target.value)}
                             />
                         </Form.Group>
-                        <BodyDiagram letters={value} onChange={onChange} isEditable={isEditable} />
+                        <BodyDiagram value={value} onChange={onChange} isEditable={isEditable} />
                     </Card.Body>
                 </Card>
                 <Card className="mb-3">

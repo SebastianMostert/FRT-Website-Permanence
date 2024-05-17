@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next';
 
 const BodyDiagram = ({ value, onChange, isEditable }) => {
     const { t } = useTranslation();
-    const [letters, setLetters] = useState(value?.letters || []);
+    const [letters, setLetters] = useState(value?.bodyDiagramLetters || []);
     const [clickedPosition, setClickedPosition] = useState({ x: 0, y: 0 });
     const [selectedOption, setSelectedOption] = useState('');
     const disabled = !isEditable;
 
     useEffect(() => {
-        setLetters(value?.letters || []);
+        setLetters(value?.bodyDiagramLetters || []);
     }, [value]);
 
     const handleClick = (event) => {
