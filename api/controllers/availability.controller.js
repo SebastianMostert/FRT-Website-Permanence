@@ -2,7 +2,7 @@ import User from '../models/user.model.js';
 import Availability from '../models/availability.model.js';
 import { errorHandler } from '../utils/error.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js';
-import { logServerError } from '../utils/logger.js';
+import { logServerError, logHTTPRequest } from '../utils/logger.js';
 
 /** 
  * LOGGER INFO
