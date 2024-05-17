@@ -256,8 +256,8 @@ const getShiftStatus = async (shift, defaultStatus) => {
     // Check if each member has a key and a phone
     for (let i = 0; i < shift.users.length; i++) {
         const member = shift.users[i];
-
-        const user = await User.findOne({ IAM: member.IAM });
+        const IAM = member.IAM;
+        const user = await User.findOne({ IAM: IAM.toLowerCase() });
 
         if (!user) {
             status = 6;

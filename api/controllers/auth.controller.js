@@ -20,11 +20,11 @@ import { logServerError, logHTTPRequest } from '../utils/logger.js';
 export const signup = async (req, res, next) => {
   logHTTPRequest('/auth/signup', req.ip);
   try {
-    req.body.IAM = req.body.IAM.toLowerCase(); // Convert IAM to lowercase
+    const { IAM } = req.body;
     req.body.password = bcryptjs.hashSync(req.body.password, 10);
 
     // Check if IAM is a member IAM
-    const verified = await isMemberIAM(req.body.IAM);
+    const verified = await isMemberIAM(IAM.toLowerCase());
     const newUser = new User({ ...req.body, verified });
     await newUser.save();
 
@@ -302,7 +302,7 @@ export const addTwoFactorAuthentication = async (req, res) => {
     // Generate a new secret for the user
     const secret = speakeasy.generateSecret({ length: 20 });
 
-    const user = await User.findOne({ IAM });
+    const user = await User.findOne({ IAM: IAM.toLowerCase() });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -314,7 +314,7 @@ export const addTwoFactorAuthentication = async (req, res) => {
 
     // Save the secret key to the user document in the database
     await User.findOneAndUpdate({
-      IAM,
+      IAM: IAM.toLowerCase(),
     }, {
       $set: {
         twoFactorAuthSecret: secret.base32,
@@ -348,7 +348,7 @@ export const validateTwoFactorCode = async (req, res) => {
     const { IAM, code } = req.body;
 
     // Find the user by ID
-    const user = await User.findOne({ IAM });
+    const user = await User.findOne({ IAM: IAM.toLowerCase() });
 
     // Check if user has a secret key for 2FA
     if (!user.twoFactorAuthSecret) {
@@ -361,7 +361,7 @@ export const validateTwoFactorCode = async (req, res) => {
     if (verified) {
       // Code is valid, you can now enable 2FA for the user
       await User.findOneAndUpdate({
-        IAM
+        IAM: IAM.toLowerCase(),
       }, {
         $set: { twoFactorAuth: true }
       });
@@ -386,11 +386,11 @@ export const removeTwoFactorAuthentication = async (req, res) => {
     if (!password) return res.status(400).json({ error: 'Missing password' });
 
     // Validate password
-    const { statusCode, statusText, success: validPassword } = await validatePassword(IAM, password, code);
+    const { statusCode, statusText, success: validPassword } = await validatePassword(IAM.toLowerCase(), password, code);
     if (!validPassword) return res.status(statusCode).json({ error: statusText });
 
     await User.findOneAndUpdate({
-      IAM
+      IAM: IAM.toLowerCase(),
     }, {
       $set: {
         twoFactorAuth: false,
@@ -441,7 +441,7 @@ function validate2FaCode(secret, token) {
 }
 
 async function validatePassword(IAM, password, code) {
-  const user = await User.findOne({ IAM: IAM });
+  const user = await User.findOne({ IAM: IAM.toLowerCase() });
   if (!user) return { success: false, statusText: 'User not found', statusCode: 404, user };
   if (!user.password) return { success: false, statusText: 'Password not found', statusCode: 404, user };
 

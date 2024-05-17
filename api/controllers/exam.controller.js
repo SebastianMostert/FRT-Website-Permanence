@@ -12,15 +12,13 @@ export const test = (req, res) => {
 
 // In your controller file (getExamsByUser.js or getExamsByUser.ts)
 export const getExamsByUser = async (req, res, next) => {
+    const IAM = req.params.IAM;
     try {
-        req.params.IAM = req.params.IAM.toLowerCase();
-
-        if (!req.params.IAM) {
+        if (!IAM) {
             throw errorHandler(400, 'No IAM provided!');
         }
 
-        const validUser = await User.findOne({ IAM: req.params.IAM });
-
+        const validUser = await User.findOne({ IAM: IAM.toLowerCase() });
         if (!validUser) {
             throw errorHandler(404, 'No user with this IAM found!');
         }
@@ -50,7 +48,7 @@ export const getExamsByUser = async (req, res, next) => {
                     const examClass = examClasses[i];
 
                     if (examClass === studentClass) {
-                        const valid = await validateExam(exam, req.params.IAM);
+                        const valid = await validateExam(exam, IAM.toLowerCase());
                         if (valid) {
                             filteredExams.push(exam);
                         }
@@ -104,7 +102,7 @@ export const removeTeacher = async (req, res, next) => {
     const { teacher, IAM } = req.body;
 
     try {
-        const removedExams = await RemovedExams.findOne({ IAM });
+        const removedExams = await RemovedExams.findOne({ IAM: IAM.toLowerCase() });
 
         if (!removedExams) {
             const teachers = teacher || [];
@@ -124,7 +122,7 @@ export const removeTeacher = async (req, res, next) => {
                 throw errorHandler(400, 'Teacher already removed!');
             }
             teachers.push(teacher);
-            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+            await RemovedExams.findOneAndUpdate({ IAM: IAM.toLowerCase() }, { teachers, subjects, exams });
 
             res.status(200).json(removedExams);
         }
@@ -138,7 +136,7 @@ export const removeSubject = async (req, res, next) => {
     const { subject, IAM } = req.body;
 
     try {
-        const removedExams = await RemovedExams.findOne({ IAM });
+        const removedExams = await RemovedExams.findOne({ IAM: IAM.toLowerCase() });
 
         if (!removedExams) {
             const subjects = subject || [];
@@ -158,7 +156,7 @@ export const removeSubject = async (req, res, next) => {
                 throw errorHandler(400, 'Subject already removed!');
             }
             subjects.push(subject);
-            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+            await RemovedExams.findOneAndUpdate({ IAM: IAM.toLowerCase() }, { teachers, subjects, exams });
 
             res.status(200).json(removedExams);
         }
@@ -172,7 +170,7 @@ export const removeExam = async (req, res, next) => {
     const { exam, IAM } = req.body;
 
     try {
-        const removedExams = await RemovedExams.findOne({ IAM });
+        const removedExams = await RemovedExams.findOne({ IAM: IAM.toLowerCase() });
 
         if (!removedExams) {
             const exams = exam || [];
@@ -192,7 +190,7 @@ export const removeExam = async (req, res, next) => {
                 throw errorHandler(400, 'Exam already removed!');
             }
             exams.push(exam);
-            await RemovedExams.findOneAndUpdate({ IAM }, { teachers, subjects, exams });
+            await RemovedExams.findOneAndUpdate({ IAM: IAM.toLowerCase() }, { teachers, subjects, exams });
 
             res.status(200).json(removedExams);
         }
@@ -208,7 +206,7 @@ export const removeExam = async (req, res, next) => {
  * @param {*} IAM 
  */
 const validateExam = async (exam, IAM) => {
-    const removedExams = await RemovedExams.findOne({ IAM });
+    const removedExams = await RemovedExams.findOne({ IAM: IAM.toLowerCase() });
 
     if (!exam) {
         throw errorHandler(400, 'No exam provided!');

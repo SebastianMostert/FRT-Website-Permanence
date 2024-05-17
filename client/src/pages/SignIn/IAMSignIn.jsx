@@ -8,11 +8,11 @@ import {
 } from '../../redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Form, Button, InputGroup } from 'react-bootstrap';
-import { BsEye, BsEyeSlash } from 'react-icons/bs';
+import { Form, Button } from 'react-bootstrap';
 
 import { ForgotPassword } from '../index'
 import { useApiClient } from '../../contexts/ApiContext';
+import PasswordInput from '../../components/Inputs/PasswordInput';
 
 const defaultValues = {
   IAM: '',
@@ -26,7 +26,6 @@ export default function IAMSignIn() {
   const toastId = React.useRef(null);
 
   const [formData, setFormData] = useState(defaultValues);
-  const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { loading, error } = useSelector((state) => state.user);
   const [failedAttempts, setFailedAttempts] = useState(0); // Define failedAttempts here
@@ -38,10 +37,6 @@ export default function IAMSignIn() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
-  const handleShowPassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
   const handleForgotPassword = () => {
@@ -139,28 +134,7 @@ export default function IAMSignIn() {
               onChange={handleChange}
             />
           </Form.Group>
-          <Form.Group controlId='password'>
-            <Form.Label>{t('sign_in.password')}</Form.Label>
-            <InputGroup className='mb-3'>
-              <Form.Control
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t('sign_in.password')}
-                className={`bg-slate-100 p-3 rounded-lg ${showPassword ? 'text-black' : ''}`}
-                onChange={handleChange}
-              />
-              <InputGroup.Text>
-                <Button
-                  variant='link'
-                  onClick={handleShowPassword}
-                >
-                  {
-                    showPassword ?
-                      <BsEye /> : <BsEyeSlash />
-                  }
-                </Button>
-              </InputGroup.Text>
-            </InputGroup>
-          </Form.Group>
+          <PasswordInput handleChange={handleChange} label={t('sign_in.password')} />
           {twoFactorAuthEnabled && (
             <Form.Group controlId='code'>
               <Form.Label>TOTP Code</Form.Label>
@@ -174,7 +148,6 @@ export default function IAMSignIn() {
               />
             </Form.Group>
           )}
-
           <Button
             variant='primary'
             type='submit'

@@ -80,7 +80,7 @@ export const updateUser = async (req, res, next) => {
             experience.FR
           ),
           administratifPosition,
-          IAM,
+          IAM: IAM.toLowerCase(),
           llisPosition,
           verified,
           emailVerified,
@@ -125,7 +125,7 @@ export const deleteUser = async (req, res, next) => {
 export const fetchUser = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
-    const user = await User.find({ IAM });
+    const user = await User.find({ IAM: IAM.toLowerCase() });
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));
     }
@@ -160,7 +160,7 @@ export const fetchAllUsers = async (req, res, next) => {
 export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
-    const user = await User.find({ IAM });
+    const user = await User.find({ IAM: IAM.toLowerCase() });
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));
     }
@@ -280,7 +280,7 @@ const checkOperationalPosition = (training, rtwExperience, frExperience) => {
 export const fetchRoles = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
-    const user = await User.find({ IAM });
+    const user = await User.find({ IAM: IAM.toLowerCase() });
     if (!user || user.length === 0) {
       return next(errorHandler(404, 'User not found.'));
     }
@@ -296,7 +296,7 @@ export const fetchRoles = async (req, res, next) => {
 export const exists = async (req, res, next) => {
   const IAM = req.params.IAM;
   try {
-    const user = await User.find({ IAM });
+    const user = await User.find({ IAM: IAM.toLowerCase() });
 
     if (user?.length > 0) {
       res.status(200).json({ exists: true }); // Send response indicating user exists

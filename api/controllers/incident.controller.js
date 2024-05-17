@@ -54,7 +54,7 @@ export const createIncident = async (req, res, next) => {
         const firstResponders = [];
         for (let i = 0; i < team.members.length; i++) {
             const { IAM, position } = team.members[i];
-            firstResponders.push({ position, IAM });
+            firstResponders.push({ position, IAM: IAM.toLowerCase() });
         }
 
         // Create a report
@@ -148,7 +148,7 @@ async function getMissionNumber() {
         }
         missionNumber = prefix + numberOfIncidents_;
     }
-    
+
     // Return the mission number as a number
     return parseInt(missionNumber);
 }

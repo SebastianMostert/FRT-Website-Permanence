@@ -66,7 +66,6 @@ import { Tooltip } from "@mui/material";
   "lastName": "Nilles",
   "IAM": "nilpo731",
   "studentClass": "S5DE1",
-  "password": "$2a$10$Gta5cRjzrJYZJ48N1ye9kuE1.7byuycVHlr5KQUNZWX6fGVdKaRXO",
   "training": [
     "SAP 1, First Aid Course"
   ],
@@ -81,7 +80,6 @@ import { Tooltip } from "@mui/material";
   "emailVerified": false,
   "onBoarded": false,
   "twoFactorAuth": false,
-  "twoFactorAuthSecret": "EFRSYLCCNBWFAVBILN2U6YJ6JVDFE5K5",
   "notifications": {
     "newsletterEmails": true,
     "securityEmails": true,
