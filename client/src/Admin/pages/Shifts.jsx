@@ -9,15 +9,14 @@ import { getColors } from '../../utils';
 import DeleteShiftModal from '../../components/Modals/DeleteShiftModal';
 import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
+import { LoadingPage } from '../../pages';
 
 // Functional component definition for Availabilities
 const Shifts = () => {
   // State variables initialization using the useState hook
-  const [colors, setColors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
-  const IAM = currentUser.IAM;
   const [calendarOverlaps, setCalendarOverlaps] = useState([]);
   const [calendarShifts, setCalendarShifts] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -28,25 +27,17 @@ const Shifts = () => {
 
   const apiClient = useApiClient();
 
-  useEffect(() => {
-    const fetchColors = async () => {
-      const data = await getColors(currentUser.IAM);
-      setColors(data);
-    }
-
-    fetchColors();
-  }, [colors, currentUser.IAM]);
-
   // useEffect hook for fetching data
   useEffect(() => {
-    if(!colors) return;
     async function fetchData() {
       setIsLoading(true);
+      const fetchedColors = await getColors(currentUser.IAM);
+
       const data = await apiClient.availability.get();
       const shifts = await apiClient.shift.get();
 
-      const overlapEvents = getOverlapAvailabilities(data, colors);
-      const shiftEvents = getShiftEvents(shifts, colors);
+      const overlapEvents = getOverlapAvailabilities(data, fetchedColors);
+      const shiftEvents = getShiftEvents(shifts, fetchedColors);
 
       setCalendarOverlaps(overlapEvents);
       setCalendarShifts(shiftEvents);
@@ -54,7 +45,7 @@ const Shifts = () => {
     }
 
     fetchData(); // Calling the fetchData function
-  }, [IAM, apiClient.availability, apiClient.shift, colors, currentUser, t]); // Dependency array for the useEffect hook
+  }, [apiClient.availability, apiClient.shift, currentUser.IAM]); // Dependency array for the useEffect hook
 
   // Event click handler function
   const handleEventClick = async (e) => {
@@ -73,13 +64,13 @@ const Shifts = () => {
       setEvent(null);
       setShowModal(false);
     }
-
-
   };
 
   async function deleteShift(id) {
     await apiClient.shift.delete(id);
   }
+
+  if(isLoading) return <LoadingPage />
 
   // Rendering the Calendar component
   return (

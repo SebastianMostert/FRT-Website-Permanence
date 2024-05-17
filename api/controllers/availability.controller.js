@@ -29,7 +29,7 @@ export const createAvailability = async (req, res, next) => {
 
 // Get availability by IAM
 export const getAvailabilities = async (req, res, next) => {
-    const { IAM } = req.body;
+    const { IAM } = req.params;
     logHTTPRequest(`/availability/get/IAM/${IAM}`, req.ip);
     try {
         const validIAM = IAM.toLowerCase();
@@ -37,7 +37,7 @@ export const getAvailabilities = async (req, res, next) => {
 
         res.status(200).json(availabilities);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -49,7 +49,7 @@ export const getAvailabilityByID = async (req, res, next) => {
         const availability = await Availability.findById(id);
         res.status(200).json(availability);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 }
@@ -76,7 +76,7 @@ export const getAllAvailabilities = async (req, res, next) => {
 
         res.status(200).json(availabilitiesWithName);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -99,7 +99,7 @@ export const deleteAvailability = async (req, res, next) => {
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 };
@@ -122,7 +122,7 @@ export const updateAvailability = async (req, res, next) => {
         }
         res.status(404).json({ message: 'Availability not found', success: false });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'Internal Server Error'));
     }
 }

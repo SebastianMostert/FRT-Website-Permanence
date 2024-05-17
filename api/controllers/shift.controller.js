@@ -44,7 +44,7 @@ export const createShift = async (req, res, next) => {
     res.status(201).json({ success: true, data: createdShifts });
     sendReportsUpdated('shifts_updated')
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({ success: false, message: 'Failed to create shifts.', error: error.message });
   }
 };

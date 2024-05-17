@@ -31,7 +31,7 @@ export const signup = async (req, res, next) => {
     // Remove message
     res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({ error });
     next(error);
   }
@@ -61,7 +61,7 @@ export const signin = async (req, res, next) => {
 
     res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(error);
   }
 };
@@ -169,7 +169,7 @@ export const forgotPassword = async (req, res) => {
       message: 'Reset token sent to email',
     });
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to send reset token',
@@ -285,7 +285,7 @@ export const resetPassword = async (req, res) => {
       message: 'Password reset successful',
     });
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to reset password',
@@ -337,7 +337,7 @@ export const addTwoFactorAuthentication = async (req, res) => {
       return res.json({ dataUrl });
     });
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -371,7 +371,7 @@ export const validateTwoFactorCode = async (req, res) => {
       return res.status(400).json({ error: 'Invalid two-factor authentication code' });
     }
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -400,7 +400,7 @@ export const removeTwoFactorAuthentication = async (req, res) => {
 
     return res.status(200).json({ message: 'Two-factor authentication disabled successfully' });
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -424,7 +424,7 @@ async function isMemberIAM(IAM) {
 
     return false;
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     throw errorHandler(500, 'Internal Server Error');
   }
 }

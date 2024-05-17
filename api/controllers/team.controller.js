@@ -37,7 +37,7 @@ export const createTeam = async (req, res, next) => {
 
         res.status(201).json({ message: 'Team created successfully', team });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -78,7 +78,7 @@ export const updateTeamMembers = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -110,7 +110,7 @@ export const updateTeamStatus = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -133,7 +133,7 @@ export const updateAlert = async (req, res, next) => {
 
         res.status(200).json(updatedTeam);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while updating team.'));
     }
 };
@@ -148,7 +148,7 @@ export const fetchTeam = async (req, res, next) => {
         }
         res.status(200).json(team);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while fetching team.'));
     }
 };
@@ -205,7 +205,7 @@ export const fetchTeams = async (req, res, next) => {
 
         res.status(200).json(teams);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while fetching teams.'));
     }
 };
@@ -217,7 +217,7 @@ export const deleteUser = async (req, res, next) => {
         await Team.findByIdAndDelete(id);
         res.status(200).json('Team has been deleted...');
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(errorHandler(500, 'An error occurred while deleting team.'));
     }
 };

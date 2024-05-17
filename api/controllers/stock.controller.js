@@ -103,7 +103,7 @@ export const deleteContainer = async (req, res) => {
         await Container.findByIdAndDelete(id);
         res.json({ message: 'Container deleted successfully' });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         errorHandler(error, res);
     }
 }
@@ -128,7 +128,7 @@ export const deletePlaceholder = async (req, res) => {
         await container.save();
         res.json({ message: 'Placeholder deleted successfully' });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         errorHandler(error, res);
     }
 }
@@ -161,7 +161,7 @@ export const deleteItem = async (req, res) => {
 
         res.json({ message: 'Item deleted successfully' });
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         errorHandler(error, res);
     }
 }

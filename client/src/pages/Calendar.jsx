@@ -16,7 +16,7 @@ import CreateAvailabilityModal from '../components/Modals/CreateAvailabilityModa
 import ShiftModal from '../components/Calendar/ShiftModal';
 import ExamModal from '../components/Modals/ExamModal';
 
-import { NoMobilePage, NotAuthorized } from './index'
+import { LoadingPage, NoMobilePage, NotAuthorized } from './index'
 import { useApiClient } from '../contexts/ApiContext';
 import moment from 'moment';
 
@@ -56,6 +56,7 @@ export default function Calendar() {
     const [refreshTriggerExam, setRefreshTriggerExam] = useState(false);
     const [refreshTriggerShift, setRefreshTriggerShift] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const [classes, setClasses] = useState([]);
 
@@ -64,12 +65,15 @@ export default function Calendar() {
     useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
-            
-            const exams = await apiClient.exam.getByIAM(IAM);
-            const availabilities = await apiClient.availability.getByIAM(IAM);
-            const classes = await apiClient.exam.getClasses();
-            const shifts = await apiClient.shift.get(IAM);
-            const colors = await getColors(currentUser.IAM);
+
+            // Fetch all these at the same time
+            const [exams, availabilities, classes, shifts, colors] = await Promise.all([
+                apiClient.exam.getByIAM(IAM),
+                apiClient.availability.getByIAM(IAM),
+                apiClient.exam.getClasses(),
+                apiClient.shift.get(IAM),
+                getColors(currentUser.IAM)
+            ]);
 
             setColors(colors);
             setClasses(classes);
@@ -86,12 +90,12 @@ export default function Calendar() {
             setCalendarAvailability(calendarAvailabilities);
             setCalendarShift(calendarShifts);
 
-            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('toast.calendar.loading.success')}` });
             setIsLoading(false);
+            toast.update(toastIdLoading.current, { type: 'success', autoClose: 5000, render: `${t('toast.calendar.loading.success')}` });
         }
 
         fetchData();
-    }, [IAM, apiClient.availability, apiClient.exam, apiClient.shift, colors, currentUser, t]);
+    }, [IAM, apiClient.availability, apiClient.exam, apiClient.shift, currentUser, t]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -118,8 +122,7 @@ export default function Calendar() {
     useEffect(() => {
         if (!refreshTrigger && !refreshTriggerAvailability && !refreshTriggerExam && !refreshTriggerShift) return;
         async function fetchData() {
-            setIsLoading(true);
-
+            setIsRefreshing(true);
             // Check what needs refreshing
             if (refreshTriggerExam) {
                 toastIdRefreshing.current = toast.info(`${t('toast.calendar.refreshing.exams')}`, { autoClose: false });
@@ -142,8 +145,8 @@ export default function Calendar() {
                 setCalendarShift(calendarShifts);
             }
 
+            setIsRefreshing(false);
             toast.update(toastIdRefreshing.current, { type: 'success', autoClose: 5000, render: `${t('toast.calendar.refreshing.success')}` });
-            setIsLoading(false);
         }
 
         fetchData();
@@ -325,63 +328,63 @@ export default function Calendar() {
         }
     }
 
-    const calendarAndModal = (
-        <>
-            {
-                mobileView ? <div id="oopss">
-                    <NoMobilePage />
-                </div> : <div className="calendar-container">
-                    <CalendarComponent
-                        events={[...calendarEvent, ...calendarAvailability, ...calendarShift]}
-                        handleEventClick={handleEventClick}
-                        handleSelect={handleSelect}
-                        handleViewDidMount={handleViewDidMount}
-                        selectable={true}
-                        customButtons={{
-                            createAvailabilityButton: {
-                                text: `${t('calendar.button.create_availability')}`,
+    console.log(isLoading)
+    console.log(isRefreshing)
 
-                                click: () => {
-                                    setShowCreateAvailabilityModal(true);
-                                }
-                            }
-                        }}
-                        loading={isLoading}
-                        handleDateClick={handleDateClick}
-                        handleEventResize={handleEventResize}
-                    />
-                    <AvailabilityModal
-                        show={showAvailabilityModal}
-                        handleClose={() => setShowAvailabilityModal(false)}
-                        event={selectedAvailability}
-                        handleDelete={handleAvailabilityDelete}
-                        updateAvailability={updateAvailability}
-                    />
-                    <ShiftModal
-                        show={showShiftModal}
-                        handleClose={() => setShowShiftModal(false)}
-                        event={selectedShift}
-                    />
-                    <ExamModal
-                        event={selectedExam}
-                        handleClose={() => setShowExamModal(false)}
-                        show={showExamModal}
-                        refreshData={refreshDataExam}
-                    />
-                    <CreateAvailabilityModal
-                        show={showCreateAvailabilityModal}
-                        handleClose={() => setShowCreateAvailabilityModal(false)}
-                        events={calendarEvent}
-                        currentUser={currentUser}
-                        refreshData={() => refreshDataAvailability()}
-                        selectedDate={selectedDate}
-                    />
-                </div>
-            }
-        </>
-    )
+    if (isLoading) return <LoadingPage />
 
-    return calendarAndModal;
+    return (
+        mobileView ? <div id="oopss">
+            <NoMobilePage />
+        </div> : <div className="calendar-container">
+            <CalendarComponent
+                events={[...calendarEvent, ...calendarAvailability, ...calendarShift]}
+                handleEventClick={handleEventClick}
+                handleSelect={handleSelect}
+                handleViewDidMount={handleViewDidMount}
+                selectable={true}
+                customButtons={{
+                    createAvailabilityButton: {
+                        text: `${t('calendar.button.create_availability')}`,
+
+                        click: () => {
+                            setShowCreateAvailabilityModal(true);
+                        }
+                    }
+                }}
+                loading={isRefreshing || isLoading}
+                handleDateClick={handleDateClick}
+                handleEventResize={handleEventResize}
+            />
+            <AvailabilityModal
+                show={showAvailabilityModal}
+                handleClose={() => setShowAvailabilityModal(false)}
+                event={selectedAvailability}
+                handleDelete={handleAvailabilityDelete}
+                updateAvailability={updateAvailability}
+            />
+            <ShiftModal
+                show={showShiftModal}
+                handleClose={() => setShowShiftModal(false)}
+                event={selectedShift}
+            />
+            <ExamModal
+                event={selectedExam}
+                handleClose={() => setShowExamModal(false)}
+                show={showExamModal}
+                refreshData={refreshDataExam}
+            />
+            <CreateAvailabilityModal
+                show={showCreateAvailabilityModal}
+                handleClose={() => setShowCreateAvailabilityModal(false)}
+                events={calendarEvent}
+                currentUser={currentUser}
+                refreshData={() => refreshDataAvailability()}
+                selectedDate={selectedDate}
+            />
+        </div>
+
+    );
 }
 
 function convertExamTimeToDate(examDate, startTime, endTime) {

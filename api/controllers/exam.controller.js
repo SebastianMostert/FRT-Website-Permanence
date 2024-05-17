@@ -64,7 +64,7 @@ export const getExamsByUser = async (req, res, next) => {
         }
     } catch (error) {
         console.error(error)
-        logServerError(error);
+        logServerError(error.message);
         next(error);
     }
 };
@@ -95,7 +95,7 @@ export const getClasses = async (req, res, next) => {
         })
         res.status(200).json(classes);
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(error);
     }
 };
@@ -129,7 +129,7 @@ export const removeTeacher = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(error);
     }
 };
@@ -163,7 +163,7 @@ export const removeSubject = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(error);
     }
 };
@@ -197,7 +197,7 @@ export const removeExam = async (req, res, next) => {
             res.status(200).json(removedExams);
         }
     } catch (error) {
-        logServerError(error);
+        logServerError(error.message);
         next(error);
     }
 };

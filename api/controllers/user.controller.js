@@ -99,7 +99,7 @@ export const updateUser = async (req, res, next) => {
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while updating user.'));
   }
 };
@@ -116,7 +116,7 @@ export const deleteUser = async (req, res, next) => {
     sendWSUpdate();
     res.status(200).json('User has been deleted...');
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while deleting user.'));
   }
 };
@@ -133,7 +133,7 @@ export const fetchUser = async (req, res, next) => {
     const { password, twoFactorAuthSecret, ...rest } = user[0];
     res.status(200).json(rest);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
@@ -151,7 +151,7 @@ export const fetchAllUsers = async (req, res, next) => {
 
     res.status(200).json(usersArray);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
@@ -168,7 +168,7 @@ export const fetchUserAuthEnabledByIAM = async (req, res, next) => {
     const { twoFactorAuth } = user[0];
     res.status(200).json(twoFactorAuth);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
@@ -184,7 +184,7 @@ export const fetchUserAuthEnabledByEmail = async (req, res, next) => {
     const { twoFactorAuth } = user[0];
     res.status(200).json(twoFactorAuth);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
@@ -288,7 +288,7 @@ export const fetchRoles = async (req, res, next) => {
     const { roles } = user[0];
     res.status(200).json(roles);
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };
@@ -304,7 +304,7 @@ export const exists = async (req, res, next) => {
       res.status(200).json({ exists: false }); // Send response indicating user doesn't exist
     }
   } catch (error) {
-    logServerError(error);
+    logServerError(error.message);
     next(errorHandler(500, 'An error occurred while fetching user.'));
   }
 };

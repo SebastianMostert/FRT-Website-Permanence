@@ -1,48 +1,37 @@
 // Importing necessary dependencies from React and other modules
 import { useEffect, useState } from 'react';
 import Calendar from '../../components/Calendar/Calendar';
-import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { getColors, getMember } from '../../utils';
 import { toast } from 'react-toastify';
 import { useApiClient } from '../../contexts/ApiContext';
 import moment from 'moment';
+import { LoadingPage } from '../../pages';
 
 // Functional component definition for Availabilities
 const Availabilities = () => {
   // State variables initialization using the useState hook
-  const [colors, setColors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useTranslation();
   const { currentUser } = useSelector((state) => state.user);
-  const IAM = currentUser.IAM;
   const [calendarAvailability, setCalendarAvailability] = useState([]);
 
   const apiClient = useApiClient();
 
-  useEffect(() => {
-    const fetchColors = async () => {
-      const data = await getColors(currentUser.IAM);
-      setColors(data);
-    }
-
-    fetchColors();
-  }, [colors, currentUser.IAM]);
-
   // useEffect hook for fetching data
   useEffect(() => {
-    if(!colors) return;
     async function fetchData() {
       setIsLoading(true);
+      const fetchedColors = await getColors(currentUser.IAM);
+
       const data = await apiClient.availability.get();
-      const availabilityEvents = await getEvents(data, colors);
+      const availabilityEvents = await getEvents(data, fetchedColors);
 
       setCalendarAvailability(availabilityEvents);
       setIsLoading(false);
     }
 
     fetchData(); // Calling the fetchData function
-  }, [IAM, apiClient.availability, colors, currentUser, t]); // Dependency array for the useEffect hook
+  }, [apiClient.availability, currentUser.IAM]); // Dependency array for the useEffect hook
 
 
   // Event click handler function
@@ -64,6 +53,8 @@ const Availabilities = () => {
       });
     }
   };
+
+  if (isLoading) return <LoadingPage />
 
   // Rendering the Calendar component
   return (
