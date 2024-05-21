@@ -56,6 +56,12 @@ const IncidentCard = ({ incident }) => {
 
     const formattedDate = `${year}-${month}-${day}`;
 
+    const user = [
+        firstResponders.chefAgres,
+        firstResponders.equipier,
+        firstResponders.stagiaire,
+    ]
+
     return (
         <Card className="shadow-sm mb-4">
             <Card.Body>
@@ -77,7 +83,7 @@ const IncidentCard = ({ incident }) => {
                 <div>
                     <strong>{t('status.team_members')}</strong>
                     <Accordion flush>
-                        {firstResponders.map((member, index) => (
+                        {user.map((member, index) => (
                             <UserAccordion key={index} user={member} index={index} />
                         ))}
                     </Accordion>

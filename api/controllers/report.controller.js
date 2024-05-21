@@ -5,11 +5,13 @@ import { logServerError } from '../utils/logger.js';
 export const createReport = async (req, res, next) => {
     const body = req.body
     try {
+        if (body.patientInfo.gender == '') body.patientInfo.gender = 'Other';
         const newReport = new Report(body);
         await newReport.save();
         res.status(201).json({ message: 'Report created successfully' });
         sendReportsUpdated('reports_updated');
     } catch (error) {
+        console.error(error)
         logServerError(error.message);
         next(error);
     }
@@ -24,6 +26,7 @@ export const updateReport = async (req, res, next) => {
         res.status(200).json({ message: 'Report updated successfully' });
         sendReportsUpdated('reports_updated');
     } catch (error) {
+        console.error(error)
         logServerError(error.message);
         next(error);
     }

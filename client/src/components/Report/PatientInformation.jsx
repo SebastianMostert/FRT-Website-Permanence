@@ -63,7 +63,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         name="age"
                         value={patientInfo.age}
                         onChange={handlePatientChange}
-                        required
                     />
                 </Col>
                 <Col sm={6}>
@@ -75,7 +74,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         name="gender"
                         value={patientInfo.gender}
                         onChange={handlePatientChange}
-                        required
                     >
                         <option value="">{t('patient_information.gender.placeholder')}</option>
                         <option value="Male">{t('patient_information.gender.male')}</option>
@@ -95,7 +93,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         name="firstName"
                         value={patientInfo.firstName}
                         onChange={handlePatientChange}
-                        required
                     />
                 </Col>
                 <Col sm={6}>
@@ -108,7 +105,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         name="lastName"
                         value={patientInfo.lastName}
                         onChange={handlePatientChange}
-                        required
                     />
                 </Col>
             </Row>

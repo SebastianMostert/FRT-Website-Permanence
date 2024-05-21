@@ -57,6 +57,9 @@ export const createIncident = async (req, res, next) => {
             firstResponders.push({ position, IAM: IAM.toLowerCase() });
         }
 
+        // Format HH:MM
+        const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
+
         // Create a report
         const report = new Report({
             missionNumber,
@@ -66,7 +69,8 @@ export const createIncident = async (req, res, next) => {
                 quickReport: incident.incidentInfo,
                 location: incident.location,
                 ambulanceCalled: incident.ambulanceCalled,
-                urgenceLevel: incident.urgenceLevel
+                urgenceLevel: incident.urgenceLevel,
+                callTime: currentTime,
             }
         });
         await report.save();

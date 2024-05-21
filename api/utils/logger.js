@@ -6,41 +6,46 @@ const { combine, json, timestamp } = format;
 export const logger = createLogger({
     level: 'info',
     format: combine(
-        timestamp(),
         json()
     ),
     transports: [
-        new transports.Console(),
-        new transports.File({ filename: 'logs/errors/server.log', level: 'error' }),
-        new transports.File({ filename: 'logs/errors/user.log', level: 'warn' }),
+        new transports.File({ filename: 'logs/errors-server.log', level: 'error' }),
+        new transports.File({ filename: 'logs/errors-user.log', level: 'warn' }),
         new transports.File({ filename: 'logs/http.log', level: 'http' }),
-        new transports.File({ filename: 'logs/complete.log' })
     ]
 });
 
 // Function to log actions
 export function logServerError(message) {
-    logger.error({ message, errorCode: 500 });
+    const timestamp = new Date();
+    const obj = { msg: message, errorCode: 500, timestamp }
+    logger.error(obj);
     // Update Logs
-    saveToDB('server-error', { message });
+    saveToDB('server-error', obj);
 }
 
-export function logUserError(message, errorCode = 400) {
-    logger.warn({ message, errorCode });
+export function logUserError({ message, errorCode = 400, IAM = 'N/A', userID = 'N/A', IP }) {
+    const timestamp = new Date();
+    const obj = { msg: message, errorCode, IP, IAM, userID, timestamp }
+    logger.warn(obj);
     // Update Logs
-    saveToDB('user-error', { message, errorCode });
+    saveToDB('user-error', obj);
 }
 
-export function logUserAction(message, IP) {
-    logger.info({ message, IP });
+export function logUserAction({ message, IP, IAM = 'N/A', userID = 'N/A' }) {
+    const timestamp = new Date();
+    const obj = { msg: message, IP, IAM, userID, timestamp }
+    logger.info(obj);
     // Update Logs
-    saveToDB('action-log', { message, IP });
+    saveToDB('action-log', obj);
 }
 
 export function logHTTPRequest(endpoint, IP) {
-    logger.http({ endpoint, IP });
+    const timestamp = new Date();
+    const obj = { endpoint, IP, timestamp }
+    logger.http(obj);
     // Update Logs
-    saveToDB('http-log', { endpoint, IP });
+    saveToDB('http-log', obj);
 }
 
 async function saveToDB(type, obj) {

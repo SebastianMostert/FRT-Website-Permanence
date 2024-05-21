@@ -328,9 +328,6 @@ export default function Calendar() {
         }
     }
 
-    console.log(isLoading)
-    console.log(isRefreshing)
-
     if (isLoading) return <LoadingPage />
 
     return (

@@ -7,6 +7,7 @@ import { logServerError, logHTTPRequest } from '../utils/logger.js';
 /** 
  * LOGGER INFO
  * All HTTP requests are logged to the logger.
+ * All server errors are logged to the logger.
 */
 
 // Create availability

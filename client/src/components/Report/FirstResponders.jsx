@@ -1,60 +1,140 @@
 /* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
 import { Row, Col, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
-const FirstResponders = ({ firstResponders, handleResponderChange, isEditable }) => {
+// TODO: Add auto complete for IAM based on team
+
+const FirstResponders = ({ firstResponders, isEditable, setFirstResponders }) => {
+    const [teams, setTeams] = useState([]);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [loading, setLoading] = useState(true);
     const { t } = useTranslation();
     const disabled = !isEditable;
 
-    const onChange = (index, e) => {
-        const { value } = e.target;
-        const updatedResponders = [...firstResponders];
-        updatedResponders[index].IAM = value;
-
-        handleResponderChange(updatedResponders);
+    const handleSingleResponderChange = (field, subField, value) => {
+        setFirstResponders({
+            ...firstResponders,
+            [field]: {
+                ...firstResponders[field],
+                [subField]: value,
+            },
+        });
     };
+
+    const onChangeSelectedTeam = (e) => {
+        const value = e.target.value
+
+        setSelectedTeam(value)
+        setFirstResponders({
+            ...firstResponders,
+            "teamID": value,
+        });
+    };
+
+    // First we need to fetch the teams
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const res = await fetch('/api/v1/team/fetch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                setTeams(data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchTeams();
+    }, []);
+
+    if (loading) return <>...</>;
+
+    const { feedback: chefAgresFeedback, minLength: chefAgresMinLength } = isValid('chefAgres', firstResponders?.chefAgres?.IAM || '', t);
+    const { feedback: equipierFeedback, minLength: equipierMinLength } = isValid('equipier', firstResponders?.equipier?.IAM || '', t);
+    const { feedback: stagiaireFeedback, minLength: stagiaireMinLength } = isValid('stagiaire', firstResponders?.stagiaire?.IAM || '', t);
 
     return (
         <Form.Group>
             <h5>{t('first_responders.title')}</h5>
             <hr />
-            {firstResponders.map((responder, index) => {
-                // Show feedback only if the responder is not a stagiaire OR if the user partially filled the form
-
-                const { feedback, showFeedback, minLength } = isValid(responder, t);
-
-                return (
-                    <Row key={index} className="mb-3">
-                        <Col sm={8} className="mx-auto">
-                            <Form.Label>{responder.position}</Form.Label>
-                            <Form.Control
-                                disabled={disabled}
-                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                                type="text"
-                                placeholder={t('first_responders.iam.placeholder')}
-                                value={responder.IAM}
-                                onChange={(e) => onChange(index, e)}
-                                minLength={minLength}
-                                maxLength={8}
-                                isInvalid={showFeedback}
-                                required={minLength >= 8}
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                {feedback}
-                            </Form.Control.Feedback>
-                        </Col>
-                    </Row>
-                )
-            }
-            )}
+            <Form.Label>{t('first_responders.team.label')}</Form.Label>
+            <Form.Select
+                disabled={disabled}
+                value={firstResponders.teamID}
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                onChange={onChangeSelectedTeam}
+                required
+            >
+                <option value="">{t('first_responders.team.placeholder')}</option>
+                {teams.map((team) => (
+                    <option key={team._id} value={team._id}>{team.name}</option>
+                ))}
+            </Form.Select>
+            <hr />
+            {/* Loop over the responders */}
+            <Row className="mb-3">
+                <Col sm={8} className="mx-auto">
+                    <Form.Label>{t('first_responders.chef_agres.label')}</Form.Label>
+                    <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                        type="text"
+                        placeholder={t('first_responders.iam.placeholder')}
+                        value={firstResponders.chefAgres.IAM}
+                        onChange={(e) => handleSingleResponderChange('chefAgres', 'IAM', e.target.value)}
+                        minLength={chefAgresMinLength}
+                        maxLength={8}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">{chefAgresFeedback}</Form.Control.Feedback>
+                </Col>
+            </Row>
+            <Row className="mb-3">
+                <Col sm={8} className="mx-auto">
+                    <Form.Label>{t('first_responders.equipier.label')}</Form.Label>
+                    <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                        type="text"
+                        placeholder={t('first_responders.iam.placeholder')}
+                        value={firstResponders.equipier.IAM}
+                        onChange={(e) => handleSingleResponderChange('equipier', 'IAM', e.target.value)}
+                        minLength={equipierMinLength}
+                        maxLength={8}
+                        required
+                    />
+                    <Form.Control.Feedback type="invalid">{equipierFeedback}</Form.Control.Feedback>
+                </Col>
+            </Row>
+            <Row className="mb-3">
+                <Col sm={8} className="mx-auto">
+                    <Form.Label>{t('first_responders.stagiaire.label')}</Form.Label>
+                    <Form.Control
+                        disabled={disabled}
+                        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                        type="text"
+                        placeholder={t('first_responders.iam.placeholder')}
+                        value={firstResponders.stagiaire.IAM}
+                        onChange={(e) => handleSingleResponderChange('stagiaire', 'IAM', e.target.value)}
+                        minLength={stagiaireMinLength}
+                        maxLength={8}
+                    />
+                    <Form.Control.Feedback type="invalid">{stagiaireFeedback}</Form.Control.Feedback>
+                </Col>
+            </Row>
         </Form.Group>
     );
 };
 
 export default FirstResponders;
 
-function isValid(responder, t) {
-    const isStagiaire = responder.position === 'Stagiaire Bin.';
+function isValid(position, IAM, t) {
+    const isStagiaire = position === 'Stagiaire Bin.';
     let showFeedback = false;
     let minLength = 9;
     let feedback = '';
@@ -67,8 +147,8 @@ function isValid(responder, t) {
     }
 
     // If the user is a stagiaire and the iam is not empty validate it:
-    if (isStagiaire && responder.IAM.length > 0) {
-        const { valid, message } = isValidIAM(responder.IAM, t);
+    if (isStagiaire && IAM.length > 0) {
+        const { valid, message } = isValidIAM(IAM, t);
         if (!valid) {
             setFeedback(message);
         }
@@ -76,7 +156,7 @@ function isValid(responder, t) {
 
     // If the user is not a stagiaire validate the IAM
     if (!isStagiaire) {
-        const { valid, message } = isValidIAM(responder.IAM, t);
+        const { valid, message } = isValidIAM(IAM, t);
         if (!valid) {
             setFeedback(message);
         }

@@ -16,6 +16,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 import MenuIcon from '@mui/icons-material/Menu';
+import ListIcon from '@mui/icons-material/List';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -229,7 +230,7 @@ const Sidebar = ({ children }) => {
                 </List>
                 <Divider />
                 <List>
-                    {['Users', 'Stock', 'Settings'].map((text) => (
+                    {['Users', 'Stock', 'Audit', 'Settings'].map((text) => (
                         <ListItem key={text} disablePadding sx={{ display: 'block' }} onClick={() => handleClick('/admin/' + text.toLowerCase())}>
                             <ListItemButton
                                 sx={{
@@ -245,7 +246,7 @@ const Sidebar = ({ children }) => {
                                         justifyContent: 'center',
                                     }}
                                 >
-                                    {text === 'Users' ? <PeopleIcon /> : text === 'Stock' ? <Inventory2Icon /> : <SettingsIcon />}
+                                    {text === 'Users' ? <PeopleIcon /> : text === 'Stock' ? <Inventory2Icon /> : text === 'Audit' ? <ListIcon /> : <SettingsIcon />}
                                 </ListItemIcon>
                                 <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
                             </ListItemButton>

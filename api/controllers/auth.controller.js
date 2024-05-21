@@ -9,11 +9,14 @@ import sendEmail from '../utils/sendEmail.js';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
 import { errorHandler } from '../utils/error.js';
-import { logServerError, logHTTPRequest } from '../utils/logger.js';
+import { logServerError, logHTTPRequest, logUserAction, logUserError } from '../utils/logger.js';
 
 /** 
  * LOGGER INFO
  * All HTTP requests are logged to the logger.
+ * All server errors are logged to the logger.
+ * All user actions are logged to the logger.
+ * All user errors are logged to the logger.
 */
 
 // Sign Up
@@ -29,7 +32,14 @@ export const signup = async (req, res, next) => {
     await newUser.save();
 
     // Remove message
-    res.status(201).json({ message: 'User created successfully', user: newUser });
+    const message = 'User created successfully';
+    res.status(201).json({ message, user: newUser });
+    logUserAction({
+      IP: req.ip,
+      IAM: IAM,
+      userID: newUser._id,
+      message,
+    });
   } catch (error) {
     logServerError(error.message);
     res.status(500).json({ error });
@@ -39,7 +49,8 @@ export const signup = async (req, res, next) => {
 
 // Sign In
 export const signin = async (req, res, next) => {
-  logHTTPRequest('/auth/signin', req.ip);
+  const IP = req.ip;
+  logHTTPRequest('/auth/signin', IP);
   try {
     let { IAM, password, code } = req.body;
     IAM = IAM.toLowerCase(); // Convert IAM to lowercase
@@ -47,11 +58,24 @@ export const signin = async (req, res, next) => {
     const { success: validPassword, statusCode, statusText, user } = await validatePassword(IAM, password, code);
 
     if (!validPassword) {
+      logUserError({
+        IP,
+        errorCode: statusCode,
+        IAM,
+        userID: user._id,
+        message: `User failed to sign in: ${statusText}`,
+      });
       throw errorHandler(statusCode, statusText);
     }
 
     // Check if the user is verified
     if (!user.verified && ['admin', 'member', 'loge'].some(role => user.roles.includes(role))) {
+      logUserError({
+        IP,
+        IAM,
+        userID: user._id,
+        message: 'User failed to sign in: User is not verified',
+      })
       throw errorHandler(401, 'User is not verified');
     }
 
@@ -60,6 +84,13 @@ export const signin = async (req, res, next) => {
     const expiryDate = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 
     res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
+
+    logUserAction({
+      IP,
+      IAM,
+      userID: user._id,
+      message: 'User signed in successfully',
+    });
   } catch (error) {
     logServerError(error.message);
     next(error);
@@ -70,6 +101,11 @@ export const signin = async (req, res, next) => {
 export const signout = (req, res) => {
   logHTTPRequest('/auth/signout', req.ip);
   res.clearCookie('access_token').status(200).json('Signout success!');
+
+  logUserAction({
+    IP: req.ip,
+    message: 'User signed out successfully',
+  });
 };
 
 // Validate
@@ -79,14 +115,33 @@ export const validate = (req, res, next) => {
   const token = req.cookies.access_token;
 
   // Make sure token exists
-  if (!token) return next(errorHandler(401, 'You are not authenticated!'));
+  if (!token) {
+    logUserError({
+      message: 'Validation failed: No token provided',
+      errorCode: 401,
+      IP: req.ip,
+    })
+    return next(errorHandler(401, 'You are not authenticated!'));
+  }
 
   // Verify token
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return next(errorHandler(403, 'Token is not valid!'));
+    if (err) {
+      logUserError({
+        message: 'Validation failed: Token is not valid',
+        errorCode: 403,
+        IP: req.ip,
+      })
+      return next(errorHandler(403, 'Token is not valid!'));
+    }
 
     // If it is valid inform the user it is valid with a 200 status
     res.status(200).json({ valid: true });
+
+    logUserAction({
+      IP: req.ip,
+      message: 'Validation successful',
+    });
   });
 };
 
@@ -104,6 +159,11 @@ export const forgotPassword = async (req, res) => {
     // Get the user 
     const user = await User.findOne({ email });
     if (!user) {
+      logUserError({
+        IP: req.ip,
+        message: 'Password forgot failed: User not found',
+        errorCode: 404,
+      })
       return res.status(404).json({
         success: false,
         message: 'User not found',
@@ -114,6 +174,13 @@ export const forgotPassword = async (req, res) => {
     if (user.twoFactorAuth) {
       const verified = validate2FaCode(user.twoFactorAuthSecret, otp);
       if (!verified) {
+        logUserError({
+          IP: req.ip,
+          message: 'Password forgot failed: Invalid two-factor authentication code',
+          errorCode: 401,
+          IAM: user.IAM,
+          userID: user._id,
+        })
         return res.status(401).json({
           success: false,
           message: 'Invalid two-factor authentication code',
@@ -168,6 +235,12 @@ export const forgotPassword = async (req, res) => {
       success: true,
       message: 'Reset token sent to email',
     });
+    logUserAction({
+      IP: req.ip,
+      message: 'Password reset token sent to email',
+      IAM: user.IAM,
+      userID: user._id,
+    });
   } catch (error) {
     logServerError(error.message);
     res.status(500).json({
@@ -193,6 +266,11 @@ export const resetPassword = async (req, res) => {
     const resetRecord = await ResetPassword.findOne({ token });
 
     if (!resetRecord) {
+      logUserError({
+        IP: req.ip,
+        message: 'Password reset failed: Invalid or expired token',
+        errorCode: 400,
+      })
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired token',
@@ -204,6 +282,11 @@ export const resetPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+      logUserError({
+        IP: req.ip,
+        message: 'Password reset failed: User not found',
+        errorCode: 404,
+      })
       return res.status(404).json({
         success: false,
         message: 'User not found',
@@ -284,6 +367,13 @@ export const resetPassword = async (req, res) => {
       success: true,
       message: 'Password reset successful',
     });
+
+    logUserAction({
+      IP: req.ip,
+      IAM: user.IAM,
+      userID: user._id,
+      message: 'Password reset successful',
+    });
   } catch (error) {
     logServerError(error.message);
     res.status(500).json({
@@ -304,11 +394,21 @@ export const addTwoFactorAuthentication = async (req, res) => {
 
     const user = await User.findOne({ IAM: IAM.toLowerCase() });
     if (!user) {
+      logUserError({
+        IP: req.ip,
+        message: 'Two-factor authentication addition failed: User not found',
+        errorCode: 404,
+      });
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Check if 2fa is enabled for the user
     if (user.twoFactorAuth) {
+      logUserError({
+        IP: req.ip,
+        message: 'Two-factor authentication addition failed: User already has 2fa enabled',
+        errorCode: 400,
+      });
       return res.status(400).json({ error: 'Two-factor authentication is already enabled' });
     }
 
@@ -332,8 +432,17 @@ export const addTwoFactorAuthentication = async (req, res) => {
     // Generate a QR Code for the user to scan
     qrcode.toDataURL(otpAuthUrl, (err, dataUrl) => {
       if (err) {
+        logServerError(err.message);
         return res.status(500).json({ error: 'Could not generate QR code' });
       }
+
+      logUserAction({
+        IP: req.ip,
+        IAM: user.IAM,
+        userID: user._id,
+        message: 'Two-factor authentication addition successful: QR code generated',
+      })
+      // Return the QR code URL
       return res.json({ dataUrl });
     });
   } catch (error) {
@@ -352,6 +461,11 @@ export const validateTwoFactorCode = async (req, res) => {
 
     // Check if user has a secret key for 2FA
     if (!user.twoFactorAuthSecret) {
+      logUserError({
+        IP: req.ip,
+        message: 'Two-factor authentication validation failed: User does not have a secret key',
+        errorCode: 400,
+      });
       return res.status(400).json({ error: 'Two-factor authentication not set up' });
     }
 
@@ -366,8 +480,21 @@ export const validateTwoFactorCode = async (req, res) => {
         $set: { twoFactorAuth: true }
       });
 
+      logUserAction({
+        IP: req.ip,
+        IAM: user.IAM,
+        userID: user._id,
+        message: 'Two-factor authentication enabled successfully',
+      });
       return res.json({ message: 'Two-factor authentication enabled successfully' });
     } else {
+      logUserError({
+        IP: req.ip,
+        message: 'Two-factor authentication validation failed: Invalid code',
+        errorCode: 400,
+        IAM: user.IAM,
+        userID: user._id,
+      });
       return res.status(400).json({ error: 'Invalid two-factor authentication code' });
     }
   } catch (error) {
@@ -386,8 +513,15 @@ export const removeTwoFactorAuthentication = async (req, res) => {
     if (!password) return res.status(400).json({ error: 'Missing password' });
 
     // Validate password
-    const { statusCode, statusText, success: validPassword } = await validatePassword(IAM.toLowerCase(), password, code);
-    if (!validPassword) return res.status(statusCode).json({ error: statusText });
+    const { statusCode, statusText, success: validPassword, user } = await validatePassword(IAM.toLowerCase(), password, code);
+    if (!validPassword) {
+      logUserError({
+        IP: req.ip,
+        message: 'Two-factor authentication removal failed: Invalid password',
+        errorCode: statusCode,
+      });
+      return res.status(statusCode).json({ error: statusText });
+    }
 
     await User.findOneAndUpdate({
       IAM: IAM.toLowerCase(),
@@ -398,6 +532,12 @@ export const removeTwoFactorAuthentication = async (req, res) => {
       },
     });
 
+    logUserAction({
+      IP: req.ip,
+      IAM: IAM.toLowerCase(),
+      message: 'Two-factor authentication removed successfully',
+      userID: user._id,
+    });
     return res.status(200).json({ message: 'Two-factor authentication disabled successfully' });
   } catch (error) {
     logServerError(error.message);

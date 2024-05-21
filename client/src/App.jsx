@@ -39,6 +39,7 @@ import Stock from './Admin/pages/Stock/Stock';
 import MembersPage from './pages/LogePages/MembersPage';
 import Settings from './pages/Settings';
 import { useApiClient } from './contexts/ApiContext';
+import AuditLog from './Admin/pages/AuditLog';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -103,6 +104,7 @@ function App() {
           <Route element={<SidebarRoute />}>
             <Route path='/admin' element={<Dashboard />} />
             <Route path='/admin/users' element={<Users />} />
+            <Route path='/admin/audit' element={<AuditLog />} />
             <Route path='/admin/availabilities' element={<Availabilities />} />
             <Route path='/admin/shifts' element={<Shifts />} />
             <Route path='/admin/settings' element={<AdminSettings />} />

@@ -22,8 +22,12 @@ const IncidentReportCard = ({
 
     const missionNumber = report.missionNumber.toString();
     const archived = report.archived;
-    const users = report.users;
+    // Set the users
+    const firstResponderInfo = report.firstResponders;
 
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const users = [firstResponderInfo.chefAgres, firstResponderInfo.equipier, firstResponderInfo.stagiaire,];
 
     const handleExport = () => {
         onExport(report, exportType);
@@ -60,6 +64,8 @@ const IncidentReportCard = ({
         fetchData();
     }, [currentUser?.IAM]);
 
+
+
     useEffect(() => {
         // Check if the current user is one of the First Responders
         const isCurrentUserFirstResponder = users.some(user => user.IAM === currentUser.IAM);
@@ -75,6 +81,8 @@ const IncidentReportCard = ({
     if (loading) {
         return <LoadingPage />
     }
+
+    console.log('users:', report.firstResponders);
 
     return (
         <Card>
@@ -161,18 +169,41 @@ const IncidentReportCard = ({
 export default IncidentReportCard;
 
 const UserAccordion = ({ user, index, t }) => {
+    const [fullUser, setFullUser] = useState(null);
+    const { IAM, position } = user;
+
+    useEffect(() => {
+        async function fetchData() {
+            const res = await fetch(`/api/v1/user/fetch/${IAM}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            const data = await res.json()
+            const user = data._doc;
+
+            setFullUser(user);
+        }
+
+        fetchData();
+    }, [IAM]);
+
+    if (!fullUser) return null
+
+    // Fetch the full user
     return (
         <Accordion.Item key={index} eventKey={index.toString()}>
             <Accordion.Header>
-                {`${user.firstName} ${user.lastName}`}
-                <span className="ms-2 text-muted">{user.position}</span>
+                {`${fullUser.firstName} ${fullUser.lastName}`}
+                <span className="ms-2 text-muted">{position}</span>
             </Accordion.Header>
             <Accordion.Body>
                 <div>
-                    <strong>Email:</strong> {user.email}
+                    <strong>Email:</strong> {fullUser.email}
                 </div>
                 <div>
-                    <strong>{t('incidents.student_class')}</strong> {user.studentClass}
+                    <strong>{t('incidents.student_class')}</strong> {fullUser.studentClass}
                 </div>
                 {/* Add more user details here as needed */}
             </Accordion.Body>

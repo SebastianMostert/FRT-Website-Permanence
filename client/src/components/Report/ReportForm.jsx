@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
-import { Container, Form, Button, Accordion, Placeholder } from 'react-bootstrap';
+import { Container, Form, Button, Accordion } from 'react-bootstrap';
 import FirstResponders from './FirstResponders';
 import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
@@ -14,11 +14,11 @@ import { useSelector } from 'react-redux';
 import { LoadingPage } from '../../pages';
 
 const defaultValues = {
-    firstRespondersValues: [
-        { position: 'Chef Agres', IAM: '' },
-        { position: 'Equipier Bin.', IAM: '' },
-        { position: 'Stagiaire Bin.', IAM: '' },
-    ],
+    firstRespondersValues: {
+        chefAgres: { position: 'Chef Agres', IAM: '' },
+        equipier: { position: 'Equipier Bin.', IAM: '' },
+        stagiaire: { position: 'Stagiaire Bin.', IAM: '' },
+    },
     patientInfoValues: {
         age: '',
         gender: '',
@@ -143,6 +143,11 @@ const defaultValues = {
         SepasContacted: false,
         ambulanceCalled: false,
         urgenceLevel: 4,
+        callTime: '',
+        responseTime: '',
+        onSiteTime: '',
+        finishedTime: '',
+        freeOnRadio: '',
     },
     archived: false,
 }
@@ -163,10 +168,6 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
 
     const { currentUser } = useSelector(state => state.user);
     const { t } = useTranslation();
-
-    const handleResponderChange = (updatedResponders) => {
-        setFirstResponders(updatedResponders);
-    };
 
     const handlePatientChange = (event) => {
         const { name, value } = event.target;
@@ -297,12 +298,6 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                     setIsNewReport(false);
                 }
 
-                if (data?.firstResponders.length > 0) {
-                    while (data?.firstResponders.length < 3) {
-                        data.firstResponders.push({ position: 'Stagiaire Bin.', IAM: '' });
-                    }
-                }
-
                 setFirstResponders(data?.firstResponders || defaultValues.firstRespondersValues);
                 setPatientInfo(data?.patientInfo || defaultValues.patientInfoValues);
                 setAbcdeData(data?.abcdeSchema || defaultValues.ABCDEValues);
@@ -340,19 +335,23 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
 
         const extractedMissionInfo = extractMissionInfo();
 
-        // Check if the current user is one of the First Responders
-        const isCurrentUserFirstResponder = firstResponders.some(user => user.IAM === currentUser.IAM);
+        // Check if the current user is one of the First Responders object
+        let isCurrentUserFirstResponder = false;
+        if (firstResponders.chefAgres.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
+        if (firstResponders.equipier.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
+        if (firstResponders.stagiaire.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
         // Check if the incident is from today
         const isToday = new Date().toLocaleDateString() === `${extractedMissionInfo.day}/${extractedMissionInfo.month}/${extractedMissionInfo.year}`;
         // Check if the user is an admin
         const isAdmin = roles.includes('admin');
         // Check if the firstResponders contains iam's that arent empty
-        const nonEmptyFirstResponders = firstResponders.some(user => user.IAM !== '');
+        let nonEmptyFirstResponders = false;
+        if (firstResponders.chefAgres.IAM !== '' && firstResponders.equipier.IAM !== '' && firstResponders.stagiaire.IAM !== '') nonEmptyFirstResponders = true;
 
         if (missionNumber.length === 10) {
             if (isToday) {
                 // Check if there is an IAM. If not, allow the user to edit
-                if(!nonEmptyFirstResponders) {
+                if (!nonEmptyFirstResponders) {
                     console.warn('There are no first responders so we allow the user to edit');
                     setIsEditable(true);
                 }
@@ -371,59 +370,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
             setIsEditable(false);
         }
     })
-    if (!dataLoaded) {
-        return (
-            <Container>
-                <h2 className="mt-4 mb-3">{t('report.title')}</h2>
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>{t('report.mission_number')}</Form.Label>
-                        <Placeholder as={Form.Control} animation='wave' bg='secondary' />
-                    </Form.Group>
-
-                    <Accordion defaultActiveKey="0">
-                        <Accordion.Item eventKey="0">
-                            <Accordion.Header>{t('report.first_responders.title')}</Accordion.Header>
-                            <Accordion.Body>
-                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    </Accordion>
-
-                    <Accordion defaultActiveKey="1">
-                        <Accordion.Item eventKey="1">
-                            <Accordion.Header>{t('report.patient.title')}</Accordion.Header>
-                            <Accordion.Body>
-                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    </Accordion>
-
-                    <Accordion defaultActiveKey="1">
-                        <Accordion.Item eventKey="1">
-                            <Accordion.Header>{t('report.abcde.title')}</Accordion.Header>
-                            <Accordion.Body>
-                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    </Accordion>
-
-                    <Accordion defaultActiveKey="1">
-                        <Accordion.Item eventKey="1">
-                            <Accordion.Header>{t('report.sampler.title')}</Accordion.Header>
-                            <Accordion.Body>
-                                <Placeholder as={Form.Control} animation='wave' bg='secondary' />
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    </Accordion>
-
-                    <Button variant="secondary" type="submit">
-                        {t('button.submit')}
-                    </Button>
-                </Form>
-            </Container>
-        );
-    }
+    if (!dataLoaded) return <LoadingPage />
 
     const reportFormSubcomponents = {
         firstResponders: {
@@ -431,7 +378,7 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 <FirstResponders
                     isEditable={isEditable}
                     firstResponders={firstResponders}
-                    handleResponderChange={handleResponderChange}
+                    setFirstResponders={setFirstResponders}
                 />
             ),
             header: t('report.first_responders.title'),

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClipboard, faHandHoldingDollar, faLocationDot, faTruckMedical, faUserNurse } from '@fortawesome/free-solid-svg-icons';
+import { faClipboard, faClock, faHandHoldingDollar, faLocationDot, faTruckMedical, faUserNurse } from '@fortawesome/free-solid-svg-icons';
 import { Form, InputGroup } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { AiFillAlert } from "react-icons/ai";
@@ -75,6 +75,13 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
         return value;
     }
 
+    function getTextAreaRows(text) {
+        const length = text.split('\n').length;
+        // Ensure that the textarea does not have more than 10 lines
+
+        return length > 10 ? 10 : length;
+    }
+
     return (
         <Form.Group className="mb-3">
             <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
@@ -82,7 +89,7 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
             </Form.Label>
             <Form.Control
                 as="textarea"
-                rows={3}
+                rows={getTextAreaRows(missionInfo.quickReport)}
                 value={missionInfo.quickReport}
                 onChange={(e) => handleMissionInfoChange(e)}
                 name="quickReport"
@@ -103,9 +110,10 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
             <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                 <FontAwesomeIcon icon={faHandHoldingDollar} style={{ marginRight: '5px' }} /> {t('mission_information.valuables_given_to.label')}
             </Form.Label>
+            {/* Make the rows dynamically size */}
             <Form.Control
                 as="textarea"
-                rows={3}
+                rows={getTextAreaRows(missionInfo.valuablesGivenTo)}
                 value={missionInfo.valuablesGivenTo}
                 onChange={(e) => handleMissionInfoChange(e)}
                 name="valuablesGivenTo"
@@ -126,7 +134,10 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
                 marks={marks}
                 min={0}
                 max={3}
+                disabled={disabled}
             />
+
+            <hr />
 
             <InputGroup>
                 <Form.Label>
@@ -136,6 +147,7 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
                     type="switch"
                     onChange={() => handleMissionInfoChange({ target: { name: 'sepasContacted', value: !missionInfo.sepasContacted } })}
                     checked={missionInfo.sepasContacted}
+                    disabled={disabled}
                 />
             </InputGroup>
 
@@ -147,10 +159,80 @@ const MissionInformation = ({ isEditable, missionInfo, handleMissionInfoChange }
                     type="switch"
                     onChange={() => handleMissionInfoChange({ target: { name: 'ambulanceCalled', value: !missionInfo.ambulanceCalled } })}
                     checked={missionInfo.ambulanceCalled}
+                    disabled={disabled}
                 />
             </InputGroup>
+            <hr />
+            {/* Now add the times */}
+            {/* Call time - The time the team was called */}
+            {/* Response time - The time the team took over the call */}
+            {/* On site time - The time the team was on site */}
+            {/* Finished time - The time the team finished with the patient */}
+            {/* Free on radio - The time the team was free on radio */}
+            {/* Now display the times */}
+            <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                <FontAwesomeIcon icon={faClock} style={{ marginRight: '5px' }} /> {t('mission_information.times.label')}
+            </Form.Label>
+            <MissionTimes value={missionInfo} onChange={handleMissionInfoChange} disabled={disabled} />
         </Form.Group>
     );
 };
 
 export default MissionInformation;
+
+const MissionTimes = ({ value, onChange, disabled }) => {
+    const { t } = useTranslation();
+    const changeTime = (field, time) => {
+        onChange({
+            target: {
+                name: field,
+                value: time
+            }
+        });
+    };
+
+    return (
+        <div>
+            <Form.Group className="mb-3">
+                <Form.Label>{t('mission_information.call_time.label')}</Form.Label>
+                <Form.Control
+                    type="time"
+                    value={value.callTime}
+                    onChange={(e) => changeTime('callTime', e.target.value)}
+                    disabled={disabled}
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>{t('mission_information.response_time.label')}</Form.Label>
+                <Form.Control
+                    type="time"
+                    value={value.responseTime}
+                    onChange={(e) => changeTime('responseTime', e.target.value)}
+                    disabled={disabled}
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>{t('mission_information.on_site_time.label')}</Form.Label>
+                <Form.Control type="time" value={value.onSiteTime} onChange={(e) => changeTime('onSiteTime', e.target.value)} disabled={disabled} />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>{t('mission_information.finished_time.label')}</Form.Label>
+                <Form.Control
+                    type="time"
+                    value={value.finishedTime}
+                    onChange={(e) => changeTime('finishedTime', e.target.value)}
+                    disabled={disabled}
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>{t('mission_information.free_on_radio.label')}</Form.Label>
+                <Form.Control
+                    type="time"
+                    value={value.freeOnRadio}
+                    onChange={(e) => changeTime('freeOnRadio', e.target.value)}
+                    disabled={disabled}
+                />
+            </Form.Group>
+        </div>
+    );
+}

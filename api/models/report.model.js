@@ -11,20 +11,18 @@ const reportSchema = new mongoose.Schema({
         required: true,
     },
     firstResponders: {
-        type: Array,
+        type: Object,
         required: true,
-        default: [],
+        default: {},
     },
     patientInfo: {
         age: {
             type: Number,
-            required: true,
             default: 0,
         },
         gender: {
             type: String,
             enum: ['Male', 'Female', 'Other'],
-            required: true,
             default: 'Other',
         },
         firstName: defaultStr,
