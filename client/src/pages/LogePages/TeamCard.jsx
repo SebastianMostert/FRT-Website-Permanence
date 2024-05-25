@@ -52,9 +52,8 @@ const LeftSide = ({ title, status, setLeftSideWidth, alerted, teamID }) => {
             ref={leftSideRef}
         >
             {/* Render the StatusSquare */}
-            <div onClick={() => setShowStatusChanger(!showStatusChanger)}>
-                <StatusSquare status={status} alerted={alerted} />
-            </div>
+            <StatusSquare status={status} alerted={alerted} onClick={() => setShowStatusChanger(!showStatusChanger)} size={40} />
+
             {/* Render the Title */}
             <div style={{ fontSize: TITLE_SIZE, fontWeight: 'bold', whiteSpace: 'normal', wordWrap: 'break-word' }}>{title}</div>
             {/* Render the StatusChanger component as an overlay */}
@@ -67,52 +66,72 @@ const LeftSide = ({ title, status, setLeftSideWidth, alerted, teamID }) => {
     );
 };
 
-const RightSide = ({ members, containerWidth, leftSideWidth, middleSideWidth }) => {
+const RightSide = ({ team, containerWidth, leftSideWidth, middleSideWidth }) => {
     const hasEnoughSpace = containerWidth - leftSideWidth - middleSideWidth - (2 * MARGIN) > RIGHT_SIDE_WIDTH;
+    const members = team.members;
 
-    if (!hasEnoughSpace) {
-        return null; // Hide the right side if there isn't enough space
-    }
-
-    // Ensure that there are always three members
-    const displayedMembers = members.slice(0, 3); // Take up to three members
+    if (!hasEnoughSpace) return null; // Hide the right side if there isn't enough space
 
     // Define the positions in the specified order
-    const positions = ['Chef Agres', 'Equipier Bin.', 'Stagiaire Bin.'];
+    const positions = team.memberPositions;
+    const renderedRows = [];
+    const length = Math.max(Math.ceil(positions.length / 3) * 3, positions.length);
 
-    // Create an array with the member or 'N/A' for each position
-    const renderedMembers = positions.map(position => {
-        const member = displayedMembers.find(member => member.position === position);
-        return (
-            <div key={position} style={{ display: 'inline-block', marginRight: '20px', flexShrink: 0 }}>
-                <div className='font-thin'>{position}</div>
-                {member ? (
-                    <>
-                        <div className='font-semibold'>
-                            {member.firstName.charAt(0)}. {member.lastName}
-                        </div>
-                        <div className='font-thin'>{member.IAM}</div>
-                    </>
-                ) : (
-                    <div className='font-semibold'>
-                        N/A
-                    </div>
-                )}
+    // Define constant width and height for member divs
+    const memberWidth = 90;
+    const memberHeight = 70;
+
+    // Define positions per row
+    const positionsPerRow = 3;
+
+    // Group members into rows of 3
+    for (let i = 0; i < length; i += positionsPerRow) {
+        const rowMembers = [];
+
+        for (let j = 0; j < positionsPerRow; j++) {
+            const positionIndex = i + j;
+            const position = positions[positionIndex];
+            const member = members.find(member => member.position === position);
+
+            rowMembers.push(
+                <div key={positionIndex} style={{ display: 'inline-block', marginRight: '20px', flexShrink: 0, width: memberWidth, height: memberHeight }}>
+                    {position && (
+                        <>
+                            <div className='font-thin' style={{ marginBottom: '5px' }}>{position}</div>
+                            {member ? (
+                                <div>
+                                    <div className='font-semibold'>
+                                        {member.firstName.charAt(0)}. {member.lastName}
+                                    </div>
+                                    <div className='font-thin'>{member.IAM}</div>
+                                </div>
+                            ) : (
+                                <div className='font-semibold'>
+                                    N/A
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        renderedRows.push(
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                {rowMembers}
             </div>
-        )
-    });
+        );
+    }
 
     return (
         <div style={{ flexGrow: 1, width: RIGHT_SIDE_WIDTH }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                {renderedMembers}
-            </div>
+            {renderedRows}
         </div>
     );
 };
 
 const TeamCard = ({ team }) => {
-    const { name, members, status, alerted, startDate, endDate, _id } = team;
+    const { name, status, alerted, startDate, endDate, _id } = team;
     const [leftSideWidth, setLeftSideWidth] = useState(LEFT_SIDE_WIDTH);
     const [_status, setStatus] = useState(status);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -136,44 +155,8 @@ const TeamCard = ({ team }) => {
 
     useEffect(() => {
         setStatus(status);
-        const fetchPromises = [];
+    }, [status]); // Add dependencies to useEffect
 
-        if (members.length < 2) setStatus(6);
-
-        for (let i = 0; i < members.length; i++) {
-            const member = members[i];
-
-            // Push each fetch promise into the array
-            fetchPromises.push(
-                fetch(`/api/v1/user/fetch/${member.IAM}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }).then(async (res) => {
-                    const data = await res.json();
-                    const user = data._doc;
-
-                    // Check if user has phone and key
-                    if (!user?.hasPhone || !user?.hasKey) {
-                        throw new Error('User does not have phone or key');
-                    }
-                }).catch(() => {
-                    // Handle errors if any
-                    setStatus(6);
-                })
-            );
-        }
-
-        // Wait for all promises to resolve
-        Promise.all(fetchPromises).then(() => {
-            // Handle any actions after all fetches resolve successfully
-        }).catch(error => {
-            // Handle errors if any of the fetch requests fail
-            console.error(error);
-            setStatus(6);
-        });
-    }, [members, status]); // Add dependencies to useEffect
 
     return (
         <Card>
@@ -194,7 +177,7 @@ const TeamCard = ({ team }) => {
                     {/* Add some space between the sides */}
                     <div style={{ marginLeft: `${MARGIN}px` }} />
                     <RightSide
-                        members={members}
+                        team={team}
                         containerWidth={containerWidth}
                         leftSideWidth={leftSideWidth}
                         middleSideWidth={MIDDLE_SIDE_WIDTH}

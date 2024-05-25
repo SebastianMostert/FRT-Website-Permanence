@@ -353,6 +353,25 @@ export const getColors = async (IAM) => {
     return eventColors;
 }
 
+export const isValidIAM = async (IAM = '', t) => {
+    // Check the length of the IAM it must be 8
+    if (IAM.length != 8) {
+        return { valid: false, message: t('input.iam.error.length') };
+    }
+
+    // Check that the first 5 characters are letters
+    if (!/^[a-zA-Z]{5}/.test(IAM)) {
+        return { valid: false, message: t('input.iam.error.letters') };
+    }
+
+    // Check that the last 3 characters are digits
+    if (!/[0-9]{3}$/.test(IAM)) {
+        return { valid: false, message: t('input.iam.error.digits') };
+    }
+
+    return { valid: true, message: '' };
+}
+
 const colors = {
     events: {
         exams: '#000000', // Black as default

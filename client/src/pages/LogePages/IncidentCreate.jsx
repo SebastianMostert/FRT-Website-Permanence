@@ -52,6 +52,7 @@ const IncidentCreate = () => {
             });
 
             const data = await res.json();
+
             const filteredTeams = data.filter(team => (team.status === "1" || team.status === "2") && !team.alerted);
             if (filteredTeams.length > 0) {
                 setError(false);

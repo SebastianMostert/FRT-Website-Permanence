@@ -70,8 +70,18 @@ const MarkBesetztModal = ({ show, handleClose, event }) => {
                 // Get the data from the response
                 const data = await res.json();
 
+                const teams = [];
+
+                // Loop through the data and create an option object for each team
+                data.forEach((team) => {
+                    const { active } = team;
+                    if(!active) return;
+
+                    teams.push(team);
+                });
+
                 // Set the data in the state
-                setTeams(data);
+                setTeams(teams);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

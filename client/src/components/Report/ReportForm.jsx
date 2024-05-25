@@ -6,19 +6,14 @@ import PatientInformation from './PatientInformation';
 import ABCDESchema from './ABCDESchema';
 import SamplerSchema from './SamplerSchema';
 import MissionNumber from '../Inputs/MissionNumber';
-import { getRoles, updateReport } from '../../utils';
+import { updateReport } from '../../utils';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import MissionInformation from './MissionInformation';
-import { useSelector } from 'react-redux';
 import { LoadingPage } from '../../pages';
 
 const defaultValues = {
-    firstRespondersValues: {
-        chefAgres: { position: 'Chef Agres', IAM: '' },
-        equipier: { position: 'Equipier Bin.', IAM: '' },
-        stagiaire: { position: 'Stagiaire Bin.', IAM: '' },
-    },
+    firstRespondersValues: {},
     patientInfoValues: {
         age: '',
         gender: '',
@@ -161,12 +156,10 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
     const [missionInfo, setMissionInfo] = useState(defaultValues.missionInfo);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [isNewReport, setIsNewReport] = useState(false);
-    const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [validated, setValidated] = useState(false);
 
-    const { currentUser } = useSelector(state => state.user);
     const { t } = useTranslation();
 
     const handlePatientChange = (event) => {
@@ -304,19 +297,10 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
                 setSamplerData(data?.samplerSchema || defaultValues.samplerValues);
                 setMissionInfo(data?.missionInfo || defaultValues.missionInfo);
                 setDataLoaded(true);
+                setLoading(false);
             });
         }
     }, [missionNumber, setIsEditable]);
-
-    useEffect(() => {
-        async function fetchData() {
-            const roles = await getRoles(currentUser?.IAM);
-            setRoles(roles);
-            setLoading(false);
-        }
-
-        fetchData();
-    }, [currentUser?.IAM]);
 
     useEffect(() => {
         const extractMissionInfo = () => {
@@ -335,32 +319,12 @@ const ReportForm = ({ _missionNumber, isEditable, setIsEditable }) => {
 
         const extractedMissionInfo = extractMissionInfo();
 
-        // Check if the current user is one of the First Responders object
-        let isCurrentUserFirstResponder = false;
-        if (firstResponders.chefAgres.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
-        if (firstResponders.equipier.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
-        if (firstResponders.stagiaire.IAM === currentUser.IAM) isCurrentUserFirstResponder = true;
         // Check if the incident is from today
         const isToday = new Date().toLocaleDateString() === `${extractedMissionInfo.day}/${extractedMissionInfo.month}/${extractedMissionInfo.year}`;
-        // Check if the user is an admin
-        const isAdmin = roles.includes('admin');
-        // Check if the firstResponders contains iam's that arent empty
-        let nonEmptyFirstResponders = false;
-        if (firstResponders.chefAgres.IAM !== '' && firstResponders.equipier.IAM !== '' && firstResponders.stagiaire.IAM !== '') nonEmptyFirstResponders = true;
 
         if (missionNumber.length === 10) {
             if (isToday) {
-                // Check if there is an IAM. If not, allow the user to edit
-                if (!nonEmptyFirstResponders) {
-                    console.warn('There are no first responders so we allow the user to edit');
-                    setIsEditable(true);
-                }
-                if (isCurrentUserFirstResponder || isAdmin) {
-                    setIsEditable(true);
-                } else {
-                    console.warn('The user is not a first responder');
-                    setIsEditable(false);
-                }
+                setIsEditable(true);
             } else {
                 console.warn('The incident is not from today');
                 setIsEditable(false);

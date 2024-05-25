@@ -1,19 +1,8 @@
 /* eslint-disable react/prop-types */
 import { Badge } from 'react-bootstrap';
 
-const squareSize = '40px';
-
-const styleDefault = {
-    width: squareSize,
-    height: squareSize,
-    marginRight: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-}
-
-const StatusSquare = ({ status, alerted, style = styleDefault }) => {// Adjust the size as needed
-
+const StatusSquare = ({ status, alerted, style, onClick, size }) => {// Adjust the size as needed
+    let squareSize = size;
     let statusText;
     let statusVariant;
     let statusDescription;
@@ -55,11 +44,20 @@ const StatusSquare = ({ status, alerted, style = styleDefault }) => {// Adjust t
             statusDescription = '';
     }
 
+    const styleDefault = {
+        width: `${squareSize}px`,
+        height: `${squareSize}px`,
+        marginRight: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    }
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', textAlign: 'center' }} onClick={onClick}>
             <Badge
                 bg={statusVariant}
-                style={style}
+                style={style ? style : styleDefault}
             >
                 {statusText}
                 <span className="sr-only">{statusDescription}</span>
@@ -68,4 +66,4 @@ const StatusSquare = ({ status, alerted, style = styleDefault }) => {// Adjust t
     );
 }
 
-export default StatusSquare
+export default StatusSquare;

@@ -3,49 +3,12 @@ import { Card, Badge, Accordion } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
-const StatusBadge = ({ status, alerted }) => {
-    const { t } = useTranslation();
-
-    const getStatusDetails = () => {
-        switch (status.toString()) {
-            case "1":
-                return { text: alerted ? '1c' : '1', variant: alerted ? 'warning' : 'secondary', description: t('status.free_on_radio') };
-            case "2":
-                return { text: alerted ? '2c' : '2', variant: alerted ? 'warning' : 'secondary', description: t('status.on_call') };
-            case "3":
-                return { text: '3', variant: 'warning', description: t('status.on_the_way_to_incident') };
-            case "4":
-                return { text: '4', variant: 'warning', description: t('status.at_incident') };
-            case "5":
-                return { text: '5', variant: 'danger', description: t('status.request_to_speak') };
-            case "6":
-                return { text: '6', variant: 'danger', description: t('status.unavailable') };
-            default:
-                return { text: '', variant: 'light', description: '' };
-        }
-    };
-
-    const { text, variant, description } = getStatusDetails();
-
-    return (
-        <Badge bg={variant} className="me-2">
-            {text}
-            <span className="visually-hidden">{description}</span>
-        </Badge>
-    );
-};
-
 const IncidentCard = ({ incident }) => {
     const { t } = useTranslation();
 
     // const { name, incidentInfo, location, ambulanceCalled } = incident;
     const { firstResponders, missionNumber, missionInfo } = incident;
-    const { ambulanceCalled, quickReport, location } = missionInfo;
-    // Declare values
-    const team = {
-        status: '6',
-        alerted: false
-    }
+    const { ambulanceCalled, quickReport, location, callTime } = missionInfo;
 
     // The first 8 numbers of the mission number are the year, month, and day YYYYMMDD 
     const strMissionNumber = missionNumber.toString();
@@ -54,32 +17,34 @@ const IncidentCard = ({ incident }) => {
     const month = strMissionNumber.substring(4, 6);
     const day = strMissionNumber.substring(6, 8);
 
-    const formattedDate = `${year}-${month}-${day}`;
+    const weekdayName = new Date(`${year}-${month}-${day}`).toLocaleString('default', { weekday: 'long' }); // Monday, Tuesday, Wednesday, ...
+    const monthName = new Date(`${year}-${month}-${day}`).toLocaleString('default', { month: 'long' }); // May, June, July, ...
+    const daySuffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
 
-    const user = [
-        firstResponders.chefAgres,
-        firstResponders.equipier,
-        firstResponders.stagiaire,
-    ]
+    const formattedDate = `${weekdayName}, ${monthName} ${day}${daySuffix}, ${year}`;
+    const formattedTime = callTime;
+    const formattedDateAndTime = `Incident on ${formattedDate} at ${formattedTime}`
+
+    const user = []
+
+    // Go through the first responders object and add them to the user array
+    for (const key in firstResponders) {
+        if (Object.prototype.hasOwnProperty.call(firstResponders, key)) {
+            if(key == 'teamID') continue
+            const element = firstResponders[key];
+            user.push(element);
+        }
+    }
 
     return (
         <Card className="shadow-sm mb-4">
             <Card.Body>
-                <Card.Title className="mb-3">Incident from the {formattedDate}</Card.Title>
-                <div className="mb-3 d-flex align-items-center">
-                    <strong className="me-3">{t('status.team_status')}</strong>
-                    <StatusBadge status={team.status} alerted={team.alerted} />
-                    <Badge bg={team.alerted ? 'success' : 'danger'}>{team.alerted ? 'Alerted' : 'Not Alerted'}</Badge>
-                </div>
-                <div className="mb-3">
-                    <strong>{t('status.incident_info')}</strong> {quickReport}
-                </div>
-                <div className="mb-3">
-                    <strong>{t('status.location')}</strong> {location}
-                </div>
-                <div className="mb-3">
-                    <strong>{t('status.ambulance_called')}</strong> <Badge bg={ambulanceCalled ? 'success' : 'danger'}>{ambulanceCalled ? 'Yes' : 'No'}</Badge>
-                </div>
+                <Card.Title className="mb-3">{formattedDateAndTime}</Card.Title>
+
+                <InfoRow label={t('status.incident_info')} value={quickReport} />
+                <InfoRow label={t('status.location')} value={location} />
+                <AmbulanceStatus label={t('status.ambulance_called')} ambulanceCalled={ambulanceCalled} />
+
                 <div>
                     <strong>{t('status.team_members')}</strong>
                     <Accordion flush>
@@ -92,6 +57,22 @@ const IncidentCard = ({ incident }) => {
         </Card>
     );
 };
+
+const InfoRow = ({ label, value }) => (
+    <div className="mb-3">
+        <strong>{label}</strong>
+        {value.split('\n').map((part, index) => (
+            <div key={index}>{part}</div>
+        ))}
+    </div>
+);
+
+const AmbulanceStatus = ({ label, ambulanceCalled }) => (
+    <div className="mb-3">
+        <strong>{label}</strong>
+        <Badge bg={ambulanceCalled ? 'success' : 'danger'}>{ambulanceCalled ? 'Yes' : 'No'}</Badge>
+    </div>
+);
 
 const UserAccordion = ({ user, index }) => {
     const [fullUser, setFullUser] = useState({});
@@ -143,9 +124,14 @@ const UserAccordion = ({ user, index }) => {
     );
 };
 
-StatusBadge.propTypes = {
-    status: PropTypes.string.isRequired,
-    alerted: PropTypes.bool.isRequired
+AmbulanceStatus.propTypes = {
+    label: PropTypes.string.isRequired,
+    ambulanceCalled: PropTypes.bool.isRequired
+};
+
+InfoRow.propTypes = {
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired
 };
 
 IncidentCard.propTypes = {

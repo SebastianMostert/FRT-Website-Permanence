@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 import { Row, Col, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { isValidIAM } from './FirstResponders';
 import { useState } from 'react';
+import { isValidIAM } from '../../utils';
 
 const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) => {
     const { t } = useTranslation();

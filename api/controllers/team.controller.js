@@ -176,7 +176,7 @@ export const fetchTeams = async (req, res, next) => {
                 team.startDate = currentShift.startDate;
                 team.endDate = currentShift.endDate;
                 team.members = currentShift.users;
-                team.status = await getShiftStatus(currentShift, team.status);
+                team.status = await getShiftStatus({ shift: currentShift, team });
 
                 await team.save();
             } else if (previousShift && nextShift) {
@@ -246,12 +246,27 @@ const shiftTimeout = (currentShift, teamID) => {
     }, timeRemaining);
 };
 
-const getShiftStatus = async (shift, defaultStatus) => {
-    let status = defaultStatus;
-    // If there are less than 2 members in the team, set status to 6
-    if (shift.users.length < 2) {
-        status = 6;
-    }
+const getShiftStatus = async ({ shift, team }) => {
+    let status = team.status;
+
+    // Get variables
+    const active = team.active;
+    const minMembers = team.minMembers;
+    const maxMembers = team.maxMembers;
+    const phoneRequired = team.phoneRequired;
+    const keyRequired = team.keyRequired;
+
+    // If there is no current shift, set status to 6
+    if (!shift) status = 6;
+
+    // If the team is not active, set status to 6
+    if (!active) status = 6;
+
+    // If there are less than min members in the team, set status to 6
+    if (shift.users.length < minMembers) status = 6;
+
+    // If there are more than max members in the team, set status to 6
+    if (shift.users.length > maxMembers) status = 6;
 
     // Check if each member has a key and a phone
     for (let i = 0; i < shift.users.length; i++) {
@@ -259,15 +274,14 @@ const getShiftStatus = async (shift, defaultStatus) => {
         const IAM = member.IAM;
         const user = await User.findOne({ IAM: IAM.toLowerCase() });
 
-        if (!user) {
-            status = 6;
-            break;
-        }
+        // If the user is not found, set status to 6
+        if (!user) status = 6;
 
-        if (!user.hasKey || !user.hasPhone) {
-            status = 6;
-            break;
-        }
+        // If the user does not have a key and it is required, set status to 6
+        if (!user.hasKey && keyRequired) status = 6;
+
+        // If the user does not have a phone and it is required, set status to 6
+        if (!user.hasPhone && phoneRequired) status = 6;
     }
 
     return status;

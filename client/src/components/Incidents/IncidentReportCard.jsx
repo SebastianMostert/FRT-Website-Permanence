@@ -27,7 +27,16 @@ const IncidentReportCard = ({
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const users = [firstResponderInfo.chefAgres, firstResponderInfo.equipier, firstResponderInfo.stagiaire,];
+    const users = [];
+
+    // Go through the first responders object and add them to the user array
+    for (const key in firstResponderInfo) {
+        if (Object.prototype.hasOwnProperty.call(firstResponderInfo, key)) {
+            if (key == 'teamID') continue
+            const element = firstResponderInfo[key];
+            users.push(element);
+        }
+    }
 
     const handleExport = () => {
         onExport(report, exportType);
@@ -64,11 +73,9 @@ const IncidentReportCard = ({
         fetchData();
     }, [currentUser?.IAM]);
 
-
-
     useEffect(() => {
         // Check if the current user is one of the First Responders
-        const isCurrentUserFirstResponder = users.some(user => user.IAM === currentUser.IAM);
+        const isCurrentUserFirstResponder = users.some(user => user?.IAM === currentUser.IAM);
         // Check if the incident is from today
         const isToday = new Date().toLocaleDateString() === `${missionInfo.day}/${missionInfo.month}/${missionInfo.year}`;
         // Check if the user is an admin
@@ -81,8 +88,6 @@ const IncidentReportCard = ({
     if (loading) {
         return <LoadingPage />
     }
-
-    console.log('users:', report.firstResponders);
 
     return (
         <Card>
@@ -170,7 +175,8 @@ export default IncidentReportCard;
 
 const UserAccordion = ({ user, index, t }) => {
     const [fullUser, setFullUser] = useState(null);
-    const { IAM, position } = user;
+    const IAM = user?.IAM || '';
+    const position = user?.position || '';
 
     useEffect(() => {
         async function fetchData() {

@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import StatusSquare from './StatusSquare';
 
-const possibleStatus = [1, 2, 3, 4, 6];
+const possibleStatus = [1, 2, 3, 4, 5, 6];
 const StatusChanger = ({ currentStatus, close, teamID }) => {
     const [status, setStatus] = useState(currentStatus);
 
@@ -88,7 +88,7 @@ const StatusChanger = ({ currentStatus, close, teamID }) => {
                             margin: '5px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
                         }}
                     />
                 </div>

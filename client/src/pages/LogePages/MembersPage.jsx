@@ -34,7 +34,18 @@ const MembersPage = () => {
       });
 
       // Get the data from the response
-      const teams = await res.json();
+      const data = await res.json();
+
+      const teams = [];
+
+      // Loop through the data and create an option object for each team
+      data.forEach((team) => {
+        const { active } = team;
+        if (!active) return;
+
+        teams.push(team);
+      });
+
       const users = [];
 
       for (const team of teams) {
