@@ -4,35 +4,76 @@ import { Card } from 'react-bootstrap';
 import StatusSquare from '../../components/StatusSquare';
 import StatusChanger from '../../components/StatusChanger';
 
-const MemberSection = ({ member, position }) => {
+// Define the fixed sizes for left, middle, and right sides
+const LEFT_SIDE_WIDTH = 400; // Fixed width for LeftSide
+const RIGHT_SIDE_WIDTH = 400; // Fixed width for RightSide
+const MIDDLE_SIDE_WIDTH = 89; // Fixed width for MiddleSide
+const MARGIN = 50; // Margin between sides
+const TIME_MARGIN = -100; // Margin between time slots
+const TITLE_SIZE = 25; // Font size for title
+
+const LeftSide = ({ title, status, setLeftSideWidth, alerted, teamID }) => {
+    const [showStatusChanger, setShowStatusChanger] = useState(false);
+    const leftSideRef = useRef(null);
+    const statusChangerRef = useRef(null);
+
+    useEffect(() => {
+        if (leftSideRef.current) {
+            const width = leftSideRef.current.offsetWidth;
+            setLeftSideWidth(width);
+        }
+    }, [setLeftSideWidth]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                statusChangerRef.current &&
+                !statusChangerRef.current.contains(event.target) &&
+                !leftSideRef.current.contains(event.target)
+            ) {
+                setShowStatusChanger(false);
+            }
+        };
+
+        if (showStatusChanger) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showStatusChanger]);
+
     return (
-        <div style={{ display: 'inline-block', marginRight: '20px', flexShrink: 0 }}>
-            <div className='font-thin'>{position}</div>
-            {member ? (
-                <>
-                    <div className='font-semibold'>
-                        {member.firstName.charAt(0)}. {member.lastName}
-                    </div>
-                    <div className='font-thin'>{member.IAM}</div>
-                </>
-            ) : (
-                <>
-                    <div className='font-semibold'>
-                        N/A
-                    </div>
-                </>
+        <div
+            style={{ position: 'relative', display: 'flex', flexDirection: 'row', alignItems: 'center', flexShrink: 0, width: LEFT_SIDE_WIDTH }}
+            ref={leftSideRef}
+        >
+            {/* Render the StatusSquare */}
+            <div onClick={() => setShowStatusChanger(!showStatusChanger)}>
+                <StatusSquare status={status} alerted={alerted} />
+            </div>
+            {/* Render the Title */}
+            <div style={{ fontSize: TITLE_SIZE, fontWeight: 'bold', whiteSpace: 'normal', wordWrap: 'break-word' }}>{title}</div>
+            {/* Render the StatusChanger component as an overlay */}
+            {showStatusChanger && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 9999 }} ref={statusChangerRef}>
+                    <StatusChanger currentStatus={status} close={() => setShowStatusChanger(false)} teamID={teamID} />
+                </div>
             )}
         </div>
     );
 };
 
-const TimeSlot = ({ startTime, endTime }) => {
-    return (
-        <span style={{ marginLeft: '10px', fontWeight: 'lighter' }}>{startTime} - {endTime}</span>
-    );
-};
+const RightSide = ({ members, containerWidth, leftSideWidth, middleSideWidth }) => {
+    const hasEnoughSpace = containerWidth - leftSideWidth - middleSideWidth - (2 * MARGIN) > RIGHT_SIDE_WIDTH;
 
-const Members = ({ members }) => {
+    if (!hasEnoughSpace) {
+        return null; // Hide the right side if there isn't enough space
+    }
+
     // Ensure that there are always three members
     const displayedMembers = members.slice(0, 3); // Take up to three members
 
@@ -42,81 +83,41 @@ const Members = ({ members }) => {
     // Create an array with the member or 'N/A' for each position
     const renderedMembers = positions.map(position => {
         const member = displayedMembers.find(member => member.position === position);
-        return member ?
-            <MemberSection key={member.id} member={member} position={position} />
-            : <MemberSection key={position} member={null} position={position} />;
+        return (
+            <div key={position} style={{ display: 'inline-block', marginRight: '20px', flexShrink: 0 }}>
+                <div className='font-thin'>{position}</div>
+                {member ? (
+                    <>
+                        <div className='font-semibold'>
+                            {member.firstName.charAt(0)}. {member.lastName}
+                        </div>
+                        <div className='font-thin'>{member.IAM}</div>
+                    </>
+                ) : (
+                    <div className='font-semibold'>
+                        N/A
+                    </div>
+                )}
+            </div>
+        )
     });
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            {renderedMembers}
-        </div>
-    );
-};
-
-const Title = ({ title }) => {
-    const titleSize = '25px';
-    return (
-        <div style={{ fontSize: titleSize, fontWeight: 'bold' }}>{title}</div>
-    );
-};
-
-const LeftSide = ({ title, startTime, endTime, status, setLeftSideWidth, alerted, teamID }) => {
-    const [showStatusChanger, setShowStatusChanger] = useState(false);
-    const leftSideRef = useRef(null);
-
-    useEffect(() => {
-        if (leftSideRef.current) {
-            const width = leftSideRef.current.offsetWidth;
-            setLeftSideWidth(width);
-        }
-    }, [setLeftSideWidth]);
-
-    return (
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'row', alignItems: 'center', flexShrink: 0 }} ref={leftSideRef}>
-            {/* Render the StatusSquare */}
-            <div onClick={() => setShowStatusChanger(!showStatusChanger)}>
-                <StatusSquare status={status} alerted={alerted} />
+        <div style={{ flexGrow: 1, width: RIGHT_SIDE_WIDTH }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                {renderedMembers}
             </div>
-            {/* Render the Title */}
-            <Title title={title} />
-            {/* Render the TimeSlot */}
-            <TimeSlot startTime={startTime} endTime={endTime} />
-            {/* Render the StatusChanger component as an overlay */}
-            {showStatusChanger && (
-                <div style={{ position: 'absolute', top: '100%', left: 0 }}>
-                    <StatusChanger currentStatus={status} close={() => setShowStatusChanger(false)} teamID={teamID} />
-                </div>
-            )}
-        </div>
-    );
-};
-
-const RightSide = ({ members, containerWidth, leftSideWidth }) => {
-    const margin = 50; // Adjust as needed
-    const minMemberSectionWidth = 3 * (130); // Width of each MemberSection (150px) + margin (20px)
-
-    const hasEnoughSpace = containerWidth - leftSideWidth - margin > minMemberSectionWidth;
-
-    if (!hasEnoughSpace) {
-        return null; // Hide the right side if there isn't enough space
-    }
-
-    return (
-        <div style={{ flexGrow: 1 }}>
-            <Members members={members} />
         </div>
     );
 };
 
 const TeamCard = ({ team }) => {
     const { name, members, status, alerted, startDate, endDate, _id } = team;
-    const [leftSideWidth, setLeftSideWidth] = useState(0);
-    const [_status, setStatus] = useState(0);
+    const [leftSideWidth, setLeftSideWidth] = useState(LEFT_SIDE_WIDTH);
+    const [_status, setStatus] = useState(status);
     const [containerWidth, setContainerWidth] = useState(0);
 
     const cardBodyRef = useRef(null);
-    const margin = 50; // Adjust as needed
 
     useEffect(() => {
         const handleResize = () => {
@@ -166,7 +167,7 @@ const TeamCard = ({ team }) => {
 
         // Wait for all promises to resolve
         Promise.all(fetchPromises).then(() => {
-
+            // Handle any actions after all fetches resolve successfully
         }).catch(error => {
             // Handle errors if any of the fetch requests fail
             console.error(error);
@@ -177,22 +178,26 @@ const TeamCard = ({ team }) => {
     return (
         <Card>
             <Card.Body ref={cardBodyRef}> {/* Ref to get the width of the card body */}
-                <div className='flex items-center align-middle' >
+                <div className='flex items-center align-middle' style={{ flexWrap: 'wrap' }}>
                     <LeftSide
                         title={name}
-                        startTime={new Date(startDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })}
-                        endTime={new Date(endDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })}
                         status={_status}
                         setLeftSideWidth={setLeftSideWidth}
                         alerted={alerted}
                         teamID={_id}
                     />
-                    {/* Add some space between the left and right sides */}
-                    <div style={{ marginLeft: `${margin}px` }} />
+                    {/* Add some space between the sides */}
+                    <div style={{ marginLeft: `${TIME_MARGIN}px` }} />
+                    <div style={{ textAlign: 'center', width: MIDDLE_SIDE_WIDTH }}>
+                        <div style={{ fontWeight: 'lighter' }}>{new Date(startDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })} - {new Date(endDate).toLocaleTimeString('en-US', { hour12: false, timeStyle: 'short' })}</div>
+                    </div>
+                    {/* Add some space between the sides */}
+                    <div style={{ marginLeft: `${MARGIN}px` }} />
                     <RightSide
                         members={members}
                         containerWidth={containerWidth}
                         leftSideWidth={leftSideWidth}
+                        middleSideWidth={MIDDLE_SIDE_WIDTH}
                     />
                 </div>
             </Card.Body>

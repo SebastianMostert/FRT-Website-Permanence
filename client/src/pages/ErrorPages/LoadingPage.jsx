@@ -68,38 +68,62 @@ const styles = {
 };
 
 const HeartbeatLoader = () => {
+
+  const styling = `
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes innerbeat {
+    0% {transform: scale(1);}
+    10% {transform: scale(1);}
+    50% {transform: scale(1.15);}
+    60% {transform: scale(1.05);}
+    75% {transform: scale(1.2);}
+  }
+  @keyframes outerbeat {
+    0% {transform: scale(1.2);}
+    10% {transform: scale(1.2);}
+    50% {transform: scale(1.3);}
+    60% {transform: scale(1.25);}
+    75% {transform: scale(1.3);}
+  }
+`;
+
   return (
     <>
       <style>
-        {`
-          @keyframes draw {
-            to {
-              stroke-dashoffset: 0;
-            }
-          }
-          @keyframes innerbeat {
-            0% {transform: scale(1);}
-            10% {transform: scale(1);}
-            50% {transform: scale(1.15);}
-            60% {transform: scale(1.05);}
-            75% {transform: scale(1.2);}
-          }
-          @keyframes outerbeat {
-            0% {transform: scale(1.2);}
-            10% {transform: scale(1.2);}
-            50% {transform: scale(1.3);}
-            60% {transform: scale(1.25);}
-            75% {transform: scale(1.3);}
-          }
-        `}
+        {styling}
       </style>
       <div style={styles.heartbeatloader}>
         <svg style={styles.svgdraw} width="100%" height="100%" viewBox="0 0 150 400" xmlns="http://www.w3.org/2000/svg">
-          <path style={styles.path} d="M 0 200 l 40 0 l 5 -40 l 5 40 l 10 0 l 5 15 l 10 -140 l 10 220 l 5 -95 l 10 0 l 5 20 l 5 -20 l 30 0" fill="transparent" strokeWidth="4" stroke="black"/>
+          <path
+            style={styles.path}
+            // Old version:  d="M 0 200 l 40 0 l 5 -40 l 5 40 l 10 0 l 5 15 l 10 -140 l 10 220 l 5 -95 l 10 0 l 5 20 l 5 -20 l 30 0"
+            // More accurate QRS complex
+            d="M 0 210 
+            l 40 0
+            l 5 -40 
+            l 5 40
+            l 10 0 
+            l 5 15
+            l 10 -140
+            l 10 160 
+            l 5 -35 
+            l 10 0 
+            l 5 -20 
+            l 5 20 
+            l 30 0"
+
+
+            fill="transparent"
+            strokeWidth="4"
+            stroke="black" />
         </svg>
         <div style={styles.innercircle}></div>
         <div style={styles.outercircle}></div>
-      </div>
+      </div >
     </>
   );
 };

@@ -51,7 +51,7 @@ const CurrentSituation = () => {
                 </div>
                 <div>
                     {teams.map((team) => (
-                        <div key={team._id}>
+                        <div key={team._id} className="mb-4">
                             <TeamCard team={team} />
                         </div>
                     ))}
