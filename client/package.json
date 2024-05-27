@@ -25,6 +25,7 @@
     "@fullcalendar/timegrid": "^6.1.11",
     "@hoseinh/react-analog-clock": "^1.0.4",
     "@mui/icons-material": "^5.15.16",
+    "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.15.17",
     "@mui/x-charts": "^7.3.2",
     "@mui/x-data-grid": "^7.3.2",

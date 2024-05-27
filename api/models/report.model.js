@@ -54,6 +54,10 @@ const reportSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    resolved: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const Report = mongoose.model('Report', reportSchema);

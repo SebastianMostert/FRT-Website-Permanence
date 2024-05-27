@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Badge } from 'react-bootstrap';
 
-const StatusSquare = ({ status, alerted, style, onClick, size }) => {// Adjust the size as needed
+const StatusSquare = ({ status, alerted, style, onClick, size = 40 }) => {// Adjust the size as needed
     let squareSize = size;
     let statusText;
     let statusVariant;
@@ -11,7 +11,7 @@ const StatusSquare = ({ status, alerted, style, onClick, size }) => {// Adjust t
         case "1":
             statusText = alerted ? '1c' : '1';
             statusVariant = alerted ? 'warning' : 'secondary';
-            statusDescription = 'On the way back from incident';
+            statusDescription = 'Free on Radio';
             break;
         case "2":
             statusText = alerted ? '2c' : '2';

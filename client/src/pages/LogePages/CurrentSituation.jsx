@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import TeamCard from './TeamCard';
+import TeamCard from '../../components/Team/TeamCard';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import DateAndTime from '../../components/DateAndTime';
 

@@ -33,13 +33,13 @@ import Availabilities from './Admin/pages/Availabilities';
 import Shifts from './Admin/pages/Shifts';
 import AdminSettings from './Admin/pages/AdminSettings';
 import CurrentSituation from './pages/LogePages/CurrentSituation';
-import Incidents from './pages/LogePages/Incidents';
-import IncidentCreate from './pages/LogePages/IncidentCreate';
 import Stock from './Admin/pages/Stock/Stock';
 import MembersPage from './pages/LogePages/MembersPage';
 import Settings from './pages/Settings';
 import { useApiClient } from './contexts/ApiContext';
 import AuditLog from './Admin/pages/AuditLog';
+import Operations from './pages/LogePages/Operations';
+import SingleOperation from './pages/LogePages/SingleOperation';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -94,8 +94,8 @@ function App() {
           <Route element={<HeaderRoute />}>
             <Route path='/current-situation' element={<CurrentSituation />} />
             <Route path='/members' element={<MembersPage />} />
-            <Route path='/incidents' element={<Incidents />} />
-            <Route path='/incidents/create' element={<IncidentCreate />} />
+            <Route path='/operations' element={<Operations />} />
+            <Route path='/operations/:missionNumber' element={<SingleOperation />} />
           </Route>
         </Route>
 
