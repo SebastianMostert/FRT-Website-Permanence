@@ -1,93 +1,136 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingPage } from '../ErrorPages';
-import { Card, Container } from 'react-bootstrap';
+import { Card, Container, Badge } from 'react-bootstrap';
 import StatusChanger from '../../components/StatusChanger';
 import StatusSquare from '../../components/StatusSquare';
 import { Timeline as MuiTimeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineConnector, TimelineContent, TimelineOppositeContent } from '@mui/lab';
-import { Typography, useMediaQuery } from '@mui/material';
-import { PhoneCallback, RingVolume, Place, DoneAll } from '@mui/icons-material';
+import { Typography, useMediaQuery, Box } from '@mui/material';
+import { PhoneCallback, RingVolume, Place, DoneAll, CheckCircleOutline } from '@mui/icons-material';
 import { FaWalkieTalkie } from "react-icons/fa6";
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 
 const SingleOperation = () => {
     const { t } = useTranslation();
+    const socket = useWebSocket();
+
     const { missionNumber } = useParams();
     const [mission, setMission] = useState(null);
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [resolved, setResolved] = useState(false);
 
-    useEffect(() => {
-        const getReportData = async () => {
-            try {
-                const res = await fetch(`/api/v1/report/fetch/${missionNumber}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const missionData = await res.json();
-                if (!missionData) return window.location.href = '/operations';
-
-                await getTeam(missionData.firstResponders.teamID);
-
-                setMission(missionData.missionInfo);
-            } catch (error) {
-                // Redirect to /operations if error occurs
-                window.location.href = '/operations';
-            }
-
-            setLoading(false);
-        };
-
-        const getTeam = async (id) => {
-            const res = await fetch(`/api/v1/team/fetch/${id}`, {
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`/api/v1/report/fetch/${missionNumber}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
 
-            const teamData = await res.json();
+            const missionData = await res.json();
+            if (!missionData) return window.location.href = '/operations';
+
+            const res2 = await fetch(`/api/v1/team/fetch/${missionData.firstResponders.teamID}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const teamData = await res2.json();
 
             if (!teamData) return window.location.href = '/operations';
 
             setTeam(teamData);
-        };
+            setResolved(missionData.resolved);
+            setMission(missionData.missionInfo);
+        } catch (error) {
+            // Redirect to /operations if error occurs
+            window.location.href = '/operations';
+        } finally {
+            setLoading(false);
+        }
+    }
 
-        getReportData();
-    }, [missionNumber]);
+
+    useEffect(() => {
+        fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Fetch data on component mount and start polling
+    useEffect(() => {
+        if (socket?.readyState !== 1) return;
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'team') fetchData();
+            if (data.type === 'report') fetchData();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, socket?.readyState]);
 
     if (loading) return <LoadingPage />;
 
     const urgenceLevel = mission.urgenceLevel;
 
+    const isResolved = resolved;
+
     return (
-        <Container className='select-none p-2'>
-            <Typography variant="h4" className="my-4 text-center">
-                Operation <strong>#{missionNumber}</strong> Details
-            </Typography>
-            <TeamCard team={team} />
-            <Card className="mb-4">
-                <Card.Body className="text-center">
-                    <Card.Title>Mission Information</Card.Title>
-                    <Card.Text><strong>Location:</strong> {mission.location}</Card.Text>
-                    <Card.Text>U{urgenceLevel} - {t(`emergency_level.${urgenceLevel}`)}</Card.Text>
-                    <Card.Text className="d-flex justify-content-center align-items-center">
-                        <div style={{ flex: 1, textAlign: 'right', paddingRight: '10px' }}>
-                            <strong>Ambulance Called:</strong> {mission.ambulanceCalled ? 'Yes' : 'No'}
-                        </div>
-                        <div className="vr" style={{ margin: '0 10px', width: '2px', backgroundColor: 'black' }}></div>
-                        <div style={{ flex: 1, textAlign: 'left', paddingLeft: '10px' }}>
-                            <strong>Sepas Contacted:</strong> {mission.SepasContacted ? 'Yes' : 'No'}
-                        </div>
-                    </Card.Text>
-                    <Timeline mission={mission} />
-                </Card.Body>
-            </Card>
-        </Container>
+        <div className='select-none'>
+            {isResolved && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: 'white'
+                    }}
+                >
+                    <CheckCircleOutline sx={{ fontSize: 80, marginRight: 2 }} />
+                    <Typography variant="h4" component="div">
+                        Mission Resolved
+                    </Typography>
+                </Box>
+            )}
+            <Container className='select-none p-2'>
+                <Typography variant="h4" className="my-4 text-center">
+                    Operation <strong>#{missionNumber}</strong> Details
+                </Typography>
+                <TeamCard team={team} />
+                <Card className="mb-4">
+                    <Card.Body className="text-center">
+                        <Card.Title>Mission Information</Card.Title>
+                        <Card.Text><strong>Location:</strong> {mission.location}</Card.Text>
+                        <Card.Text>
+                            <Badge bg="danger">U{urgenceLevel}</Badge> - {t(`emergency_level.${urgenceLevel}`)}
+                        </Card.Text>
+                        <Card.Text className="d-flex justify-content-center align-items-center">
+                            <div style={{ flex: 1, textAlign: 'right', paddingRight: '10px' }}>
+                                <strong>Ambulance Called:</strong> {mission.ambulanceCalled ? 'Yes' : 'No'}
+                            </div>
+                            <div className="vr" style={{ margin: '0 10px', width: '2px', backgroundColor: 'black' }}></div>
+                            <div style={{ flex: 1, textAlign: 'left', paddingLeft: '10px' }}>
+                                <strong>Sepas Contacted:</strong> {mission.SepasContacted ? 'Yes' : 'No'}
+                            </div>
+                        </Card.Text>
+                        <Timeline mission={mission} />
+                    </Card.Body>
+                </Card>
+            </Container>
+        </div>
     );
 };
 

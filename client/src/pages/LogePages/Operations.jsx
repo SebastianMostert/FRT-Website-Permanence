@@ -53,7 +53,7 @@ const Operations = () => {
     setShowModal(true);
   };
 
-  const filteredTeams = teams.filter((team) => team.status !== 6 && !team.alerted);
+  const filteredTeams = teams.filter((team) => team.status != 6 && !team.alerted);
   const filteredIncidents = incidents.filter((incident) => !incident.resolved && !incident.archived);
 
   const teamsToShow = (
