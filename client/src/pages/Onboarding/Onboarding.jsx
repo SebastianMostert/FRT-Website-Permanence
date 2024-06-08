@@ -174,7 +174,18 @@ const App = () => {
   const signIn = async () => {
     try {
       dispatch(signInStart());
-      const resData = await apiClient.auth.signin({ IAM: data.IAM, password: data.password });
+
+      // Get user's location
+      const location = await getUserLocation();
+      console.log(`${location}`);
+
+      // Make sign-in request with location data
+      const resData = await apiClient.auth.signin({
+        IAM: data.IAM,
+        password: data.password,
+        location
+      });
+
       if (resData.success === false) {
         dispatch(signInFailure(resData));
         return;
@@ -185,6 +196,26 @@ const App = () => {
       dispatch(signInFailure(error));
     }
   };
+
+  // Function to retrieve user's location using HTML5 Geolocation API
+  const getUserLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const { latitude, longitude } = position.coords;
+            resolve({ latitude, longitude });
+          },
+          error => {
+            reject(new Error('Failed to retrieve user location.' + error.message));
+          }
+        );
+      } else {
+        reject(new Error('Geolocation is not supported by this browser.'));
+      }
+    });
+  };
+
 
   return (
     <div className={darkMode ? 'dark-bg' : 'light-bg'} style={{ minHeight: '100vh' }}>

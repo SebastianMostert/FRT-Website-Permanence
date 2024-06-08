@@ -181,10 +181,16 @@ export default function Calendar() {
         const start = new Date(e.start);
         const end = new Date(e.end);
 
-        const date = `${start.getMonth() + 1}-${start.getDate()}-${start.getFullYear()}`;
-        const startTime = start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const endTime = end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
+        const date = `${start.getFullYear()}-${(start.getMonth() + 1).toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`
+        // Times need to be a 24-hour format HH:MM
+        const startTime = start.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+        const endTime = end.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        })
         const { isValid, event } = validateDate(date, startTime, endTime);
 
         if (isValid) {
@@ -316,15 +322,37 @@ export default function Calendar() {
     };
 
     const updateAvailability = async (start, end, id) => {
-        try {
-            await apiClient.availability.update({
-                id,
-                startTime: start,
-                endTime: end
-            })
-            refreshDataAvailability();
-        } catch (error) {
-            toast.error(`${t('toast.calendar.availability.update.error')}`);
+
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        alert(`Updating availability from ${startDate} to ${endDate}`);
+
+        const date = `${startDate.getMonth() + 1}-${startDate.getDate()}-${startDate.getFullYear()}`;
+        const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        const { isValid, event } = validateDate(date, startTime, endTime, [...calendarEvent, ...calendarAvailability, ...calendarShift]);
+
+        if (isValid) {
+            try {
+                await apiClient.availability.update({
+                    id,
+                    startTime: startDate,
+                    endTime: endDate
+                })
+                refreshDataAvailability();
+            } catch (error) {
+                toast.error(`${t('toast.availability.create.error')}`);
+            }
+        } else {
+            // Display an error message or handle invalid date/time range
+            const { extendedProps } = event;
+            if (!extendedProps) return;
+            const { type } = extendedProps;
+            if (!type) return;
+
+            toast.error(`${t(`toast.availability.overlap.${type}`)}`);
         }
     }
 

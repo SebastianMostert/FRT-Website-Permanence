@@ -14,5 +14,6 @@
     "profile.signed_out": "Successfully signed out!",
     "profile.signed_out.error": "An error occurred while signing out!",
 
-    "profile.manage_2fa": "Manage Two-Factor Authentication"
+    "profile.manage_2fa": "Manage Two-Factor Authentication",
+    "profile.manage_sessions": "Manage Sessions"
 }

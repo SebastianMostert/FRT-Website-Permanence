@@ -8,7 +8,6 @@ const Report = () => {
   const [isEditable, setIsEditable] = useState(false);
   let { missionNumber } = useParams();
 
-
   useEffect(() => {
     const extractMissionInfo = () => {
       const year = missionNumber.substring(0, 4);

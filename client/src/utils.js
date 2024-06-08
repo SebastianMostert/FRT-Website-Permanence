@@ -171,7 +171,57 @@ export function reportCSV(reportData) {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * 
+ * @param {string} date Format: 2024-06-22
+ * @param {?string} startTime Format: 08:30
+ * @param {?string} endTime Format: 09:00
+ * @param {?object[]} events
+ * @returns 
+ */
 export function validateDate(date, startTime, endTime, events) {
+    console.log("Format YYYY-MM-DD: ", date);
+    console.log("Format HH:MM: ", startTime);
+    console.log("Format HH:MM: ", endTime);
+
+    // Validate the inputs
+    if (!date) {
+        return {
+            isValid: false,
+            event: {
+                extendedProps: {
+                    type: 'invalid_props',
+                },
+            },
+        };
+    }
+
+    // The times are optional, if they are provided, validate them
+    if (startTime) {
+        if (!startTime.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)) {
+            return {
+                isValid: false,
+                event: {
+                    extendedProps: {
+                        type: 'invalid_props',
+                    },
+                },
+            };
+        }
+    }
+    if (endTime) {
+        if (!endTime.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)) {
+            return {
+                isValid: false,
+                event: {
+                    extendedProps: {
+                        type: 'invalid_props',
+                    },
+                },
+            };
+        }
+    }
+
     // Get the current date
     const currentDate = new Date();
 
@@ -185,15 +235,6 @@ export function validateDate(date, startTime, endTime, events) {
     nextWeekDeadline.setHours(14, 0, 0, 0); // Set the time to 2pm
 
     let overlappingEvent = null;
-
-    // else if (new Date(date) <= nextWeekDeadline) {
-    //     // Create a "fake" event for dates after the next week's deadline
-    //     overlappingEvent = {
-    //         extendedProps: {
-    //             type: 'after_deadline',
-    //         },
-    //     };
-    // } 
 
     // Check if the selected date is in the past
     if (new Date(date) < currentDate) {
@@ -237,6 +278,7 @@ export function validateDate(date, startTime, endTime, events) {
                 } else if (events) {
                     // Iterate through each existing event
                     for (const event of events) {
+
                         // Convert existing event's start and end times to timestamps
                         const eventStartTime = new Date(event.start).getTime();
                         const eventEndTime = new Date(event.end).getTime();

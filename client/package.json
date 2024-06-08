@@ -47,7 +47,7 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "dotenv-webpack": "^8.0.1",
-    "frt-api": "^9.0.10",
+    "frt-api": "^9.0.13",
     "i18next": "^23.10.1",
     "jquery": "^3.7.1",
     "js-cookie": "^3.0.5",

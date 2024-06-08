@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import MemberIAM from '../models/memberIAM.model.js';
+import Session from '../models/session.model.js';
 import ResetPassword from '../models/resetPasswordRequest.model.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
@@ -10,6 +11,7 @@ import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
 import { errorHandler } from '../utils/error.js';
 import { logServerError, logHTTPRequest, logUserAction, logUserError } from '../utils/logger.js';
+import { UAParser } from 'ua-parser-js';
 
 /** 
  * LOGGER INFO
@@ -49,11 +51,27 @@ export const signup = async (req, res, next) => {
 
 // Sign In
 export const signin = async (req, res, next) => {
+  const parser = new UAParser();
+  const ua = req.headers['user-agent'];
+  const parsedUA = parser.setUA(ua).getResult();
+
+  const deviceInfo = {
+    os: parsedUA.os.name,
+    os_version: parsedUA.os.version,
+    browser: parsedUA.browser.name,
+    browser_version: parsedUA.browser.version,
+    device: parsedUA.device.model || 'Unknown device',
+    is_mobile: parsedUA.device.type === 'mobile',
+    is_tablet: parsedUA.device.type === 'tablet',
+    is_pc: parsedUA.device.type === 'desktop' || !parsedUA.device.type // Default to desktop if no type is detected
+  };
+
   const IP = req.ip;
   logHTTPRequest('/auth/signin', IP);
+
   try {
-    let { IAM, password, code } = req.body;
-    IAM = IAM.toLowerCase(); // Convert IAM to lowercase
+    let { IAM, password, code, rememberMe } = req.body;
+    IAM = IAM.toLowerCase();
 
     const { success: validPassword, statusCode, statusText, user } = await validatePassword(IAM, password, code);
 
@@ -62,28 +80,56 @@ export const signin = async (req, res, next) => {
         IP,
         errorCode: statusCode,
         IAM,
-        userID: user._id,
+        userID: user?._id,
         message: `User failed to sign in: ${statusText}`,
       });
       throw errorHandler(statusCode, statusText);
     }
 
-    // Check if the user is verified
     if (!user.verified && ['admin', 'member', 'loge'].some(role => user.roles.includes(role))) {
       logUserError({
         IP,
         IAM,
         userID: user._id,
         message: 'User failed to sign in: User is not verified',
-      })
+      });
       throw errorHandler(401, 'User is not verified');
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: rememberMe ? '30d' : '1h' });
     const { password: hashedPassword, twoFactorAuthSecret, ...rest } = user._doc;
-    const expiryDate = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+    const expiryDate = rememberMe ? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) : new Date(Date.now() + 1000 * 60 * 30); // 30 days or 30 minutes
 
-    res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
+    // Get location 
+    const location = req.body.location || null;
+    let locationDetails = 'unknown';
+
+    if (location) {
+      const { latitude, longitude } = location;
+      locationDetails = await getCityFromCoordinates(latitude, longitude);
+    }
+
+    // Create session document in MongoDB
+    const session = new Session({
+      userId: user._id,
+      token,
+      ipAddress: IP,
+      userAgent: ua,
+      deviceInfo,
+      location: locationDetails,
+      lastActive: new Date(),
+      expiresAt: expiryDate,
+      rememberMe,
+    });
+
+    await session.save();
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      expires: expiryDate
+    }).status(200).json(rest);
 
     logUserAction({
       IP,
@@ -91,16 +137,38 @@ export const signin = async (req, res, next) => {
       userID: user._id,
       message: 'User signed in successfully',
     });
+
   } catch (error) {
     logServerError(error.message);
-    next(error);
+    next(error.message);
   }
 };
 
 // Sign Out
-export const signout = (req, res) => {
+export const signout = async (req, res) => {
   logHTTPRequest('/auth/signout', req.ip);
-  res.clearCookie('access_token').status(200).json('Signout success!');
+  const token = req.cookies.access_token;
+
+  // Check if the session exists in the database
+  const session = await Session.findOne({ token });
+
+  if (!session) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    }).status(200).json('Signout success!');
+
+    console.log('Signout success!');
+  } else {
+    res.clearCookie('access_token').status(200).json('Signout success!');
+
+    // Delete session document in MongoDB
+    await Session.deleteOne({ token });
+
+    console.log('Signout success! Session deleted from MongoDB');
+  }
+
 
   logUserAction({
     IP: req.ip,
@@ -109,40 +177,164 @@ export const signout = (req, res) => {
 };
 
 // Validate
-export const validate = (req, res, next) => {
+export const validate = async (req, res, next) => {
   logHTTPRequest('/auth/validate', req.ip);
-  // Get the token
+
+  // Extract token from request cookies
   const token = req.cookies.access_token;
 
-  // Make sure token exists
+  // Check if token exists
   if (!token) {
+    // Log error and return authentication error if token is missing
     logUserError({
       message: 'Validation failed: No token provided',
       errorCode: 401,
       IP: req.ip,
-    })
+    });
     return next(errorHandler(401, 'You are not authenticated!'));
   }
 
-  // Verify token
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
+  try {
+    // Verify token validity
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if token is invalid
+    if (!decoded) {
+      // Log error and return token validation error
       logUserError({
-        message: 'Validation failed: Token is not valid',
+        message: 'Validation failed: Invalid token',
         errorCode: 403,
         IP: req.ip,
-      })
+      });
       return next(errorHandler(403, 'Token is not valid!'));
     }
 
-    // If it is valid inform the user it is valid with a 200 status
+    // Find session corresponding to the token
+    const session = await Session.findOne({ token });
+
+    // Check if session exists
+    if (!session) {
+      // Clear invalid token cookie, log error, and return session not found error
+      res.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      });
+
+      logUserError({
+        message: 'Validation failed: Session not found',
+        errorCode: 403,
+        IP: req.ip,
+      });
+      return next(errorHandler(403, 'Session is not valid!'));
+    }
+
+    // Check if session has expired
+    if (new Date() > session.expiresAt) {
+      // Clear expired token cookie, log error, delete session, and return session expired error
+      res.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      });
+
+      logUserError({
+        message: 'Validation failed: Session has expired',
+        errorCode: 403,
+        IP: req.ip,
+      });
+
+      await Session.findOneAndDelete({ token });
+
+      return next(errorHandler(403, 'Session has expired!'));
+    }
+
+    // Update session last active date
+    session.lastActive = new Date();
+    await session.save();
+
+    // Check if session creation date is older than 30 days
+    if (new Date() > new Date(session.createdAt).setDate(new Date(session.createdAt).getDate() + 30)) {
+      // Clear expired token cookie, log error, delete session, and return session expired error
+      res.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      });
+
+      logUserError({
+        message: 'Validation failed: Session has expired',
+        errorCode: 403,
+        IP: req.ip,
+      });
+
+      await Session.findOneAndDelete({ token });
+
+      return next(errorHandler(403, 'Session has expired!'));
+    }
+
+    // Check if it's not a "remember me" session
+    if (!session.rememberMe) {
+      // Check if session creation date is older than 24 hours
+      if (new Date() > new Date(session.createdAt).setDate(new Date(session.createdAt).getDate() + 1)) {
+        // Clear expired token cookie, log error, delete session, and return session expired error
+        res.clearCookie('access_token', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'Strict',
+        });
+
+        logUserError({
+          message: 'Validation failed: Session has expired',
+          errorCode: 403,
+          IP: req.ip,
+        });
+
+        await Session.findOneAndDelete({ token });
+
+        return next(errorHandler(403, 'Session has expired!'));
+      }
+
+      // Reset expiration time to 30 minutes from now
+      let newExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+      const creationDate = new Date(session.createdAt);
+
+      // Ensure session never exceeds 24 hours from creation
+      if (new Date() > creationDate.setDate(new Date(creationDate).getDate() + 1)) {
+        // Set expiration time to 24 hours from creation
+        newExpiresAt = new Date(creationDate + 1000 * 60 * 60 * 24);
+      }
+
+      // Update session expiration and last active time
+      session.expiresAt = newExpiresAt;
+      session.lastActive = new Date();
+      await session.save();
+    }
+
+    // Respond with successful validation
     res.status(200).json({ valid: true });
 
+    // Log successful validation
     logUserAction({
       IP: req.ip,
-      message: 'Validation successful',
+      message: 'Validation successful, session extended by 30 minutes',
     });
-  });
+  } catch (err) {
+    // Clear invalid token cookie, log error, and return token validation error
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    });
+
+    logUserError({
+      message: 'Validation failed: Token is not valid',
+      errorCode: 403,
+      IP: req.ip,
+    });
+    return next(errorHandler(403, 'Token is not valid!'));
+  }
 };
 
 // Add a forgot password and reset password function
@@ -597,3 +789,23 @@ async function validatePassword(IAM, password, code) {
 
   return { success: true, user, statusCode: 200, statusText: 'Password is correct' };
 }
+
+const getCityFromCoordinates = async (latitude, longitude) => {
+  const url = `https://address-from-to-latitude-longitude.p.rapidapi.com/geolocationapi?lat=${latitude}&lng=${longitude}`;
+  const options = {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': process.env.RAPID_API_KEY,
+      'x-rapidapi-host': 'address-from-to-latitude-longitude.p.rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json();
+
+    return result.Results;
+  } catch (error) {
+    console.error(error);
+  }
+};

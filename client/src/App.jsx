@@ -38,8 +38,10 @@ import MembersPage from './pages/LogePages/MembersPage';
 import Settings from './pages/Settings';
 import { useApiClient } from './contexts/ApiContext';
 import AuditLog from './Admin/pages/AuditLog';
+import Email from './Admin/pages/Email';
 import Operations from './pages/LogePages/Operations';
 import SingleOperation from './pages/LogePages/SingleOperation';
+import SessionManager from './pages/SessionManager';
 
 function TokenValidator() {
   const { currentUser } = useSelector((state) => state.user);
@@ -104,6 +106,7 @@ function App() {
           <Route element={<SidebarRoute />}>
             <Route path='/admin' element={<Dashboard />} />
             <Route path='/admin/users' element={<Users />} />
+            <Route path='/admin/email' element={<Email />} />
             <Route path='/admin/audit' element={<AuditLog />} />
             <Route path='/admin/availabilities' element={<Availabilities />} />
             <Route path='/admin/shifts' element={<Shifts />} />
@@ -123,6 +126,7 @@ function App() {
           </Route>
           <Route element={<LoggedInRoute />}>
             <Route path='/profile' element={<Profile />} />
+            <Route path='/sessions' element={<SessionManager />} />
             <Route path='/settings' element={<Settings />} />
           </Route>
         </Route>

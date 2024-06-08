@@ -8,7 +8,7 @@ import {
 } from '../../redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, FormGroup } from 'react-bootstrap';
 
 import { ForgotPassword } from '../index'
 import { useApiClient } from '../../contexts/ApiContext';
@@ -18,8 +18,8 @@ const defaultValues = {
   IAM: '',
   password: '',
   code: '',
+  rememberMe: false, // Add rememberMe property with default value false
 };
-
 
 export default function IAMSignIn() {
   const { t } = useTranslation();
@@ -28,19 +28,20 @@ export default function IAMSignIn() {
   const [formData, setFormData] = useState(defaultValues);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { loading, error } = useSelector((state) => state.user);
-  const [failedAttempts, setFailedAttempts] = useState(0); // Define failedAttempts here
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const apiClient = useApiClient();
 
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleForgotPassword = () => {
-    setShowForgotPassword(true);
+  const handleCheckboxChange = (e) => {
+    setFormData({ ...formData, rememberMe: e.target.checked });
   };
 
   const handleSubmit = async (e) => {
@@ -51,32 +52,33 @@ export default function IAMSignIn() {
       });
       dispatch(signInStart());
 
-      const data = await apiClient.auth.signin({ IAM: formData.IAM, password: formData.password, code: formData.code });
-      if (data.success === false) {
+      // Get user's location
+      const location = await getUserLocation();
 
-        if (!data.message.startsWith("Two-factor")) setFailedAttempts((prevAttempts) => prevAttempts + 1);
-        if (failedAttempts >= 0) {
-          toast.update(toastId.current, {
-            type: 'error',
-            autoClose: 5000,
-            render: `${t('toast.sign_in.failed', { reason: data.message })}`,
-          });
+      try {
+        const data = await apiClient.auth.signin({
+          IAM: formData.IAM,
+          password: formData.password,
+          code: formData.code,
+          rememberMe: formData.rememberMe, // Pass rememberMe property to the API
+          location
+        });
+
+        toast.update(toastId.current, {
+          type: 'success',
+          autoClose: 5000,
+          render: `${t('toast.sign_in.success')}`,
+        });
+        dispatch(signInSuccess(data));
+        // Get ?redirect= if present
+        const redirect = window.location.search.split('=')[1];
+        if (redirect) {
+          navigate(redirect);
+        } else {
+          navigate('/');
         }
-        dispatch(signInFailure(data));
-        return;
-      }
-      toast.update(toastId.current, {
-        type: 'success',
-        autoClose: 5000,
-        render: `${t('toast.sign_in.success')}`,
-      });
-      dispatch(signInSuccess(data));
-      // Get ?redirect= if present
-      const redirect = window.location.search.split('=')[1];
-      if (redirect) {
-        navigate(redirect);
-      } else {
-        navigate('/');
+      } catch (error) {
+        setFailedAttempts((prevAttempts) => prevAttempts + 1);
       }
     } catch (error) {
       toast.update(toastId.current, {
@@ -86,6 +88,28 @@ export default function IAMSignIn() {
       });
       dispatch(signInFailure(error));
     }
+  };
+
+  const getUserLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const { latitude, longitude } = position.coords;
+            resolve({ latitude, longitude });
+          },
+          error => {
+            reject(new Error('Failed to retrieve user location.' + error.message));
+          }
+        );
+      } else {
+        reject(new Error('Geolocation is not supported by this browser.'));
+      }
+    });
+  };
+
+  const handleForgotPassword = () => {
+    setShowForgotPassword(true);
   };
 
   useEffect(() => {
@@ -114,7 +138,7 @@ export default function IAMSignIn() {
       }
     }
 
-    if (IAM.length == 8) fetchUser();
+    if (IAM.length === 8) fetchUser();
     else setTwoFactorAuthEnabled(null);
   }, [navigate, formData.IAM]);
 
@@ -148,6 +172,15 @@ export default function IAMSignIn() {
               />
             </Form.Group>
           )}
+          {/* Remember Me checkbox */}
+          <FormGroup controlId='rememberMe'>
+            <Form.Check
+              type='checkbox'
+              label='Remember Me'
+              checked={formData.rememberMe}
+              onChange={handleCheckboxChange}
+            />
+          </FormGroup>
           <Button
             variant='primary'
             type='submit'

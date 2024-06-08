@@ -9,6 +9,7 @@
     "toast.availability.overlap.outside_working_hours": "Failed to create availability, availability is outside working hours!",
     "toast.availability.overlap.shift": "Failed to create availability, availability is overlapping with a shift!",
     "toast.availability.overlap.exam": "Failed to create availability, availability is overlapping with an exam!",
+    "toast.availability.overlap.invalid_props": "Failed to create availability, an invalid property was provided!",
     "toast.report.create.error": "Failed to create report!",
     "toast.report.create.error.invalid": "Failed to create report, some fields are invalid!",
     "toast.report.create.success": "Successfully created report!",

@@ -10,10 +10,12 @@ import shiftRoutes from './routes/shift.route.js';
 import teamRoutes from './routes/team.route.js';
 import stockRoutes from './routes/stock.route.js';
 import AuditRoutes from './routes/audit.route.js';
+import SessionRoutes from './routes/session.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import cors from 'cors';
 import { WebSocketServer } from 'ws'; // Import the 'ws' package
+import device from 'express-device';
 dotenv.config();
 
 mongoose
@@ -46,6 +48,8 @@ app.get('*', (req, res) => {
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use(device.capture());
 
 const server = app.listen(3000, () => {
   console.info('Server listening on port 3000');
@@ -80,6 +84,7 @@ app.use(`/api/v${apiVersion}/shift`, shiftRoutes)
 app.use(`/api/v${apiVersion}/team`, teamRoutes)
 app.use(`/api/v${apiVersion}/stock`, stockRoutes)
 app.use(`/api/v${apiVersion}/audit`, AuditRoutes)
+app.use(`/api/v${apiVersion}/session`, SessionRoutes)
 
 
 app.use((err, req, res, next) => {

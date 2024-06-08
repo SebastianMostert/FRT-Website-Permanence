@@ -56,7 +56,6 @@ const SingleOperation = () => {
         }
     }
 
-
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,11 +78,9 @@ const SingleOperation = () => {
 
     const urgenceLevel = mission.urgenceLevel;
 
-    const isResolved = resolved;
-
     return (
         <div className='select-none'>
-            {isResolved && (
+            {resolved && (
                 <Box
                     sx={{
                         position: 'absolute',

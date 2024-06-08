@@ -286,6 +286,11 @@ export default function Profile() {
                     {t('profile.manage_2fa')}
                 </Button>
             </Link>
+            <Link to="/sessions" className="d-block text-center">
+                <Button variant="outline-primary" className="w-100 mt-3">
+                    {t('profile.manage_sessions')}
+                </Button>
+            </Link>
 
             <div className='flex justify-between mt-5'>
                 <span
