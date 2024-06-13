@@ -1,8 +1,14 @@
 {
     "home.title.mission": "Our Mission",
-    "home.description.mission": "Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing assistance, and fostering a secure environment for all.",
+    "home.description.mission": "Ensuring the safety and well-being of the school community at Lënster Lycée International School. We are dedicated to responding promptly and effectively to emergencies, providing a first line of assistance, and fostering a secure environment for all.",
     "home.title.contact": "Contact Us",
-    "home.contact.label.112": "In case of an emergency, call",
-    "home.contact.label.email": "Email address",
-    "home.contact.label.instagram": "Follow us on Instagram"
+    "home.contact.label.general_emergency": "In case of a vital emergency, always call",
+    "home.contact.label.school_emergency": "If an emergency occurs in school, contact us via our internal number at",
+    "home.contact.label.email": "Questions? Suggestions? Email us at",
+    "home.contact.label.instagram": "Follow us on Instagram to keep up with our latest news and updates!",
+    "home.title.stats": "What we have done so far",
+    "home.stats.title.cases": "Number of Cases",
+    "home.stats.description.cases": "Number of cases successfully resolved by our team of first responders",
+    "home.stats.title.members": "Number of Members",
+    "home.stats.description.members": "Number of team members dedicated to providing immediate assistance and first aid"
 }

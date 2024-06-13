@@ -1,3 +1,5 @@
+import { WebSocket } from 'ws';
+import { wss } from '../index.js';
 import Report from '../models/report.model.js';
 import { sendReportsUpdated } from '../utils/invalidateCache.js'
 import { logServerError } from '../utils/logger.js';

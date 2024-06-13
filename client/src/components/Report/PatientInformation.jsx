@@ -10,7 +10,7 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
 
     const [ageInputEnabled, setAgeInputEnabled] = useState(!disabled);
 
-    const { feedback: iamFeedback, showFeedback: iamShowFeedback, minLength: iamMinLength } = isValidIamInput(patientInfo.IAM, t);
+    const { feedback: iamFeedback, showFeedback: iamShowFeedback, minLength: iamMinLength } = isValidIamInput(false, patientInfo.IAM, t);
     const { feedback: matriculeFeedback, showFeedback: matriculeShowFeedback, minLength: matriculeMinLength } = isValidMatriculeInput(patientInfo.matricule, t);
 
     const updateAge = (age) => {
@@ -122,7 +122,6 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
                         minLength={iamMinLength}
                         maxLength={8}
                         isInvalid={iamShowFeedback}
-                        required={iamMinLength >= 8}
                     />
                     <Form.Control.Feedback type="invalid">
                         {iamFeedback}
@@ -156,9 +155,9 @@ const PatientInformation = ({ patientInfo, handlePatientChange, isEditable }) =>
 
 export default PatientInformation;
 
-function isValidIamInput(IAM, t) {
+function isValidIamInput(required, IAM, t) {
     let showFeedback = false;
-    let minLength = 9;
+    let minLength = 0;
     let feedback = '';
 
     function setFeedback(_feedback) {
@@ -169,13 +168,18 @@ function isValidIamInput(IAM, t) {
         minLength = 9;
     }
 
-    const { valid, message } = isValidIAM(IAM, t);
-    if (!valid) {
-        setFeedback(message);
-    }
-
-    if (!showFeedback) {
-        minLength = 8;
+    // If required, ensure that the IAM is valid
+    if (required) {
+        const { valid, message } = isValidIAM(IAM, t);
+        if (!valid) {
+            setFeedback(message);
+        }
+    } else if (IAM.length > 0) {
+        // If not required but the IAM is not empty, ensure that the IAM is valid
+        const { valid, message } = isValidIAM(IAM, t);
+        if (!valid) {
+            setFeedback(message);
+        }
     }
 
     return { showFeedback, minLength, feedback };
@@ -200,11 +204,14 @@ function isValidMatriculeInput(matricule, t) {
     if (matriculeLength > 0) {
         if (matriculeLength != 13) {
             setFeedback(t('input.matricule.error.length'));
-        } else if (!/^[0-9]{13}$/.test(matricule)) {
-            setFeedback(t('input.matricule.error.digits'));
+        } else if (!/^[0-9]{8}[0-9X]{5}$/.test(matricule)) {
+            setFeedback(t('input.matricule.error.format'));
+        } else if (/^[0-9]{8}X{5}$/.test(matricule) || /^[0-9]{13}$/.test(matricule)) {
+            // Is valid
+        } else {
+            setFeedback(t('input.matricule.error.format'));
         }
     }
-
     if (!showFeedback) {
         // Check if the matricule contains a valid date
         const { date } = getMatriculeDate(matricule);

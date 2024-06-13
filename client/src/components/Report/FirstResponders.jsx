@@ -96,18 +96,32 @@ const FirstResponders = ({ firstResponders, isEditable, setFirstResponders }) =>
                 const formattedPosition = formatPosition(position);
                 const value = firstResponders[formattedPosition]?.IAM || '';
 
-                // If we are past the min members, make the input not required
+                // If the current index is less than the minimum number of members, make the input required
                 const required = index < minMembers;
 
+                const { minLength, feedback, valid } = isValid(required, value, t);
+
+                console.log({ minLength, feedback });
+
                 return (
-                    <IAMInput
-                        key={index}
-                        disabled={disabled}
-                        onChange={(e) => handleSingleResponderChange(formattedPosition, 'IAM', e.target.value)}
-                        required={required}
-                        value={value}
-                        position={position}
-                    />
+                    <Row key={position} className="mb-3">
+                        <Col sm={8} className="mx-auto">
+                            <Form.Label>{position}</Form.Label>
+                            <Form.Control
+                                disabled={disabled}
+                                style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+                                type="text"
+                                placeholder={t('first_responders.iam.placeholder')}
+                                value={value}
+                                onChange={(e) => handleSingleResponderChange(formattedPosition, 'IAM', e.target.value)}
+                                minLength={minLength}
+                                maxLength={8}
+                                required={required}
+                                isInvalid={!valid}
+                            />
+                            <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback>
+                        </Col>
+                    </Row>
                 )
             })}
         </Form.Group>
@@ -116,72 +130,30 @@ const FirstResponders = ({ firstResponders, isEditable, setFirstResponders }) =>
 
 export default FirstResponders;
 
-const IAMInput = ({ disabled, value, onChange, required, position }) => {
-    const { t } = useTranslation();
-
-    const { minLength, feedback } = isValid(required, value, t);
-
-    return (
-        <Row className="mb-3">
-            <Col sm={8} className="mx-auto">
-                <Form.Label>{position}</Form.Label>
-                <Form.Control
-                    disabled={disabled}
-                    style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
-                    type="text"
-                    placeholder={t('first_responders.iam.placeholder')}
-                    value={value}
-                    onChange={onChange}
-                    minLength={minLength}
-                    maxLength={8}
-                    required={required}
-                />
-                <Form.Control.Feedback type="invalid">{feedback}</Form.Control.Feedback>
-            </Col>
-        </Row>
-    )
-};
-
 function isValid(isRequired, IAM, t) {
-    let showFeedback = false;
-    let minLength = 9;
+    let minLength = 0;
     let feedback = '';
+    let valid = true;
 
     function setFeedback(_feedback) {
         feedback = _feedback;
-        showFeedback = true;
+        valid = false;
 
         // Setting this to any number higher than 8 will ensure an error message is shown
         minLength = 9;
     }
 
-    // If the user is a stagiaire and the iam is not empty validate it:
-    if (isRequired && IAM.length > 0) {
+
+    // If 
+    if (isRequired) {
         const { valid, message } = isValidIAM(IAM, t);
+
         if (!valid) {
             setFeedback(message);
         }
     }
 
-    // If the user is not a stagiaire validate the IAM
-    if (!isRequired) {
-        const { valid, message } = isValidIAM(IAM, t);
-        if (!valid) {
-            setFeedback(message);
-        }
-    }
-
-    // If the showFeedback is false, proceed:
-    if (!showFeedback) {
-        // If the user is a stagiaire set minLength to 0
-        if (isRequired) {
-            minLength = 0;
-        } else {
-            minLength = 8;
-        }
-    }
-
-    return { showFeedback, minLength, feedback };
+    return { minLength, feedback, valid };
 }
 
 function formatPosition(position) {

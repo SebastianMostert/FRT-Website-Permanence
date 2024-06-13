@@ -395,7 +395,7 @@ export const getColors = async (IAM) => {
     return eventColors;
 }
 
-export const isValidIAM = async (IAM = '', t) => {
+export const isValidIAM = (IAM = '', t) => {
     // Check the length of the IAM it must be 8
     if (IAM.length != 8) {
         return { valid: false, message: t('input.iam.error.length') };
