@@ -39,6 +39,7 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
         handleClose();
 
         // Check if the selected date/time range overlaps with any existing events
+        // Works
         const { isValid, event } = validateDate(date, startTime, endTime, events);
 
         if (isValid) {
@@ -48,13 +49,14 @@ const CreateAvailabilityModal = ({ show, handleClose, events, currentUser, refre
             try {
                 await apiClient.availability.create({
                     IAM: currentUser.IAM,
-                    startTime,
-                    endTime
+                    startTime: new Date(`${date}T${startTime}`),
+                    endTime: new Date(`${date}T${endTime}`),
                 })
 
                 refreshData()
                 toast.success(`${t('toast.availability.create.success', { startTime: moment(start).format('HH:mm'), endTime: moment(end).format('HH:mm') })}`)
             } catch (error) {
+                console.error(error);
                 toast.error(`${t('toast.availability.create.error')}`);
             }
         } else {

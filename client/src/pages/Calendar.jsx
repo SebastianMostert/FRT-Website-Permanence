@@ -186,11 +186,15 @@ export default function Calendar() {
         const startTime = start.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-        })
+            hour12: false,
+        });
         const endTime = end.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-        })
+            hour12: false,
+        });
+
+        // Works
         const { isValid, event } = validateDate(date, startTime, endTime);
 
         if (isValid) {
@@ -284,6 +288,7 @@ export default function Calendar() {
         const date = new Date(dateClicked.date);
 
         const dateStr = formatDate(date);
+        // Works
         const { isValid, event } = validateDate(date);
 
         if (!isValid) {
@@ -326,11 +331,9 @@ export default function Calendar() {
         const startDate = new Date(start);
         const endDate = new Date(end);
 
-        alert(`Updating availability from ${startDate} to ${endDate}`);
-
         const date = `${startDate.getMonth() + 1}-${startDate.getDate()}-${startDate.getFullYear()}`;
-        const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         const { isValid, event } = validateDate(date, startTime, endTime, [...calendarEvent, ...calendarAvailability, ...calendarShift]);
 
