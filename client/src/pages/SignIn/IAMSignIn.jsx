@@ -98,8 +98,33 @@ export default function IAMSignIn() {
             const { latitude, longitude } = position.coords;
             resolve({ latitude, longitude });
           },
-          error => {
-            reject(new Error('Failed to retrieve user location.' + error.message));
+          async error => {
+            if (error.code === 1) {
+              // User denied permission, attempt to get approximate location
+              toast.warn('Using approximate location. This is less secure.');
+              try {
+                // Get the user's IP address
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                if (!ipResponse.ok) {
+                  throw new Error('Failed to retrieve IP address.');
+                }
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip;
+
+                // Use the IP address to get location
+                const locationResponse = await fetch(`http://ip-api.com/json/${ip}`);
+                if (!locationResponse.ok) {
+                  throw new Error('Failed to retrieve location from IP.');
+                }
+                const locationData = await locationResponse.json();
+                const { lat, lon } = locationData;
+                resolve({ latitude: lat, longitude: lon });
+              } catch (ipError) {
+                reject(new Error('Failed to retrieve approximate location. ' + ipError.message));
+              }
+            } else {
+              reject(new Error('Failed to retrieve user location. ' + error.message));
+            }
           }
         );
       } else {
