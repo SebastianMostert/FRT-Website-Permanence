@@ -9,17 +9,19 @@ import {
     deleteItem,
     deletePlaceholder,
 } from '../controllers/stock.controller.js';
+import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
-router.post('/containers/fetch', fetchContainers); // Fetch all containers
-router.post('/containers/create', createContainer); // Create a new container
-router.delete('/containers/delete/:id', deleteContainer); // Delete a container
+// PROTECTED ROUTES
+router.post('/containers/fetch', verifyToken, fetchContainers); // Fetch all containers
+router.post('/containers/create', verifyToken, createContainer); // Create a new container
+router.delete('/containers/delete/:id', verifyToken, deleteContainer); // Delete a container
 
-router.post('/placeholders/create/:id', createPlaceholder); // Create a new placeholder
-router.delete('/placeholders/delete/:containerID/:placeholderID', deletePlaceholder); // Delete a placeholder
+router.post('/placeholders/create/:id', verifyToken, createPlaceholder); // Create a new placeholder
+router.delete('/placeholders/delete/:containerID/:placeholderID', verifyToken, deletePlaceholder); // Delete a placeholder
 
-router.post('/items/create/:id', createItem); // Create a new item
-router.post('/items/update/:id', increaseItemAmount); // Update a container
-router.delete('/items/delete/:containerID/:placeholderID/:itemID', deleteItem); // Delete a item
+router.post('/items/create/:id', verifyToken, createItem); // Create a new item
+router.post('/items/update/:id', verifyToken, increaseItemAmount); // Update a container
+router.delete('/items/delete/:containerID/:placeholderID/:itemID', verifyToken, deleteItem); // Delete a item
 export default router;

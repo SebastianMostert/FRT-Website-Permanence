@@ -10,9 +10,10 @@ import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
-router.post('/user/:IAM', verifyToken, getExamsByUser);
 router.post('/classes', getClasses);
 
+// PROTECTED ROUTES
+router.post('/user/:IAM', verifyToken, getExamsByUser);
 router.post('/remove/exam', verifyToken, removeExam);
 router.post('/remove/subject', verifyToken, removeSubject);
 router.post('/remove/teacher', verifyToken, removeTeacher);

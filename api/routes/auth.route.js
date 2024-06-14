@@ -22,6 +22,7 @@ router.post('/signout', signout);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
+// PROTECTED ROUTES
 router.post('/2fa/add', verifyToken, addTwoFactorAuthentication);
 router.post('/2fa/validate', verifyToken, validateTwoFactorCode);
 router.post('/2fa/remove', verifyToken, removeTwoFactorAuthentication);

@@ -12,6 +12,7 @@ import qrcode from 'qrcode';
 import { errorHandler } from '../utils/error.js';
 import { logServerError, logHTTPRequest, logUserAction, logUserError } from '../utils/logger.js';
 import { UAParser } from 'ua-parser-js';
+import { sendSecurityEmailPasswordReset } from './email.controller.js';
 
 /** 
  * LOGGER INFO
@@ -479,6 +480,7 @@ export const resetPassword = async (req, res) => {
         message: 'Password reset failed: User not found',
         errorCode: 404,
       })
+
       return res.status(404).json({
         success: false,
         message: 'User not found',
@@ -495,65 +497,7 @@ export const resetPassword = async (req, res) => {
     await ResetPassword.deleteOne({ token });
 
     // Inform the user that password reset was successful via email
-    const helpEmail = 'lux.frt.llis@gmail.com';
-    const helpSubject = encodeURIComponent('Password Security Issue');
-    const helpBody = encodeURIComponent(`Hello,\n\nI am reaching out because it seems that my password has been changed without my authorization.\nCould you please assist me in resolving this issue?\nMy IAM is: ${user.IAM}\n\nThank you,\n${user.lastName} ${user.firstName}`);
-
-    const contactHelpLink = `mailto:${helpEmail}?subject=${helpSubject}&body=${helpBody}`;
-    const html = `
-      <html>
-        <head>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 20px;
-              background-color: #f4f4f4;
-            }
-            .container {
-              max-width: 600px;
-              margin: 0 auto;
-              background-color: #fff;
-              padding: 40px;
-              border-radius: 8px;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-            h1 {
-              color: #333;
-            }
-            p {
-              margin: 20px 0;
-              color: #555;
-            }
-            .btn {
-              display: inline-block;
-              padding: 10px 20px;
-              background-color: #007bff;
-              color: #fff;
-              text-decoration: none;
-              border-radius: 5px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Password Reset Successful</h1>
-            <p>Your password has been successfully reset.</p>
-            <p>If you did not request this change, please contact us immediately.</p>
-            <p>Thank you!</p>
-            <a href="${contactHelpLink}" style="color: #ffffff; text-decoration: none; font-weight: bold;"><div style="background-color: #007bff; color: #ffffff; border-radius: 4px; text-align: center; padding: 10px; margin-bottom: 20px;">
-              Email Support
-            </div></a>
-          </div>
-        </body>
-      </html>
-    `;
-
-    await sendEmail({
-      to: email,
-      subject: 'Password Reset',
-      html,
-    });
+    sendSecurityEmailPasswordReset({ email, user: { IAM: user.IAM, firstName: user.firstName, lastName: user.lastName } });
 
     res.status(200).json({
       success: true,
@@ -572,7 +516,7 @@ export const resetPassword = async (req, res) => {
       success: false,
       message: 'Failed to reset password',
     });
-  }
+  };
 };
 
 export const addTwoFactorAuthentication = async (req, res) => {

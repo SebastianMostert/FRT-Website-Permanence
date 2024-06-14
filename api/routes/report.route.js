@@ -10,6 +10,7 @@ import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
+// PROTECTED ROUTES
 router.post('/create', verifyToken, createReport);
 router.post('/update/:id', verifyToken, updateReport);
 router.post('/fetch/:id', verifyToken, getReport);

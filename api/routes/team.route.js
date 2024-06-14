@@ -8,15 +8,17 @@ import {
     updateTeamStatus,
     updateAlert
 } from '../controllers/team.controller.js';
+import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
-router.post('/create', createTeam);
-router.post('/fetch', fetchTeams);
-router.post('/fetch/:id', fetchTeam);
-router.post('/update-members/:id', updateTeamMembers);
-router.post('/update-status/:id', updateTeamStatus);
-router.post('/update-alert/:id', updateAlert);
-router.delete('/delete/:id', deleteUser);
+// PROTECTED ROUTES
+router.post('/create', verifyToken, createTeam);
+router.post('/fetch', verifyToken, fetchTeams);
+router.post('/fetch/:id', verifyToken, fetchTeam);
+router.post('/update-members/:id', verifyToken, updateTeamMembers);
+router.post('/update-status/:id', verifyToken, updateTeamStatus);
+router.post('/update-alert/:id', verifyToken, updateAlert);
+router.delete('/delete/:id', verifyToken, deleteUser);
 
 export default router;
