@@ -75,7 +75,7 @@ const MarkBesetztModal = ({ show, handleClose, event }) => {
                 // Loop through the data and create an option object for each team
                 data.forEach((team) => {
                     const { active } = team;
-                    if(!active) return;
+                    if (!active) return;
 
                     teams.push(team);
                 });
@@ -292,6 +292,25 @@ const MarkBesetztModal = ({ show, handleClose, event }) => {
             for (let i = 0; i < users.length; i++) {
                 const element = users[i];
 
+                const partners = [];
+
+                for (let j = 0; j < shift.length; j++) {
+                    const partner = shift[j];
+                    if (element.IAM === partner.IAM) continue;
+                    partners.push(partner);
+                }
+
+
+                const user = element;
+
+                const data = {
+                    partners,
+                    user,
+                    startDate,
+                    endDate,
+                }
+
+                // TODO: Move to backend
                 notifyUser({
                     allUsers: shift,
                     user: element,

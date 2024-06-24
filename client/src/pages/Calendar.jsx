@@ -24,6 +24,7 @@ const VIEW_TYPE_KEY = 'viewType';
 const EXAM_TYPE = 'exam';
 const AVAILABILITY_TYPE = 'availability';
 const SHIFT_TYPE = 'shift';
+const MOBILE_SIZE = 375;
 
 export default function Calendar() {
     const { t } = useTranslation();
@@ -49,7 +50,7 @@ export default function Calendar() {
     const [showCreateAvailabilityModal, setShowCreateAvailabilityModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
 
-    const [mobileView, setMobileView] = useState(window.innerWidth < 768);
+    const [mobileView, setMobileView] = useState(window.innerWidth < MOBILE_SIZE);
 
     const [refreshTrigger, setRefreshTrigger] = useState(false);
     const [refreshTriggerAvailability, setRefreshTriggerAvailability] = useState(false);
@@ -100,7 +101,7 @@ export default function Calendar() {
     useEffect(() => {
         const handleResize = () => {
             // Set initialView based on screen size
-            if (window.innerWidth < 768) {
+            if (window.innerWidth < MOBILE_SIZE) {
                 setMobileView(true);
             } else {
                 setMobileView(false);
@@ -194,8 +195,10 @@ export default function Calendar() {
             hour12: false,
         });
 
+        const allEvents = [...calendarEvent];
+
         // Works
-        const { isValid, event } = validateDate(date, startTime, endTime);
+        const { isValid, event } = validateDate(date, startTime, endTime, allEvents);
 
         if (isValid) {
             try {
@@ -298,7 +301,6 @@ export default function Calendar() {
             setSelectedDate(dateStr);
             setShowCreateAvailabilityModal(true);
         }
-
     };
 
     const handleEventResize = async (e) => {
@@ -327,15 +329,20 @@ export default function Calendar() {
     };
 
     const updateAvailability = async (start, end, id) => {
-
         const startDate = new Date(start);
         const endDate = new Date(end);
 
-        const date = `${startDate.getMonth() + 1}-${startDate.getDate()}-${startDate.getFullYear()}`;
+        // Date must be YYYY-MM-DD
+        const date = startDate.toISOString().slice(0, 10);
         const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-        const { isValid, event } = validateDate(date, startTime, endTime, [...calendarEvent, ...calendarAvailability, ...calendarShift]);
+        const allEvents = [...calendarEvent, ...calendarAvailability, ...calendarShift];
+
+        // Remove the event that is being resized
+        const updatedEvents = allEvents.filter((event) => event.id !== id);
+
+        const { isValid, event } = validateDate(date, startTime, endTime, updatedEvents);
 
         if (isValid) {
             try {

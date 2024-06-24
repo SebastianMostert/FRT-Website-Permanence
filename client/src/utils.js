@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf'
+import moment from 'moment';
 
 export async function verifyClass(classStr, classes) {
     try {
@@ -196,6 +197,18 @@ export function validateDate(date, startTime, endTime, events) {
         };
     }
 
+    // Validate the date
+    if (!moment(date, 'YYYY-MM-DD', true).isValid()) {
+        return {
+            isValid: false,
+            event: {
+                extendedProps: {
+                    type: 'invalid_date',
+                },
+            },
+        };
+    }
+
     // The times are optional, if they are provided, validate them
     if (startTime) {
         if (!startTime.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)) {
@@ -216,6 +229,21 @@ export function validateDate(date, startTime, endTime, events) {
                 event: {
                     extendedProps: {
                         type: 'invalid_props',
+                    },
+                },
+            };
+        }
+    }
+
+    // Validate the events array if it exists
+    if (events?.length > 0) {
+        // Check if the events array is an array
+        if (!Array.isArray(events)) {
+            return {
+                isValid: false,
+                event: {
+                    extendedProps: {
+                        type: 'invalid_array',
                     },
                 },
             };
@@ -278,16 +306,31 @@ export function validateDate(date, startTime, endTime, events) {
                 } else if (events) {
                     // Iterate through each existing event
                     for (const event of events) {
+                        // Convert existing event's start and end times to dates
+                        const eventStartDate = new Date(event.start);
+                        const eventEndDate = new Date(event.end);
 
-                        // Convert existing event's start and end times to timestamps
-                        const eventStartTime = new Date(event.start).getTime();
-                        const eventEndTime = new Date(event.end).getTime();
+                        const formattedStartDate = eventStartDate.toISOString().slice(0, 10);
+                        const formattedEndDate = eventEndDate.toISOString().slice(0, 10);
+
+                        // First check if the event is on the same day as the selected date
+                        if (formattedStartDate !== date && formattedEndDate !== date) {
+                            continue;
+                        }
+
+                        const eventStartTime = eventStartDate.getTime();
+                        const eventEndTime = eventEndDate.getTime();
+
+                        let isOverlap = false;
+
+                        const isBeforeStart = (selectedStartTime < eventStartTime && selectedEndTime < eventStartTime);
+                        const isAfterEnd = (selectedStartTime > eventEndTime && selectedEndTime > eventEndTime);
+                        const beforeOrAfter = (isBeforeStart || isAfterEnd);
+
+                        if (!beforeOrAfter) isOverlap = true;
 
                         // Check for overlap
-                        if (
-                            selectedStartTime < eventEndTime && // New event's start is before existing event's end
-                            selectedEndTime > eventStartTime // New event's end is after existing event's start
-                        ) {
+                        if (isOverlap) {
                             // Return false if there is an overlap
                             overlappingEvent = event;
                             break;

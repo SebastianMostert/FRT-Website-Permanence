@@ -3,3 +3,22 @@ TODO: Add Dark/Light mode
 
 TODO: Add status changing | Done for the Loge but the team needs a way to do it
 TODO: The report should save automatically whenever editing it
+
+TODO: We need a way to create teams (Admin Page)
+
+TODO: Make changes to the API - More intuative, more secure, etc.
+
+BIG CHANGES:
+TODO: Add authentication with clerk or similar provider (safer, easier)
+TODO: Change the way shifts are made:
+    - Availabilities should be CONFIRMED by an admin
+    - When confirming, the admin chooses a team to add the availability to
+        - This availability will then become a shift
+        - If the team is full LOCK IT
+    - This shift will be displayed to all members
+    - Members will be able to add themselves to the shift and specify the time period they are available for
+        - This time period can be start before the shift starts and end after the shift ends
+        - Any time before the shift starts will be created as a new availability
+        - Any time after the shift ends will be created as a new availability
+    - Admins will be able to edit the shift at any time
+    - Admins can "lock" the shift so users cannot add themselves to it anymore

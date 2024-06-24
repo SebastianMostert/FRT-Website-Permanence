@@ -10,14 +10,22 @@ import SlotLane from './SlotLane';
 import SlotLabel from './SlotLabel';
 import DayHeader from './DayHeader';
 import EventCell from './EventCell';
+import { LoadingPage } from "../../pages"
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 
 const VIEW_TYPE_KEY = 'viewType';
 const hideToolbarSize = 1000;
+const MOBILE_SIZE = 768;
 
 const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, selectable, customButtons, loading, handleDateClick, handleEventResize }) => {
     const { t } = useTranslation();
+    const [toolbarLoading, setToolbarLoading] = useState(true);
+    const [titleFormat, setTitleFormat] = useState({
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
     const [headerToolbar, setHeaderToolbar] = useState({
         left: 'prev,next today',
         center: 'title',
@@ -26,6 +34,17 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
     const [showWeekend, setShowWeekend] = useState(false);
 
     useEffect(() => {
+        const changeToolbarView = (obj) => {
+            if (customButtons && !loading) {
+                const rightButtons = obj?.right;
+
+                obj.right = rightButtons ? `${rightButtons},createAvailabilityButton` : 'createAvailabilityButton';
+            }
+
+            setHeaderToolbar(obj);
+            setToolbarLoading(false);
+        };
+
         const handleResize = () => {
             const windowWidth = window.innerWidth;
 
@@ -35,34 +54,29 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
             //     setShowWeekend(false);
             // }
 
-            // Set initialView based on screen size
+            // Set toolbar based on screen size
             if (windowWidth <= hideToolbarSize) {
-                if (customButtons) {
-                    setHeaderToolbar({
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'createAvailabilityButton',
-                    });
-                } else {
-                    setHeaderToolbar({
-                        left: 'prev,next today',
-                        center: 'title',
-                    });
-                }
+                changeToolbarView({
+                    left: 'prev,next today',
+                    center: 'title',
+                })
             } else {
-                if (customButtons) {
-                    setHeaderToolbar({
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
-                    });
-                } else {
-                    setHeaderToolbar({
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
-                    });
-                }
+                changeToolbarView({
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
+                })
+            }
+
+            // If the screen size is mobile
+            if (windowWidth <= MOBILE_SIZE) {
+                changeToolbarView({
+                    left: 'prev,next',
+                    center: 'title',
+                })
+                setTitleFormat({ month: '2-digit', day: '2-digit' })
+            } else {
+                setTitleFormat({ year: 'numeric', month: 'long', day: 'numeric' })
             }
         };
 
@@ -76,42 +90,33 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [customButtons]);
-
-    useEffect(() => {
-        if (loading) {
-            setHeaderToolbar({
-                left: 'prev,next today',
-                center: 'title',
-                right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
-            });
-        } else {
-            if (customButtons) {
-                setHeaderToolbar({
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay createAvailabilityButton',
-                });
-            } else {
-                setHeaderToolbar({
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
-                });
-            }
-        }
     }, [customButtons, loading]);
+
+    if (toolbarLoading) return <LoadingPage />;
+
+    const getNewViewType = () => {
+        const localStorage = window.localStorage;
+
+        const localStorageType = localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth';
+
+        const shouldHideToolbar = window.innerWidth <= hideToolbarSize;
+        const isMobile = window.innerWidth <= MOBILE_SIZE;
+
+        // If the screen size is mobile show timeGridDay
+        // Otherwise if the toolbar should be hidden show timeGridWeew
+        // Otherwise show localStorageType
+        const newViewType = isMobile ? 'timeGridDay' : shouldHideToolbar ? 'timeGridWeek' : localStorageType;
+
+        localStorage.setItem(VIEW_TYPE_KEY, newViewType);
+        return newViewType;
+    };
 
     return (
         <FullCalendar
             plugins={[multiMonthPlugin, dayGridPlugin, timeGridPlugin, interaction, bootstrap5Plugin]}
             initialView={window.localStorage.getItem(VIEW_TYPE_KEY) || 'dayGridMonth'}
             windowResize={(e) => {
-                const localStorage = window.localStorage;
-                const localStorageType = localStorage.getItem(VIEW_TYPE_KEY);
-                const newViewType = window.innerWidth <= hideToolbarSize ? 'timeGridWeek' : localStorageType || 'dayGridMonth';
-                localStorage.setItem(VIEW_TYPE_KEY, newViewType);
-
+                const newViewType = getNewViewType();
                 const calendar = e.view.calendar;
 
                 calendar.changeView(newViewType);
@@ -149,9 +154,10 @@ const Calendar = ({ events, handleEventClick, handleSelect, handleViewDidMount, 
             // Styling
             headerToolbar={headerToolbar}
             customButtons={customButtons}
-            navLinks={true}
             height={'auto'}
-            titleFormat={{ year: 'numeric', month: 'short', day: '2-digit' }}
+            allDayText={`${t('calendar.all_day')}`}
+            allDaySlot={false}
+            titleFormat={titleFormat}
             slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
             eventTimeFormat={{ hour12: false, hour: '2-digit', minute: '2-digit' }}
             themeSystem="bootstrap5"
