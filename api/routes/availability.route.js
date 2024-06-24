@@ -4,6 +4,7 @@ import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
+// PROTECTED ROUTES
 router.post('/create', verifyToken, createAvailability);
 router.post('/get', verifyToken, getAllAvailabilities);
 router.post('/get/IAM/:IAM', verifyToken, getAvailabilities);
