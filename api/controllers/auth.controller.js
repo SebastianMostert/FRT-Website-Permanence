@@ -109,7 +109,6 @@ export const signin = async (req, res, next) => {
       ipAddress: IP,
       userAgent: ua,
       deviceInfo,
-      location: locationDetails,
       lastActive: new Date(),
       expiresAt: expiryDate,
       rememberMe,
