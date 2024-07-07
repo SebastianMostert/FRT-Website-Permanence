@@ -52,16 +52,12 @@ export default function IAMSignIn() {
       });
       dispatch(signInStart());
 
-      // Get user's location
-      const location = await getUserLocation();
-
       try {
         const data = await apiClient.auth.signin({
           IAM: formData.IAM,
           password: formData.password,
           code: formData.code,
           rememberMe: formData.rememberMe, // Pass rememberMe property to the API
-          location
         });
 
         toast.update(toastId.current, {
@@ -88,49 +84,6 @@ export default function IAMSignIn() {
       });
       dispatch(signInFailure(error));
     }
-  };
-
-  const getUserLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const { latitude, longitude } = position.coords;
-            resolve({ latitude, longitude });
-          },
-          async error => {
-            if (error.code === 1) {
-              // User denied permission, attempt to get approximate location
-              toast.warn('Using approximate location. This is less secure.');
-              try {
-                // Get the user's IP address
-                const ipResponse = await fetch('https://api.ipify.org?format=json');
-                if (!ipResponse.ok) {
-                  throw new Error('Failed to retrieve IP address.');
-                }
-                const ipData = await ipResponse.json();
-                const ip = ipData.ip;
-
-                // Use the IP address to get location
-                const locationResponse = await fetch(`http://ip-api.com/json/${ip}`);
-                if (!locationResponse.ok) {
-                  throw new Error('Failed to retrieve location from IP.');
-                }
-                const locationData = await locationResponse.json();
-                const { lat, lon } = locationData;
-                resolve({ latitude: lat, longitude: lon });
-              } catch (ipError) {
-                reject(new Error('Failed to retrieve approximate location. ' + ipError.message));
-              }
-            } else {
-              reject(new Error('Failed to retrieve user location. ' + error.message));
-            }
-          }
-        );
-      } else {
-        reject(new Error('Geolocation is not supported by this browser.'));
-      }
-    });
   };
 
   const handleForgotPassword = () => {

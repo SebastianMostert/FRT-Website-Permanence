@@ -18,10 +18,6 @@ const sessionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    location: {
-        type: Object, // Can use GeoJSON or other methods to store more detailed location data
-        required: false
-    },
     deviceInfo: {
         type: Object,
         required: false

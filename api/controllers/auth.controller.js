@@ -101,14 +101,6 @@ export const signin = async (req, res, next) => {
     const { password: hashedPassword, twoFactorAuthSecret, ...rest } = user._doc;
     const expiryDate = rememberMe ? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) : new Date(Date.now() + 1000 * 60 * 30); // 30 days or 30 minutes
 
-    // Get location 
-    const location = req.body.location || null;
-    let locationDetails = 'unknown';
-
-    if (location) {
-      const { latitude, longitude } = location;
-      locationDetails = await getCityFromCoordinates(latitude, longitude);
-    }
 
     // Create session document in MongoDB
     const session = new Session({
